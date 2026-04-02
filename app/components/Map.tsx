@@ -20,19 +20,19 @@ export default function Map() {
     script.async = true;
     script.onload = () => {
       if (!mapRef.current) return;
-      const map = new window.google.maps.Map(mapRef.current, {
+      const map = new (window as any).google.maps.Map(mapRef.current, {
         center: { lat: 40.7549, lng: -73.9840 },
         zoom: 13,
         mapTypeControl: false,
         streetViewControl: false,
       });
       restaurants.forEach(r => {
-        const marker = new window.google.maps.Marker({
+        const marker = new (window as any).google.maps.Marker({
           position: { lat: r.lat, lng: r.lng },
           map,
           title: r.name,
         });
-        const info = new window.google.maps.InfoWindow({
+        const info = new (window as any).google.maps.InfoWindow({
           content: `<div style="padding:8px"><div style="font-size:20px">${r.emoji}</div><b>${r.name}</b><br/><span style="color:#4A9FD5">${r.price} lunch special</span></div>`,
         });
         marker.addListener('click', () => info.open(map, marker));
