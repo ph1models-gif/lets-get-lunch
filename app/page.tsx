@@ -1,6 +1,5 @@
 'use client';
 import MapComponent from './components/Map';
-import Map from './components/Map';
 import { useState } from 'react';
 
 const restaurants = [
@@ -68,25 +67,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Map placeholder */}
-      <section className="w-full h-64 bg-[#E8EDF4] relative overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-4xl mb-2">🗺️</div>
-            <p className="text-sm text-gray-500 font-medium">Interactive map — restaurant pins load here</p>
-            <p className="text-xs text-gray-400 mt-1">Google Maps API integration</p>
-          </div>
-        </div>
-        {/* Mock pins */}
-        {[{x:'20%',y:'40%',e:'🍝'},{x:'45%',y:'30%',e:'🍱'},{x:'60%',y:'55%',e:'🍔'},{x:'75%',y:'35%',e:'🐟'},{x:'35%',y:'65%',e:'🍜'}].map((p,i) => (
-          <div key={i} style={{position:'absolute',left:p.x,top:p.y}} className="flex flex-col items-center">
-            <div className="w-9 h-9 bg-white rounded-full border-2 border-[#4A9FD5] flex items-center justify-center text-lg shadow-sm cursor-pointer hover:scale-110 transition-transform">
-              {p.e}
-            </div>
-          </div>
-        ))}
       <MapComponent />
-      </section>
 
       {/* Filters */}
       <section className="px-4 py-4 border-b border-gray-100 sticky top-[57px] bg-white z-40">
