@@ -1,4 +1,6 @@
 'use client';
+import MapComponent from './components/Map';
+import Map from './components/Map';
 import { useState } from 'react';
 
 const restaurants = [
@@ -83,6 +85,7 @@ export default function Home() {
             </div>
           </div>
         ))}
+      <MapComponent />
       </section>
 
       {/* Filters */}
