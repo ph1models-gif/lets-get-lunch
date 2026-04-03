@@ -13,32 +13,56 @@ const restaurants = [
 ];
 
 export default function Map() {
-  const mapRef = useRef(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
-    script.async = true;
-    script.onload = () => {
-      if (!mapRef.current) return;
-      const map = new (window as any).google.maps.Map(mapRef.current, {
-        center: { lat: 40.7549, lng: -73.9840 },
+    if (!mapRef.current || mapInstanceRef.current) return;
+
+    // Load Leaflet CSS
+    if (!document.querySelector('link[href*="leaflet"]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+    }
+
+    // Dynamically import Leaflet to avoid SSR issues
+    import('leaflet').then((L) => {
+      if (!mapRef.current || mapInstanceRef.current) return;
+
+      const map = L.map(mapRef.current, {
+        center: [40.7549, -73.9840],
         zoom: 13,
-        mapTypeControl: false,
-        streetViewControl: false,
       });
+      mapInstanceRef.current = map;
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(map);
+
       restaurants.forEach(r => {
-        const marker = new (window as any).google.maps.Marker({
-          position: { lat: r.lat, lng: r.lng },
-          map,
-          title: r.name,
+        const icon = L.divIcon({
+          html: `<div style="font-size:24px;text-align:center;line-height:32px">${r.emoji}</div>`,
+          className: '',
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
         });
-        const info = new (window as any).google.maps.InfoWindow({
-          content: `<div style="padding:8px"><div style="font-size:20px">${r.emoji}</div><b>${r.name}</b><br/><span style="color:#4A9FD5">${r.price} lunch special</span></div>`,
-        });
-        marker.addListener('click', () => info.open(map, marker));
+
+        const marker = L.marker([r.lat, r.lng], { icon }).addTo(map);
+        marker.bindPopup(
+          `<div style="padding:4px"><b>${r.name}</b><br/><span style="color:#4A9FD5">${r.price} lunch special</span></div>`
+        );
       });
+    });
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
     };
-    document.head.appendChild(script);
   }, []);
+
   return <div ref={mapRef} style={{ width: '100%', height: '400px' }} />;
 }
