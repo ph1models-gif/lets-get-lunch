@@ -24,6 +24,8 @@ export default function Map() {
         center: { lat: 40.7549, lng: -73.9840 },
         zoom: 13,
         mapTypeControl: false,
+        scrollwheel: false,
+        gestureHandling: "cooperative",
         streetViewControl: false,
       });
       restaurants.forEach(r => {
