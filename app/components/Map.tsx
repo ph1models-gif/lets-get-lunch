@@ -1,69 +1,31 @@
 'use client';
-import { useEffect, useRef } from 'react';
-import Script from 'next/script';
-
-const restaurants = [
-  { id: 1, name: "Osteria Morini", lat: 40.7243, lng: -74.0018, price: "$32", emoji: "🍝" },
-  { id: 2, name: "Sushi Yasuda", lat: 40.7527, lng: -73.9772, price: "$35", emoji: "🍱" },
-  { id: 3, name: "The Smith", lat: 40.7580, lng: -73.9855, price: "$28", emoji: "🍔" },
-  { id: 4, name: "Avra Estiatorio", lat: 40.7549, lng: -73.9740, price: "$34", emoji: "🐟" },
-  { id: 5, name: "Cafe Boulud", lat: 40.7726, lng: -73.9632, price: "$35", emoji: "🥩" },
-  { id: 6, name: "Via Carota", lat: 40.7334, lng: -74.0040, price: "$30", emoji: "🍃" },
-  { id: 7, name: "Momofuku Noodle Bar", lat: 40.7289, lng: -73.9845, price: "$26", emoji: "🍜" },
-  { id: 8, name: "Le Bernardin", lat: 40.7614, lng: -73.9816, price: "$35", emoji: "🦞" },
-];
+import { useEffect } from 'react';
 
 export default function Map() {
-  const mapRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const loader = document.createElement('script');
+    loader.type = 'module';
+    loader.src = 'https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js';
+    document.head.appendChild(loader);
+  }, []);
 
-  function initMap() {
-    if (!mapRef.current) return;
-    const map = new (window as any).google.maps.Map(mapRef.current, {
-      center: { lat: 40.7484, lng: -73.9840 },
-      zoom: 13,
-      mapTypeControl: false,
-      streetViewControl: false,
-      fullscreenControl: false,
-      scrollwheel: false,
-      gestureHandling: 'cooperative',
-    });
-
-    restaurants.forEach(r => {
-      const marker = new (window as any).google.maps.Marker({
-        position: { lat: r.lat, lng: r.lng },
-        map,
-        title: r.name,
-        icon: {
-          path: (window as any).google.maps.SymbolPath.CIRCLE,
-          scale: 18,
-          fillColor: '#4A9FD5',
-          fillOpacity: 1,
-          strokeColor: 'white',
-          strokeWeight: 2,
-        },
-        label: { text: r.price, color: 'white', fontSize: '10px', fontWeight: 'bold' },
-      });
-
-      const info = new (window as any).google.maps.InfoWindow({
-        content: `<div style="padding:8px;font-family:sans-serif;">
-          <div style="font-size:22px;text-align:center;">${r.emoji}</div>
-          <div style="font-weight:600;font-size:13px;">${r.name}</div>
-          <div style="color:#4A9FD5;font-weight:700;">${r.price} lunch special</div>
-        </div>`,
-      });
-
-      marker.addListener('click', () => info.open(map, marker));
-    });
-  }
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   return (
-    <>
-      <Script
-        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
-        onLoad={initMap}
-        strategy="afterInteractive"
-      />
-      <div ref={mapRef} style={{ width: '100%', height: '420px' }} />
-    </>
+    <div style={{ width: '100%', height: '420px' }}>
+      <div dangerouslySetInnerHTML={{ __html: `
+        <gmpx-api-loader key="${apiKey}" solution-channel="GMP_GE_mapsandplacesautocomplete_v2"></gmpx-api-loader>
+        <gmp-map center="40.7484,-73.9840" zoom="13" map-id="DEMO_MAP_ID" style="width:100%;height:420px;">
+          <gmp-advanced-marker position="40.7243,-74.0018" title="Osteria Morini $32"></gmp-advanced-marker>
+          <gmp-advanced-marker position="40.7527,-73.9772" title="Sushi Yasuda $35"></gmp-advanced-marker>
+          <gmp-advanced-marker position="40.7580,-73.9855" title="The Smith $28"></gmp-advanced-marker>
+          <gmp-advanced-marker position="40.7549,-73.9740" title="Avra Estiatorio $34"></gmp-advanced-marker>
+          <gmp-advanced-marker position="40.7726,-73.9632" title="Cafe Boulud $35"></gmp-advanced-marker>
+          <gmp-advanced-marker position="40.7334,-74.0040" title="Via Carota $30"></gmp-advanced-marker>
+          <gmp-advanced-marker position="40.7289,-73.9845" title="Momofuku $26"></gmp-advanced-marker>
+          <gmp-advanced-marker position="40.7614,-73.9816" title="Le Bernardin $35"></gmp-advanced-marker>
+        </gmp-map>
+      ` }} />
+    </div>
   );
 }
