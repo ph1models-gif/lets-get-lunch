@@ -15,7 +15,7 @@ const R = [
 export default function MapInner() {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const key = "AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0";
     const s = document.createElement('script');
     s.src = `https://maps.googleapis.com/maps/api/js?key=${key}`;
     s.async = true;
