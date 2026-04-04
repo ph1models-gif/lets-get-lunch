@@ -15,9 +15,9 @@ const R = [
 export default function MapInner() {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    
     const s = document.createElement('script');
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}`;
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
     s.async = true;
     s.onload = () => {
       if (!ref.current) return;
