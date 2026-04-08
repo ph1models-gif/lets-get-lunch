@@ -19,7 +19,7 @@ export default function Home() {
   const [maxPrice, setMaxPrice] = useState(35);
   const [selected, setSelected] = useState<number|null>(null);
 
-  const filters = ['All', 'Work-friendly', 'Under $30', 'Italian', 'Japanese', 'French', 'American'];
+  const filters = ['All', 'Work-friendly',  'Italian', 'Japanese', 'French', 'American'];
 
   const filtered = restaurants.filter(r => {
     if (search && !r.name.toLowerCase().includes(search.toLowerCase()) && !r.neighborhood.toLowerCase().includes(search.toLowerCase()) && !r.cuisine.toLowerCase().includes(search.toLowerCase())) return false;
