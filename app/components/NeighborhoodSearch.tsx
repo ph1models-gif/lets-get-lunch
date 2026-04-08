@@ -22,7 +22,7 @@ export default function NeighborhoodSearch({ onSelect, onChange }: Props) {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const showDropdown = open && query.length >= 3;
+  const showDropdown = open && query.length >= 1;
 
   const filtered = showDropdown ? Object.entries(HOODS).reduce((acc, [borough, hoods]) => {
     const matches = (hoods as string[]).filter((h: string) =>
@@ -49,7 +49,7 @@ export default function NeighborhoodSearch({ onSelect, onChange }: Props) {
           value={query}
           onChange={e => { setQuery(e.target.value); onChange(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
-          placeholder="Type 3+ letters to find neighborhood..."
+          placeholder="Neighborhood — try "Midtown""
           style={{flex:1,padding:'12px 0',background:'transparent',border:'none',outline:'none',fontSize:'14px',color:'#111'}}
         />
         {query && (
