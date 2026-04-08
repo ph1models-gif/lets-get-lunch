@@ -22,7 +22,17 @@ export default function Home() {
   const filters = ['All', 'Italian', 'Japanese/Sushi', 'French', 'American', 'Seafood', 'Mediterranean', 'Latin/Mexican', 'Indian', 'Vegan-Friendly', 'Steakhouse', 'BBQ', ];
 
   const filtered = restaurants.filter(r => {
-    if (search && !r.name.toLowerCase().includes(search.toLowerCase()) && !r.neighborhood.toLowerCase().includes(search.toLowerCase()) && !r.cuisine.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search) {
+      const s = search.toLowerCase();
+      const keywords: Record<string, boolean> = {
+        'laptop': r.workFriendly, 'wifi': r.workFriendly, 'wi-fi': r.workFriendly,
+        'quiet': !r.workFriendly, 'walk-in': r.walkIn, 'walkin': r.walkIn,
+        'outlets': r.workFriendly, 'work': r.workFriendly,
+      };
+      const keywordMatch = Object.entries(keywords).some(([k, v]) => s.includes(k) && v);
+      const textMatch = r.name.toLowerCase().includes(s) || r.neighborhood.toLowerCase().includes(s) || r.cuisine.toLowerCase().includes(s) || r.special.toLowerCase().includes(s);
+      if (!keywordMatch && !textMatch) return false;
+    }
     if (filter === 'Vegan-Friendly' && !r.cuisine.toLowerCase().includes('vegan')) return false;
     if (filter === 'Seafood' && !r.cuisine.toLowerCase().includes('seafood')) return false;
     if (!['All','Vegan-Friendly','Seafood'].includes(filter) && !r.cuisine.toLowerCase().includes(filter.toLowerCase().split('/')[0])) return false;
@@ -56,7 +66,7 @@ export default function Home() {
         <div className="max-w-lg mx-auto flex gap-2">
           <input
             type="text"
-            placeholder="Search neighborhood, cuisine, or restaurant..."
+            placeholder="Try: Italian, Midtown, laptop friendly, quiet..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#4A9FD5]"
