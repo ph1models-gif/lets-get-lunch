@@ -138,6 +138,28 @@ export default function ListYourRestaurant() {
             </div>
           </div>
 
+
+          <div className="bg-gray-50 rounded-2xl p-6">
+            <h2 className="font-semibold text-gray-900 mb-4">Food photos</h2>
+            <p className="text-sm text-gray-500 mb-4">Upload photos of your lunch dishes. Food photos get 3x more clicks.</p>
+            <label className="block w-full border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-[#4A9FD5] transition-colors">
+              <input type="file" multiple accept="image/*" onChange={handleImages} className="hidden" />
+              <div className="text-3xl mb-2">📸</div>
+              <div className="text-sm font-medium text-gray-700">Click to upload food photos</div>
+              <div className="text-xs text-gray-400 mt-1">JPG, PNG up to 10MB each</div>
+            </label>
+            {previews.length > 0 && (
+              <div className="grid grid-cols-3 gap-3 mt-4">
+                {previews.map((p, i) => (
+                  <div key={i} className="relative">
+                    <img src={p} alt="" className="w-full h-24 object-cover rounded-xl" />
+                    <button type="button" onClick={() => { setImages(imgs => imgs.filter((_,j)=>j!==i)); setPreviews(ps => ps.filter((_,j)=>j!==i)); }} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">x</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="bg-gray-50 rounded-2xl p-6">
             <h2 className="font-semibold text-gray-900 mb-4">Contact information</h2>
             <div className="space-y-4">
