@@ -42,7 +42,7 @@ export default function Home() {
     if (!['All','Vegan-Friendly','Seafood'].includes(filter) && !r.cuisine.toLowerCase().includes(filter.toLowerCase().split('/')[0])) return false;
     if (r.price > maxPrice) return false;
     if (laptopOnly && !r.workFriendly) return false;
-    if (walkInOnly && !r.walkIn) return false;
+    if (walkInOnly && !r.workFriendly) return false;
     if (veganOnly && !r.cuisine.toLowerCase().includes('vegan')) return false;
     return true;
   });
