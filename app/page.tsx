@@ -17,6 +17,9 @@ export default function Home() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
   const [maxPrice, setMaxPrice] = useState(35);
+  const [laptopOnly, setLaptopOnly] = useState(false);
+  const [walkInOnly, setWalkInOnly] = useState(false);
+  const [veganOnly, setVeganOnly] = useState(false);
   const [selected, setSelected] = useState<number|null>(null);
 
   const filters = ['All', 'Italian', 'Japanese/Sushi', 'French', 'American', 'Seafood', 'Mediterranean', 'Latin/Mexican', 'Indian', 'Vegan-Friendly', 'Steakhouse', 'BBQ', ];
@@ -37,6 +40,9 @@ export default function Home() {
     if (filter === 'Seafood' && !r.cuisine.toLowerCase().includes('seafood')) return false;
     if (!['All','Vegan-Friendly','Seafood'].includes(filter) && !r.cuisine.toLowerCase().includes(filter.toLowerCase().split('/')[0])) return false;
     if (r.price > maxPrice) return false;
+    if (laptopOnly && !r.workFriendly) return false;
+    if (walkInOnly && !r.walkIn) return false;
+    if (veganOnly && !r.cuisine.toLowerCase().includes('vegan')) return false;
     return true;
   });
 
