@@ -1,5 +1,6 @@
 'use client';
 import MapComponent from './components/Map';
+import NeighborhoodSearch from './components/NeighborhoodSearch';
 import { useState } from 'react';
 
 const restaurants = [
