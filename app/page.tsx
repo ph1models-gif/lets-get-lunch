@@ -19,13 +19,13 @@ export default function Home() {
   const [maxPrice, setMaxPrice] = useState(35);
   const [selected, setSelected] = useState<number|null>(null);
 
-  const filters = ['All', 'Work-friendly',  'Italian', 'Japanese', 'French', 'American'];
+  const filters = ['All', 'Italian', 'Japanese/Sushi', 'French', 'American', 'Seafood', 'Mediterranean', 'Latin/Mexican', 'Indian', 'Vegan-Friendly', 'Steakhouse', 'BBQ', 'Bakery/Deli'];
 
   const filtered = restaurants.filter(r => {
     if (search && !r.name.toLowerCase().includes(search.toLowerCase()) && !r.neighborhood.toLowerCase().includes(search.toLowerCase()) && !r.cuisine.toLowerCase().includes(search.toLowerCase())) return false;
-    if (filter === 'Work-friendly' && !r.workFriendly) return false;
-    if (filter === 'Under $30' && r.price >= 30) return false;
-    if (['Italian','Japanese','French','American'].includes(filter) && !r.cuisine.includes(filter)) return false;
+    if (filter === 'Vegan-Friendly' && !r.cuisine.toLowerCase().includes('vegan')) return false;
+    if (filter === 'Seafood' && !r.cuisine.toLowerCase().includes('seafood')) return false;
+    if (!['All','Vegan-Friendly','Seafood'].includes(filter) && !r.cuisine.toLowerCase().includes(filter.toLowerCase().split('/')[0])) return false;
     if (r.price > maxPrice) return false;
     return true;
   });
