@@ -30,7 +30,7 @@ export default function Home() {
       const s = search.toLowerCase();
       const keywords: Record<string, boolean> = {
         'laptop': r.workFriendly, 'wifi': r.workFriendly, 'wi-fi': r.workFriendly,
-        'quiet': !r.workFriendly, 'walk-in': r.walkIn, 'walkin': r.walkIn,
+        'quiet': !r.workFriendly, 'walk-in': r.workFriendly, 'walkin': r.workFriendly,
         'outlets': r.workFriendly, 'work': r.workFriendly,
       };
       const keywordMatch = Object.entries(keywords).some(([k, v]) => s.includes(k) && v);
