@@ -1,7 +1,7 @@
 'use client';
 import MapComponent from './components/Map';
 import NeighborhoodSearch from './components/NeighborhoodSearch';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 const restaurants = [
   { id: 1, name: "Osteria Morini", neighborhood: "SoHo", cuisine: "Italian", special: "Tagliatelle bolognese + arugula salad + tiramisu", price: 32, emoji: "🍝", workFriendly: true, rating: 4.8, seats: 12, hours: "11:30am–3pm" },
@@ -21,6 +21,7 @@ export default function Home() {
   const [laptopOnly, setLaptopOnly] = useState(false);
   const [walkInOnly, setWalkInOnly] = useState(false);
   const [veganOnly, setVeganOnly] = useState(false);
+  const mapPanRef = useRef<((lat: number, lng: number) => void) | null>(null);
   const [selected, setSelected] = useState<number|null>(null);
 
   const filters = ['All', 'Italian', 'Japanese/Sushi', 'French', 'American', 'Seafood', 'Mediterranean', 'Latin/Mexican', 'Indian', 'Vegan-Friendly', 'Steakhouse', 'BBQ', ];
@@ -75,6 +76,7 @@ export default function Home() {
             onChange={val => setSearch(val)}
             onSelect={(hood, borough, coords) => {
               setSearch(hood);
+              if (coords && mapPanRef.current) mapPanRef.current(coords[0], coords[1]);
             }}
           />
           <button className="bg-[#4A9FD5] text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-[#3a8fc5]">
@@ -83,7 +85,7 @@ export default function Home() {
         </div>
       </section>
 
-      <MapComponent />
+      <MapComponent onPanReady={(fn: (lat: number, lng: number) => void) => { mapPanRef.current = fn; }} />
 
       {/* Filters */}
       <section className="px-4 py-4 border-b border-gray-100 sticky top-[57px] bg-white z-40">
