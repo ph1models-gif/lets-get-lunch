@@ -70,12 +70,11 @@ export default function Home() {
           Discover today’s best prix-fixe lunch deals in Manhattan, Brooklyn & beyond. Real tables, real service, real value — all under $35. Many spots have Wi-Fi, outlets, and zero judgment if you linger with your laptop.
         </p>
         <div className="max-w-lg mx-auto flex gap-2">
-          <input
-            type="text"
-            placeholder="Try: Italian, Midtown, laptop friendly, quiet..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#4A9FD5]"
+          <NeighborhoodSearch
+            onChange={val => setSearch(val)}
+            onSelect={(hood, borough, coords) => {
+              setSearch(hood);
+            }}
           />
           <button className="bg-[#4A9FD5] text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-[#3a8fc5]">
             Search
