@@ -51,7 +51,7 @@ export default function Home() {
           <span className="text-[#4A9FD5]">at the table — not the desk.</span>
         </h1>
         <p className="text-gray-500 text-lg max-w-xl mx-auto mb-8">
-          2–3 course sit-down lunches under $35 at top NYC restaurants. Many are work-friendly — bring your laptop.
+          Discover today’s best prix-fixe lunch deals in Manhattan, Brooklyn & beyond. Real tables, real service, real value — all under $35. Many spots have Wi-Fi, outlets, and zero judgment if you linger with your laptop.
         </p>
         <div className="max-w-lg mx-auto flex gap-2">
           <input
