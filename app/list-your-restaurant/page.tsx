@@ -3,6 +3,15 @@ import { useState } from 'react';
 
 export default function ListYourRestaurant() {
   const [submitted, setSubmitted] = useState(false);
+  const [images, setImages] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+
+  const handleImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setImages(files);
+    setPreviews(files.map(f => URL.createObjectURL(f)));
+  };
+
   const [form, setForm] = useState({
     restaurant: '', contact: '', email: '', phone: '',
     address: '', neighborhood: '', cuisine: '', seats: '',
