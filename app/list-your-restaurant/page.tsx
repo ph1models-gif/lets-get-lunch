@@ -3,18 +3,44 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { supabase } from '../../lib/supabase';
 
+const NEIGHBORHOODS = [
+  "Midtown","Midtown East","Midtown West","Upper East Side","Upper West Side",
+  "Chelsea","West Village","Greenwich Village","SoHo","NoHo","Tribeca",
+  "Financial District","Lower East Side","East Village","Gramercy Park",
+  "Murray Hill","Kips Bay","Harlem","Hell's Kitchen","Chinatown","Little Italy",
+  "Battery Park City","Union Square","Lenox Hill","Yorkville","Washington Heights",
+  "Inwood","Morningside Heights","Williamsburg","Dumbo","Brooklyn Heights",
+  "Park Slope","Cobble Hill","Carroll Gardens","Boerum Hill","Fort Greene",
+  "Clinton Hill","Bushwick","Greenpoint","Red Hook","Crown Heights",
+  "Prospect Heights","Downtown Brooklyn","Astoria","Long Island City",
+  "Flushing","Jackson Heights","Forest Hills","Sunnyside","Ridgewood",
+  "Fordham","Riverdale","Mott Haven","St. George","Stapleton"
+];
+
+const CUISINES = [
+  "American","Italian","Japanese/Sushi","French","Mexican/Latin",
+  "Chinese","Indian","Mediterranean","Greek","Thai","Korean",
+  "Vietnamese","Middle Eastern","Seafood","Steakhouse","BBQ",
+  "Vegan/Plant-Based","Bakery/Cafe","Other"
+];
+
+const HOURS_OPTIONS = [
+  "11am–2pm","11am–2:30pm","11am–3pm","11:30am–2pm",
+  "11:30am–2:30pm","11:30am–3pm","12pm–2pm","12pm–2:30pm",
+  "12pm–3pm","12pm–3:30pm"
+];
+
 export default function ListYourRestaurant() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
 
   const [form, setForm] = useState({
     restaurant: '', contact: '', email: '', phone: '',
-    address: '', neighborhood: '', cuisine: '', seats: '',
-    hours: '', special: '', price: '', workFriendly: 'no',
-    wifi: 'no', message: ''
+    address: '', neighborhood: '', cuisine: '', cuisineOther: '',
+    seats: '', hours: '', special: '', price: '',
+    workFriendly: 'no', wifi: 'no', message: ''
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -23,7 +49,6 @@ export default function ListYourRestaurant() {
 
   const handleImages = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setImages(files);
     setPreviews(files.map(f => URL.createObjectURL(f)));
   };
 
@@ -32,6 +57,8 @@ export default function ListYourRestaurant() {
     setLoading(true);
     setError('');
 
+    const finalCuisine = form.cuisine === 'Other' ? form.cuisineOther : form.cuisine;
+
     const { error: err } = await supabase.from('vendors').insert({
       restaurant_name: form.restaurant,
       contact_name: form.contact,
@@ -39,7 +66,7 @@ export default function ListYourRestaurant() {
       phone: form.phone,
       address: form.address,
       neighborhood: form.neighborhood,
-      cuisine: form.cuisine,
+      cuisine: finalCuisine,
       seats: form.seats,
       hours: form.hours,
       special: form.special,
@@ -120,11 +147,20 @@ export default function ListYourRestaurant() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>Neighborhood *</label>
-                  <input name="neighborhood" required value={form.neighborhood} onChange={handleChange} placeholder="e.g. Midtown" className={inputClass} />
+                  <select name="neighborhood" required value={form.neighborhood} onChange={handleChange} className={inputClass}>
+                    <option value="">Select neighborhood...</option>
+                    {NEIGHBORHOODS.map(n => <option key={n} value={n}>{n}</option>)}
+                  </select>
                 </div>
                 <div>
                   <label className={labelClass}>Cuisine type *</label>
-                  <input name="cuisine" required value={form.cuisine} onChange={handleChange} placeholder="e.g. Italian" className={inputClass} />
+                  <select name="cuisine" required value={form.cuisine} onChange={handleChange} className={inputClass}>
+                    <option value="">Select cuisine...</option>
+                    {CUISINES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  {form.cuisine === 'Other' && (
+                    <input name="cuisineOther" value={form.cuisineOther} onChange={handleChange} placeholder="Please specify..." className={`${inputClass} mt-2`} required />
+                  )}
                 </div>
               </div>
               <div>
@@ -138,7 +174,7 @@ export default function ListYourRestaurant() {
             <h2 className="font-semibold text-gray-900 mb-4">Lunch special</h2>
             <div className="space-y-4">
               <div>
-                <label className={labelClass}>What&apos;s your lunch special? *</label>
+                <label className={labelClass}>Describe your lunch special *</label>
                 <input name="special" required value={form.special} onChange={handleChange} placeholder="e.g. Pasta + salad + dessert" className={inputClass} />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -147,8 +183,11 @@ export default function ListYourRestaurant() {
                   <input name="price" required value={form.price} onChange={handleChange} placeholder="e.g. $29" className={inputClass} />
                 </div>
                 <div>
-                  <label className={labelClass}>Lunch hours *</label>
-                  <input name="hours" required value={form.hours} onChange={handleChange} placeholder="e.g. 11:30am – 3pm" className={inputClass} />
+                  <label className={labelClass}>Lunch service hours *</label>
+                  <select name="hours" required value={form.hours} onChange={handleChange} className={inputClass}>
+                    <option value="">Select hours...</option>
+                    {HOURS_OPTIONS.map(h => <option key={h} value={h}>{h}</option>)}
+                  </select>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -157,7 +196,7 @@ export default function ListYourRestaurant() {
                   <input name="seats" value={form.seats} onChange={handleChange} placeholder="e.g. 20" className={inputClass} />
                 </div>
                 <div>
-                  <label className={labelClass}>Work-friendly?</label>
+                  <label className={labelClass}>Laptop friendly?</label>
                   <select name="workFriendly" value={form.workFriendly} onChange={handleChange} className={inputClass}>
                     <option value="yes">Yes — laptops welcome</option>
                     <option value="no">No — dining only</option>
@@ -188,7 +227,7 @@ export default function ListYourRestaurant() {
                 {previews.map((p, i) => (
                   <div key={i} className="relative">
                     <Image src={p} alt="Food preview" width={300} height={96} className="w-full h-24 object-cover rounded-xl" unoptimized />
-                    <button type="button" onClick={() => { setImages(imgs => imgs.filter((_,j)=>j!==i)); setPreviews(ps => ps.filter((_,j)=>j!==i)); }} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">x</button>
+                    <button type="button" onClick={() => setPreviews(ps => ps.filter((_,j)=>j!==i))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">x</button>
                   </div>
                 ))}
               </div>
