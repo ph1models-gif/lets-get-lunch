@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Image from 'next/image';
 
 export default function ListYourRestaurant() {
   const [submitted, setSubmitted] = useState(false);
@@ -152,7 +153,7 @@ export default function ListYourRestaurant() {
               <div className="grid grid-cols-3 gap-3 mt-4">
                 {previews.map((p, i) => (
                   <div key={i} className="relative">
-                    <img src={p} alt="" className="w-full h-24 object-cover rounded-xl" />
+                    <Image src={p} alt="Food preview" width={300} height={96} className="w-full h-24 object-cover rounded-xl" unoptimized />
                     <button type="button" onClick={() => { setImages(imgs => imgs.filter((_,j)=>j!==i)); setPreviews(ps => ps.filter((_,j)=>j!==i)); }} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">x</button>
                   </div>
                 ))}
