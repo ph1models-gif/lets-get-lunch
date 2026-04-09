@@ -1,20 +1,50 @@
 'use client';
 import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { supabase } from '../../../lib/supabase';
 
-const restaurants = [
-  { id:1, name:"Osteria Morini", neighborhood:"SoHo", cuisine:"Italian", special:"Tagliatelle bolognese + arugula salad + tiramisu", price:32, emoji:"🍝", workFriendly:true, walkIn:true, rating:4.8, seats:12, hours:"11:30am–3pm", address:"218 Lafayette St, New York, NY" },
-  { id:2, name:"Sushi Yasuda", neighborhood:"Midtown East", cuisine:"Japanese", special:"8-piece omakase + miso soup + green tea", price:35, emoji:"🍱", workFriendly:false, walkIn:false, rating:4.9, seats:6, hours:"12pm–2:30pm", address:"204 E 43rd St, New York, NY" },
-  { id:3, name:"The Smith", neighborhood:"Midtown", cuisine:"American", special:"Burger + fries + house salad + soft drink", price:28, emoji:"🍔", workFriendly:true, walkIn:true, rating:4.6, seats:18, hours:"11am–3pm", address:"956 2nd Ave, New York, NY" },
-  { id:4, name:"Avra Estiatorio", neighborhood:"Midtown East", cuisine:"Greek", special:"Grilled branzino + Greek salad + baklava", price:34, emoji:"🐟", workFriendly:false, walkIn:false, rating:4.7, seats:8, hours:"12pm–3pm", address:"141 E 48th St, New York, NY" },
-  { id:5, name:"Cafe Boulud", neighborhood:"Upper East Side", cuisine:"French", special:"Soupe du jour + steak frites + creme brulee", price:35, emoji:"🥩", workFriendly:true, walkIn:false, rating:4.8, seats:10, hours:"12pm–2:30pm", address:"20 E 76th St, New York, NY" },
-  { id:6, name:"Via Carota", neighborhood:"West Village", cuisine:"Italian", special:"Cacio e pepe + insalata verde + panna cotta", price:30, emoji:"🍃", workFriendly:true, walkIn:true, rating:4.9, seats:14, hours:"11:30am–3pm", address:"51 Grove St, New York, NY" },
-  { id:7, name:"Momofuku Noodle Bar", neighborhood:"East Village", cuisine:"Asian", special:"Ramen + steamed buns + soft drink", price:26, emoji:"🍜", workFriendly:true, walkIn:true, rating:4.7, seats:20, hours:"11am–3pm", address:"171 1st Ave, New York, NY" },
-  { id:8, name:"Le Bernardin", neighborhood:"Midtown", cuisine:"French Seafood", special:"Tuna carpaccio + halibut + chocolate mousse", price:35, emoji:"🦞", workFriendly:false, walkIn:false, rating:5.0, seats:4, hours:"12pm–2:30pm", address:"155 W 51st St, New York, NY" },
-];
+interface Restaurant {
+  id: string;
+  name: string;
+  neighborhood: string;
+  address: string;
+  cuisine: string;
+  emoji: string;
+  work_friendly: boolean;
+  walk_in: boolean;
+  wifi: boolean;
+  rating: number;
+  seats: number;
+  hours: string;
+  deals: { special: string; price: number; courses: number }[];
+}
 
 export default function RestaurantPage() {
   const { id } = useParams();
-  const r = restaurants.find(x => x.id === Number(id));
+  const [r, setR] = useState<Restaurant | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      const { data } = await supabase
+        .from('restaurants')
+        .select('*, deals(*)')
+        .eq('id', id)
+        .single();
+      setR(data);
+      setLoading(false);
+    }
+    load();
+  }, [id]);
+
+  if (loading) return (
+    <main className="min-h-screen bg-white flex items-center justify-center">
+      <div className="text-center">
+        <div className="text-5xl mb-4">🍽️</div>
+        <p className="text-gray-400">Loading...</p>
+      </div>
+    </main>
+  );
 
   if (!r) return (
     <main className="min-h-screen bg-white flex items-center justify-center px-4">
@@ -26,10 +56,12 @@ export default function RestaurantPage() {
     </main>
   );
 
+  const deal = r.deals?.[0];
+
   return (
     <main className="min-h-screen bg-white">
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
-        <a href="/" className="flex items-center gap-2 text-[#4A9FD5] hover:underline text-sm font-medium">
+        <a href="/" className="text-[#4A9FD5] hover:underline text-sm font-medium">
           &larr; Back to results
         </a>
         <a href="/list-your-restaurant" className="text-sm text-gray-500 hover:text-gray-700">For restaurants</a>
@@ -46,7 +78,7 @@ export default function RestaurantPage() {
             <p className="text-gray-500 mt-1">{r.neighborhood} · {r.cuisine}</p>
           </div>
           <div className="text-right">
-            <span className="text-3xl font-bold text-[#4A9FD5]">${r.price}</span>
+            <span className="text-3xl font-bold text-[#4A9FD5]">${deal?.price}</span>
             <p className="text-xs text-gray-400">per person</p>
           </div>
         </div>
@@ -59,19 +91,26 @@ export default function RestaurantPage() {
 
         <div className="bg-[#EEF6FC] rounded-2xl p-6 mb-6">
           <h2 className="font-semibold text-gray-900 mb-3 text-lg">Today&apos;s lunch deal</h2>
-          <p className="text-gray-700 text-base leading-relaxed mb-4">{r.special}</p>
+          <p className="text-gray-700 text-base leading-relaxed mb-4">{deal?.special}</p>
           <div className="flex gap-4 text-sm text-gray-600">
             <span>🕐 {r.hours}</span>
             <span>💺 {r.seats} seats left</span>
+            <span>🍽️ {deal?.courses}-course</span>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          <div className={`rounded-xl p-4 text-sm font-medium flex items-center gap-2 ${r.workFriendly ? 'bg-blue-50 text-[#4A9FD5]' : 'bg-gray-50 text-gray-400'}`}>
-            💻 {r.workFriendly ? 'Laptop friendly' : 'No laptops'}
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className={`rounded-xl p-4 text-sm font-medium flex flex-col items-center gap-1 ${r.work_friendly ? 'bg-blue-50 text-[#4A9FD5]' : 'bg-gray-50 text-gray-400'}`}>
+            <span>💻</span>
+            <span>{r.work_friendly ? 'Laptop ok' : 'No laptops'}</span>
           </div>
-          <div className={`rounded-xl p-4 text-sm font-medium flex items-center gap-2 ${r.walkIn ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-400'}`}>
-            🚶 {r.walkIn ? 'Walk-ins welcome' : 'Reservation required'}
+          <div className={`rounded-xl p-4 text-sm font-medium flex flex-col items-center gap-1 ${r.walk_in ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-400'}`}>
+            <span>🚶</span>
+            <span>{r.walk_in ? 'Walk-ins' : 'Resy only'}</span>
+          </div>
+          <div className={`rounded-xl p-4 text-sm font-medium flex flex-col items-center gap-1 ${r.wifi ? 'bg-blue-50 text-[#4A9FD5]' : 'bg-gray-50 text-gray-400'}`}>
+            <span>📶</span>
+            <span>{r.wifi ? 'Free WiFi' : 'No WiFi'}</span>
           </div>
         </div>
 
