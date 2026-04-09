@@ -21,12 +21,9 @@ export default function MapInner({ onPanReady }: Props) {
   const mapRef = useRef<any>(null);
 
   useEffect(() => {
-    if ((window as any).google) {
-      initMap();
-      return;
-    }
+    if ((window as any).google) { initMap(); return; }
     const s = document.createElement('script');
-    s.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0';
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
     s.async = true;
     s.onload = initMap;
     document.head.appendChild(s);
@@ -35,6 +32,7 @@ export default function MapInner({ onPanReady }: Props) {
   function initMap() {
     if (!ref.current) return;
     const g = (window as any).google.maps;
+
     const map = new g.Map(ref.current, {
       center: {lat:40.7484, lng:-73.984},
       zoom: 13,
@@ -51,6 +49,7 @@ export default function MapInner({ onPanReady }: Props) {
       });
     }
 
+    // Restaurant pins
     R.forEach(r => {
       const mk = new g.Marker({
         position: {lat:r.lat, lng:r.lng},
@@ -60,14 +59,36 @@ export default function MapInner({ onPanReady }: Props) {
         icon: {path:g.SymbolPath.CIRCLE, scale:18, fillColor:'#4A9FD5', fillOpacity:1, strokeColor:'white', strokeWeight:2},
       });
       const popup = new g.InfoWindow({
-        content: `<div style="padding:8px;min-width:160px">
-          <b style="font-size:14px">${r.name}</b><br/>
-          <span style="color:#4A9FD5;font-weight:bold;font-size:13px">${r.price}</span><br/>
-          <span style="color:#666;font-size:12px">${r.special}</span>
+        content: `<div style="padding:10px;min-width:180px;font-family:sans-serif">
+          <div style="font-weight:600;font-size:14px;margin-bottom:4px">${r.name}</div>
+          <div style="color:#4A9FD5;font-weight:700;font-size:15px;margin-bottom:4px">${r.price}</div>
+          <div style="color:#666;font-size:12px">${r.special}</div>
         </div>`
       });
       mk.addListener('click', () => popup.open(map, mk));
     });
+
+    // Blue dot — user location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        const userLatLng = {lat: pos.coords.latitude, lng: pos.coords.longitude};
+        new g.Marker({
+          position: userLatLng,
+          map,
+          title: 'You are here',
+          icon: {
+            path: g.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: '#4285F4',
+            fillOpacity: 1,
+            strokeColor: 'white',
+            strokeWeight: 3,
+          },
+          zIndex: 999,
+        });
+        map.panTo(userLatLng);
+      }, () => {});
+    }
   }
 
   return <div ref={ref} style={{width:'100%', height:'420px'}} />;
