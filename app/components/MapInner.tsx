@@ -47,6 +47,7 @@ export default function MapInner({ onPanReady }: Props) {
       });
     }
 
+    let openPopup: any = null;
     R.forEach(r => {
       const mk = new g.Marker({
         position: {lat:r.lat, lng:r.lng},
@@ -66,7 +67,7 @@ export default function MapInner({ onPanReady }: Props) {
         </div>`
       });
 
-      mk.addListener('click', () => popup.open(map, mk));
+      mk.addListener('click', () => { if (openPopup) openPopup.close(); openPopup = popup; popup.open(map, mk); });
     });
 
     if (navigator.geolocation) {
