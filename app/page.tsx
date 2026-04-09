@@ -119,12 +119,10 @@ export default function Home() {
       {/* Restaurant grid */}
       <section className="px-4 pb-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filtered.map(r => (
-          <div
+          
             key={r.id}
-            onClick={() => setSelected(selected === r.id ? null : r.id)}
-            className={`bg-white rounded-2xl border cursor-pointer transition-all hover:shadow-md ${
-              selected === r.id ? 'border-[#4A9FD5] shadow-md' : 'border-gray-200'
-            }`}
+            href={`/restaurants/${r.id}`}
+            className="block bg-white rounded-2xl border cursor-pointer transition-all hover:shadow-md border-gray-200 hover:border-[#4A9FD5] no-underline"
           >
             {/* Food photo placeholder */}
             <div className={`h-44 rounded-t-2xl flex items-center justify-center text-6xl ${
@@ -150,7 +148,7 @@ export default function Home() {
                 Reserve a table
               </button>
             </div>
-          </div>
+          </a>
         ))}
       </section>
 
