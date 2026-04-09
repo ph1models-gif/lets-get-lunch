@@ -77,7 +77,7 @@ export default function Home() {
             onChange={val => setSearch(val)}
             onSelect={(hood, borough, coords) => {
               setSearch(hood);
-              if (coords && mapPanRef.current) mapPanRef.current(coords[0], coords[1]);
+              if (coords && mapPanRef.current) mapPanRef.current(coords.lat, coords.lng);
             }}
           />
           <button className="bg-[#4A9FD5] text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-[#3a8fc5]">
