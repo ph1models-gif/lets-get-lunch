@@ -41,8 +41,8 @@ app/
 ## What is NOT done yet (build order)
 1. [ ] Move Google Maps API key to env var (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY)
 2. [ ] Fix <img> ESLint warning in list-your-restaurant/page.tsx (swap for next/image) — BUILD MAY STILL FAIL HERE
-3. [ ] User location blue dot on map
-4. [ ] Food photos in map pin popups
+3. [x] User location blue dot on map — DONE
+4. [x] Food photos in map pin popups — DONE (deal details showing in popups)
 5. [ ] Rich pin popups with full deal details
 6. [ ] Restaurant detail page: /restaurants/[id]
 7. [ ] Supabase backend (replace hardcoded mock data)
