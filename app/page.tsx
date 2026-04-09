@@ -21,6 +21,7 @@ export default function Home() {
   const [laptopOnly, setLaptopOnly] = useState(false);
   const [walkInOnly, setWalkInOnly] = useState(false);
   const [veganOnly, setVeganOnly] = useState(false);
+  const panRef = useRef<((lat: number, lng: number) => void) | null>(null);
   const mapPanRef = useRef<((lat: number, lng: number) => void) | null>(null);
   const [selected, setSelected] = useState<number|null>(null);
 
