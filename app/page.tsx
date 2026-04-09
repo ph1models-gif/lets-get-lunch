@@ -1,49 +1,71 @@
 'use client';
 import MapComponent from './components/Map';
 import NeighborhoodSearch from './components/NeighborhoodSearch';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 
-const restaurants = [
-  { id:1, name:"Osteria Morini", neighborhood:"SoHo", cuisine:"Italian", special:"Tagliatelle bolognese + arugula salad + tiramisu", price:32, emoji:"🍝", workFriendly:true, walkIn:true, rating:4.8, seats:12, hours:"11:30am–3pm" },
-  { id:2, name:"Sushi Yasuda", neighborhood:"Midtown East", cuisine:"Japanese", special:"8-piece omakase + miso soup + green tea", price:35, emoji:"🍱", workFriendly:false, walkIn:false, rating:4.9, seats:6, hours:"12pm–2:30pm" },
-  { id:3, name:"The Smith", neighborhood:"Midtown", cuisine:"American", special:"Burger + fries + house salad + soft drink", price:28, emoji:"🍔", workFriendly:true, walkIn:true, rating:4.6, seats:18, hours:"11am–3pm" },
-  { id:4, name:"Avra Estiatorio", neighborhood:"Midtown East", cuisine:"Greek", special:"Grilled branzino + Greek salad + baklava", price:34, emoji:"🐟", workFriendly:false, walkIn:false, rating:4.7, seats:8, hours:"12pm–3pm" },
-  { id:5, name:"Cafe Boulud", neighborhood:"Upper East Side", cuisine:"French", special:"Soupe du jour + steak frites + creme brulee", price:35, emoji:"🥩", workFriendly:true, walkIn:false, rating:4.8, seats:10, hours:"12pm–2:30pm" },
-  { id:6, name:"Via Carota", neighborhood:"West Village", cuisine:"Italian", special:"Cacio e pepe + insalata verde + panna cotta", price:30, emoji:"🍃", workFriendly:true, walkIn:true, rating:4.9, seats:14, hours:"11:30am–3pm" },
-  { id:7, name:"Momofuku Noodle Bar", neighborhood:"East Village", cuisine:"Asian", special:"Ramen + steamed buns + soft drink", price:26, emoji:"🍜", workFriendly:true, walkIn:true, rating:4.7, seats:20, hours:"11am–3pm" },
-  { id:8, name:"Le Bernardin", neighborhood:"Midtown", cuisine:"French Seafood", special:"Tuna carpaccio + halibut + chocolate mousse", price:35, emoji:"🦞", workFriendly:false, walkIn:false, rating:5.0, seats:4, hours:"12pm–2:30pm" },
-];
+interface Restaurant {
+  id: string;
+  name: string;
+  neighborhood: string;
+  address: string;
+  lat: number;
+  lng: number;
+  cuisine: string;
+  emoji: string;
+  work_friendly: boolean;
+  walk_in: boolean;
+  wifi: boolean;
+  rating: number;
+  seats: number;
+  hours: string;
+  deals: { special: string; price: number; courses: number }[];
+}
 
 export default function Home() {
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
   const [maxPrice, setMaxPrice] = useState(35);
   const [laptopOnly, setLaptopOnly] = useState(false);
   const [walkInOnly, setWalkInOnly] = useState(false);
-  const [veganOnly, setVeganOnly] = useState(false);
   const mapPanRef = useRef<((lat: number, lng: number) => void) | null>(null);
+
+  useEffect(() => {
+    async function load() {
+      const { data, error } = await supabase
+        .from('restaurants')
+        .select('*, deals(*)')
+        .eq('is_active', true);
+      if (!error && data) setRestaurants(data);
+      setLoading(false);
+    }
+    load();
+  }, []);
 
   const filters = ['All','Italian','Japanese/Sushi','French','American','Seafood','Mediterranean','Latin/Mexican','Indian','Vegan-Friendly','Steakhouse','BBQ'];
 
   const filtered = restaurants.filter(r => {
+    const deal = r.deals?.[0];
+    if (!deal) return false;
     if (search) {
       const s = search.toLowerCase();
       const keywords: Record<string, boolean> = {
-        'laptop': r.workFriendly, 'wifi': r.workFriendly, 'wi-fi': r.workFriendly,
-        'quiet': !r.workFriendly, 'walk-in': r.walkIn, 'walkin': r.walkIn,
-        'outlets': r.workFriendly, 'work': r.workFriendly,
+        'laptop': r.work_friendly, 'wifi': r.wifi, 'wi-fi': r.wifi,
+        'quiet': !r.work_friendly, 'walk-in': r.walk_in, 'walkin': r.walk_in,
+        'outlets': r.work_friendly, 'work': r.work_friendly,
       };
       const keywordMatch = Object.entries(keywords).some(([k, v]) => s.includes(k) && v);
-      const textMatch = r.name.toLowerCase().includes(s) || r.neighborhood.toLowerCase().includes(s) || r.cuisine.toLowerCase().includes(s) || r.special.toLowerCase().includes(s);
+      const textMatch = r.name.toLowerCase().includes(s) || r.neighborhood.toLowerCase().includes(s) || r.cuisine.toLowerCase().includes(s) || deal.special.toLowerCase().includes(s);
       if (!keywordMatch && !textMatch) return false;
     }
     if (filter === 'Vegan-Friendly' && !r.cuisine.toLowerCase().includes('vegan')) return false;
     if (filter === 'Seafood' && !r.cuisine.toLowerCase().includes('seafood')) return false;
     if (!['All','Vegan-Friendly','Seafood'].includes(filter) && !r.cuisine.toLowerCase().includes(filter.toLowerCase().split('/')[0])) return false;
-    if (r.price > maxPrice) return false;
-    if (laptopOnly && !r.workFriendly) return false;
-    if (walkInOnly && !r.walkIn) return false;
-    if (veganOnly && !r.cuisine.toLowerCase().includes('vegan')) return false;
+    if (deal.price > maxPrice) return false;
+    if (laptopOnly && !r.work_friendly) return false;
+    if (walkInOnly && !r.walk_in) return false;
     return true;
   });
 
@@ -106,42 +128,52 @@ export default function Home() {
             <input type="checkbox" checked={walkInOnly} onChange={e => setWalkInOnly(e.target.checked)} className="rounded" />
             🚶 Walk-ins
           </label>
-          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-            <input type="checkbox" checked={veganOnly} onChange={e => setVeganOnly(e.target.checked)} className="rounded" />
-            🌱 Vegan
-          </label>
         </div>
       </section>
 
       <section className="px-4 py-3">
-        <p className="text-sm text-gray-500">{filtered.length} lunch specials available today</p>
+        {loading
+          ? <p className="text-sm text-gray-400">Loading restaurants...</p>
+          : <p className="text-sm text-gray-500">{filtered.length} lunch specials available today</p>
+        }
       </section>
 
       <section className="px-4 pb-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filtered.map(r => (
-          <a key={r.id} href={`/restaurants/${r.id}`}
-            className="block bg-white rounded-2xl border border-gray-200 hover:border-[#4A9FD5] hover:shadow-md transition-all no-underline">
-            <div className="h-44 rounded-t-2xl flex items-center justify-center text-6xl bg-gray-50">
-              {r.emoji}
-            </div>
-            <div className="p-4">
-              <div className="flex justify-between items-start mb-1">
-                <h3 className="font-semibold text-gray-900">{r.name}</h3>
-                <span className="font-bold text-[#4A9FD5] text-lg">${r.price}</span>
-              </div>
-              <p className="text-xs text-gray-500 mb-2">{r.neighborhood} · {r.cuisine} · {r.hours}</p>
-              <p className="text-sm text-gray-700 mb-3 leading-relaxed">{r.special}</p>
-              <div className="flex gap-2 flex-wrap mb-3">
-                {r.workFriendly && <span className="text-xs bg-blue-50 text-[#4A9FD5] px-2 py-1 rounded-full font-medium">💻 Work-friendly</span>}
-                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">⭐ {r.rating}</span>
-                <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full">{r.seats} seats left</span>
-              </div>
-              <div className="w-full py-2.5 bg-[#4A9FD5] text-white rounded-xl text-sm font-medium text-center">
-                View deal
-              </div>
-            </div>
-          </a>
-        ))}
+        {loading ? (
+          [1,2,3].map(i => (
+            <div key={i} className="bg-gray-50 rounded-2xl border border-gray-100 h-64 animate-pulse" />
+          ))
+        ) : (
+          filtered.map(r => {
+            const deal = r.deals?.[0];
+            return (
+              <a key={r.id} href={`/restaurants/${r.id}`}
+                className="block bg-white rounded-2xl border border-gray-200 hover:border-[#4A9FD5] hover:shadow-md transition-all no-underline">
+                <div className="h-44 rounded-t-2xl flex items-center justify-center text-6xl bg-gray-50">
+                  {r.emoji}
+                </div>
+                <div className="p-4">
+                  <div className="flex justify-between items-start mb-1">
+                    <h3 className="font-semibold text-gray-900">{r.name}</h3>
+                    <span className="font-bold text-[#4A9FD5] text-lg">${deal?.price}</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mb-2">{r.neighborhood} · {r.cuisine} · {r.hours}</p>
+                  <p className="text-sm text-gray-700 mb-3 leading-relaxed">{deal?.special}</p>
+                  <div className="flex gap-2 flex-wrap mb-3">
+                    {r.work_friendly && <span className="text-xs bg-blue-50 text-[#4A9FD5] px-2 py-1 rounded-full font-medium">💻 Work-friendly</span>}
+                    {r.wifi && <span className="text-xs bg-blue-50 text-[#4A9FD5] px-2 py-1 rounded-full font-medium">📶 WiFi</span>}
+                    {r.walk_in && <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full font-medium">🚶 Walk-ins</span>}
+                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">⭐ {r.rating}</span>
+                    <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full">{r.seats} seats left</span>
+                  </div>
+                  <div className="w-full py-2.5 bg-[#4A9FD5] text-white rounded-xl text-sm font-medium text-center">
+                    View deal
+                  </div>
+                </div>
+              </a>
+            );
+          })
+        )}
       </section>
 
       <section className="bg-[#EEF6FC] px-4 py-12 text-center">
