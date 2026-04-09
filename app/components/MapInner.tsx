@@ -1,16 +1,6 @@
 'use client';
 import React, { useEffect, useRef } from 'react';
-
-const R = [
-  {id:1, name:'Osteria Morini', lat:40.7243, lng:-74.0018, price:'$32', special:'Tagliatelle + salad + tiramisu'},
-  {id:2, name:'Sushi Yasuda', lat:40.7527, lng:-73.9772, price:'$35', special:'8-piece omakase + miso soup'},
-  {id:3, name:'The Smith', lat:40.7580, lng:-73.9855, price:'$28', special:'Burger + fries + soft drink'},
-  {id:4, name:'Avra Estiatorio', lat:40.7549, lng:-73.9740, price:'$34', special:'Branzino + Greek salad + baklava'},
-  {id:5, name:'Cafe Boulud', lat:40.7726, lng:-73.9632, price:'$35', special:'Soupe du jour + steak frites'},
-  {id:6, name:'Via Carota', lat:40.7334, lng:-74.0040, price:'$30', special:'Cacio e pepe + insalata + panna cotta'},
-  {id:7, name:'Momofuku', lat:40.7289, lng:-73.9845, price:'$26', special:'Ramen + bao + soft drink'},
-  {id:8, name:'Le Bernardin', lat:40.7614, lng:-73.9816, price:'$35', special:'Salmon + lobster bisque + dessert'},
-];
+import { supabase } from '../../lib/supabase';
 
 interface Props {
   onPanReady?: (fn: (lat: number, lng: number) => void) => void;
@@ -28,7 +18,7 @@ export default function MapInner({ onPanReady }: Props) {
     document.head.appendChild(s);
   }, []);
 
-  function initMap() {
+  async function initMap() {
     if (!ref.current) return;
     const g = (window as any).google.maps;
 
@@ -47,13 +37,24 @@ export default function MapInner({ onPanReady }: Props) {
       });
     }
 
+    const { data: restaurants } = await supabase
+      .from('restaurants')
+      .select('id, name, lat, lng, deals(price, special)')
+      .eq('is_active', true);
+
+    if (!restaurants) return;
+
     let openPopup: any = null;
-    R.forEach(r => {
+
+    restaurants.forEach((r: any) => {
+      const deal = r.deals?.[0];
+      if (!r.lat || !r.lng) return;
+
       const mk = new g.Marker({
-        position: {lat:r.lat, lng:r.lng},
+        position: {lat: Number(r.lat), lng: Number(r.lng)},
         map,
         title: r.name,
-        label: {text:r.price, color:'white', fontSize:'10px', fontWeight:'bold'},
+        label: {text: deal ? `$${deal.price}` : '', color:'white', fontSize:'10px', fontWeight:'bold'},
         icon: {path:g.SymbolPath.CIRCLE, scale:18, fillColor:'#4A9FD5', fillOpacity:1, strokeColor:'white', strokeWeight:2},
         cursor: 'pointer',
       });
@@ -61,13 +62,17 @@ export default function MapInner({ onPanReady }: Props) {
       const popup = new g.InfoWindow({
         content: `<div style="padding:10px;min-width:180px;font-family:sans-serif;cursor:pointer" onclick="window.location.href='/restaurants/${r.id}'">
           <div style="font-weight:600;font-size:14px;margin-bottom:4px">${r.name}</div>
-          <div style="color:#4A9FD5;font-weight:700;font-size:15px;margin-bottom:4px">${r.price}</div>
-          <div style="color:#666;font-size:12px;margin-bottom:8px">${r.special}</div>
+          <div style="color:#4A9FD5;font-weight:700;font-size:15px;margin-bottom:4px">${deal ? '$'+deal.price : ''}</div>
+          <div style="color:#666;font-size:12px;margin-bottom:8px">${deal?.special || ''}</div>
           <div style="background:#4A9FD5;color:white;text-align:center;padding:6px;border-radius:8px;font-size:12px;font-weight:600">View deal →</div>
         </div>`
       });
 
-      mk.addListener('click', () => { if (openPopup) openPopup.close(); openPopup = popup; popup.open(map, mk); });
+      mk.addListener('click', () => {
+        if (openPopup) openPopup.close();
+        openPopup = popup;
+        popup.open(map, mk);
+      });
     });
 
     if (navigator.geolocation) {
@@ -77,14 +82,7 @@ export default function MapInner({ onPanReady }: Props) {
           position: userLatLng,
           map,
           title: 'You are here',
-          icon: {
-            path: g.SymbolPath.CIRCLE,
-            scale: 10,
-            fillColor: '#4285F4',
-            fillOpacity: 1,
-            strokeColor: 'white',
-            strokeWeight: 3,
-          },
+          icon: {path:g.SymbolPath.CIRCLE, scale:10, fillColor:'#4285F4', fillOpacity:1, strokeColor:'white', strokeWeight:3},
           zIndex: 999,
         });
         map.panTo(userLatLng);
