@@ -23,7 +23,7 @@ export default function MapInner({ onPanReady }: Props) {
   useEffect(() => {
     if ((window as any).google) { initMap(); return; }
     const s = document.createElement('script');
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
+    s.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0";
     s.async = true;
     s.onload = initMap;
     document.head.appendChild(s);
