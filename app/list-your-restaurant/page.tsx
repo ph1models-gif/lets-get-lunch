@@ -1,17 +1,14 @@
 'use client';
 import { useState } from 'react';
 import Image from 'next/image';
+import { supabase } from '../../lib/supabase';
 
 export default function ListYourRestaurant() {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
-
-  const handleImages = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setImages(files);
-    setPreviews(files.map(f => URL.createObjectURL(f)));
-  };
 
   const [form, setForm] = useState({
     restaurant: '', contact: '', email: '', phone: '',
@@ -24,9 +21,41 @@ export default function ListYourRestaurant() {
     setForm({...form, [e.target.name]: e.target.value});
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setImages(files);
+    setPreviews(files.map(f => URL.createObjectURL(f)));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    setError('');
+
+    const { error: err } = await supabase.from('vendors').insert({
+      restaurant_name: form.restaurant,
+      contact_name: form.contact,
+      email: form.email,
+      phone: form.phone,
+      address: form.address,
+      neighborhood: form.neighborhood,
+      cuisine: form.cuisine,
+      seats: form.seats,
+      hours: form.hours,
+      special: form.special,
+      price: form.price,
+      work_friendly: form.workFriendly,
+      wifi: form.wifi,
+      message: form.message,
+      status: 'pending',
+    });
+
+    setLoading(false);
+    if (err) {
+      setError('Something went wrong. Please try again.');
+    } else {
+      setSubmitted(true);
+    }
   };
 
   const inputClass = "w-full px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#4A9FD5] focus:ring-1 focus:ring-[#4A9FD5]";
@@ -36,8 +65,8 @@ export default function ListYourRestaurant() {
     <main className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="text-center max-w-md">
         <div className="text-5xl mb-6">🍽️</div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-3">You're on the list!</h1>
-        <p className="text-gray-500 mb-6">We'll review your restaurant and be in touch within 48 hours to get you set up on Let's Get Lunch.</p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-3">You&apos;re on the list!</h1>
+        <p className="text-gray-500 mb-6">We&apos;ll review your restaurant and be in touch within 48 hours to get you set up on Let&apos;s Get Lunch.</p>
         <a href="/" className="inline-block bg-[#4A9FD5] text-white px-8 py-3 rounded-xl font-medium hover:bg-[#3a8fc5]">Back to home</a>
       </div>
     </main>
@@ -48,7 +77,7 @@ export default function ListYourRestaurant() {
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
         <a href="/" className="flex items-center gap-2">
           <span className="text-xl">🍽️</span>
-          <span className="font-semibold text-gray-900">Let's Get Lunch</span>
+          <span className="font-semibold text-gray-900">Let&apos;s Get Lunch</span>
         </a>
         <a href="/login" className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full">Sign in</a>
       </nav>
@@ -73,6 +102,12 @@ export default function ListYourRestaurant() {
             </div>
           ))}
         </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 text-sm">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="bg-gray-50 rounded-2xl p-6">
@@ -103,7 +138,7 @@ export default function ListYourRestaurant() {
             <h2 className="font-semibold text-gray-900 mb-4">Lunch special</h2>
             <div className="space-y-4">
               <div>
-                <label className={labelClass}>What's your lunch special? *</label>
+                <label className={labelClass}>What&apos;s your lunch special? *</label>
                 <input name="special" required value={form.special} onChange={handleChange} placeholder="e.g. Pasta + salad + dessert" className={inputClass} />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -122,7 +157,7 @@ export default function ListYourRestaurant() {
                   <input name="seats" value={form.seats} onChange={handleChange} placeholder="e.g. 20" className={inputClass} />
                 </div>
                 <div>
-                  <label className={labelClass}>Work-friendly? (laptops ok)</label>
+                  <label className={labelClass}>Work-friendly?</label>
                   <select name="workFriendly" value={form.workFriendly} onChange={handleChange} className={inputClass}>
                     <option value="yes">Yes — laptops welcome</option>
                     <option value="no">No — dining only</option>
@@ -138,7 +173,6 @@ export default function ListYourRestaurant() {
               </div>
             </div>
           </div>
-
 
           <div className="bg-gray-50 rounded-2xl p-6">
             <h2 className="font-semibold text-gray-900 mb-4">Food photos</h2>
@@ -179,21 +213,21 @@ export default function ListYourRestaurant() {
                 </div>
               </div>
               <div>
-                <label className={labelClass}>Anything else you'd like us to know?</label>
+                <label className={labelClass}>Anything else you&apos;d like us to know?</label>
                 <textarea name="message" value={form.message} onChange={handleChange} placeholder="Tell us about your space, vibe, or any special perks..." rows={3} className={inputClass} />
               </div>
             </div>
           </div>
 
-          <button type="submit" className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors">
-            Submit your restaurant — it's free
+          <button type="submit" disabled={loading} className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50">
+            {loading ? 'Submitting...' : "Submit your restaurant — it's free"}
           </button>
           <p className="text-center text-xs text-gray-400">We review every submission and respond within 48 hours.</p>
         </form>
       </div>
 
       <footer className="px-4 py-8 border-t border-gray-100 text-center">
-        <p className="text-sm text-gray-400">© 2026 Let's Get Lunch · NYC</p>
+        <p className="text-sm text-gray-400">© 2026 Let&apos;s Get Lunch · NYC</p>
       </footer>
     </main>
   );
