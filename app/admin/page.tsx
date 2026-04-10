@@ -7,15 +7,20 @@ const PASSWORD = 'lunch2026'
 
 type Vendor = {
   id: string
-  business_name: string
-  cuisine_type: string
-  neighborhood: string
+  restaurant_name: string
+  contact_name: string
+  email: string
+  phone: string
   address: string
+  neighborhood: string
+  cuisine: string
+  seats: string
   hours: string
-  deal_title: string
-  deal_description: string
-  contact_email: string
-  contact_phone: string
+  special: string
+  price: string
+  work_friendly: string
+  wifi: string
+  message: string
   photo_url: string | null
   photo_urls: string[] | null
   status: string
@@ -122,8 +127,8 @@ export default function AdminPage() {
     const { data: rest } = await supabase
       .from('restaurants')
       .insert({
-        name: vendor.business_name,
-        cuisine: vendor.cuisine_type,
+        name: vendor.restaurant_name,
+        cuisine: vendor.cuisine,
         neighborhood: vendor.neighborhood,
         address: vendor.address,
         hours: vendor.hours,
@@ -139,8 +144,8 @@ export default function AdminPage() {
     if (rest) {
       await supabase.from('deals').insert({
         restaurant_id: rest.id,
-        title: vendor.deal_title,
-        description: vendor.deal_description,
+        special: vendor.special,
+        price: parseFloat(vendor.price.replace('$','')) || 0,
         is_active: true,
       })
     }
@@ -274,8 +279,8 @@ export default function AdminPage() {
               <div key={v.id} className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900">{v.business_name}</h2>
-                    <p className="text-sm text-gray-500">{v.cuisine_type} · {v.neighborhood}</p>
+                    <h2 className="text-lg font-semibold text-gray-900">{v.restaurant_name}</h2>
+                    <p className="text-sm text-gray-500">{v.cuisine} · {v.neighborhood}</p>
                   </div>
                   <span className="text-xs text-gray-400">{new Date(v.created_at).toLocaleDateString()}</span>
                 </div>
@@ -285,12 +290,12 @@ export default function AdminPage() {
                 <div className="grid grid-cols-2 gap-2 text-sm text-gray-700 mb-3">
                   <div><span className="font-medium">Address:</span> {v.address}</div>
                   <div><span className="font-medium">Hours:</span> {v.hours}</div>
-                  <div><span className="font-medium">Email:</span> {v.contact_email}</div>
-                  <div><span className="font-medium">Phone:</span> {v.contact_phone}</div>
+                  <div><span className="font-medium">Email:</span> {v.email}</div>
+                  <div><span className="font-medium">Phone:</span> {v.phone}</div>
                 </div>
                 <div className="bg-orange-50 rounded-lg p-3 mb-4 text-sm">
-                  <p className="font-medium text-orange-800">{v.deal_title}</p>
-                  <p className="text-orange-700">{v.deal_description}</p>
+                  <p className="font-medium text-orange-800">{v.special}</p>
+                  <p className="text-orange-700">{v.price}</p>
                 </div>
                 <div className="flex gap-3">
                   <button
