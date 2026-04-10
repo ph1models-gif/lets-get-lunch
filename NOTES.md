@@ -56,20 +56,31 @@ lib/
 - [x] Admin can approve/reject vendor submissions
 - [x] Approving a vendor adds them to restaurants + deals tables instantly
 - [x] RLS policies allow public read/insert/update on all tables
+- [x] Supabase Storage bucket: restaurant-photos (public, 2 policies)
+- [x] Vendor form photo upload — 1 main photo + up to 3 additional
+- [x] Photos upload to Supabase Storage on form submit
+- [x] photo_url and photo_urls columns added to vendors + restaurants tables
+- [x] Admin page shows photos on each vendor submission card
+- [x] Approving a vendor copies photo_url + photo_urls to restaurants table
 
 ## What is NOT done yet
-1. [ ] Supabase Storage for food photos (bucket: restaurant-photos)
-2. [ ] Wire vendor form photo upload to Supabase Storage
-3. [ ] Show real food photos on restaurant cards and detail pages
-4. [ ] Move Google Maps API key to env var
-5. [ ] Reserve a table button (currently does nothing)
-6. [ ] Resend email confirmation on vendor signup
-7. [ ] Add lat/lng geocoding when admin approves a vendor
+1. [ ] Show real food photos on homepage restaurant cards
+2. [ ] Show real food photos + gallery on restaurant detail page
+3. [ ] Move Google Maps API key to env var
+4. [ ] Reserve a table button (currently does nothing)
+5. [ ] Resend email confirmation on vendor signup
+6. [ ] Add lat/lng geocoding when admin approves a vendor
 
 ## Known issues
 - Approved restaurants need lat/lng manually added in Supabase or they won't show on map
 - Google Maps API key is hardcoded in app/components/MapInner.tsx
-- Food photos not saving — Supabase Storage bucket not created yet
+- Homepage cards and detail pages still show placeholder images — not wired to photo_url yet
+
+## Supabase Storage
+- Bucket: restaurant-photos (public)
+- Policies: public SELECT + public INSERT
+- photo_url = main hero image (text)
+- photo_urls = array of up to 3 additional images (text[])
 
 ## Supabase RLS policies in place
 - restaurants: public select (is_active=true), public insert
