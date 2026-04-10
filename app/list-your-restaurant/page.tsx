@@ -34,6 +34,7 @@ export default function ListYourRestaurant() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
 
   const [form, setForm] = useState({
@@ -49,7 +50,13 @@ export default function ListYourRestaurant() {
 
   const handleImages = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
+    setImages(files);
     setPreviews(files.map(f => URL.createObjectURL(f)));
+  };
+
+  const removeImage = (i: number) => {
+    setImages(imgs => imgs.filter((_,j)=>j!==i));
+    setPreviews(ps => ps.filter((_,j)=>j!==i));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,6 +65,29 @@ export default function ListYourRestaurant() {
     setError('');
 
     const finalCuisine = form.cuisine === 'Other' ? form.cuisineOther : form.cuisine;
+
+    // Upload first photo to Supabase Storage if provided
+    let photo_url = null;
+    if (images.length > 0) {
+      const file = images[0];
+      const ext = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: uploadErr } = await supabase.storage
+        .from('restaurant-photos')
+        .upload(fileName, file, { contentType: file.type });
+
+      if (uploadErr) {
+        setError('Photo upload failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('restaurant-photos')
+        .getPublicUrl(fileName);
+
+      photo_url = urlData.publicUrl;
+    }
 
     const { error: err } = await supabase.from('vendors').insert({
       restaurant_name: form.restaurant,
@@ -75,6 +105,7 @@ export default function ListYourRestaurant() {
       wifi: form.wifi,
       message: form.message,
       status: 'pending',
+      photo_url,
     });
 
     setLoading(false);
@@ -227,7 +258,7 @@ export default function ListYourRestaurant() {
                 {previews.map((p, i) => (
                   <div key={i} className="relative">
                     <Image src={p} alt="Food preview" width={300} height={96} className="w-full h-24 object-cover rounded-xl" unoptimized />
-                    <button type="button" onClick={() => setPreviews(ps => ps.filter((_,j)=>j!==i))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">x</button>
+                    <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
                   </div>
                 ))}
               </div>
