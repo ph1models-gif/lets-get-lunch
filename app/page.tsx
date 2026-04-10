@@ -19,6 +19,8 @@ interface Restaurant {
   rating: number;
   seats: number;
   hours: string;
+  photo_url: string | null;
+  photo_urls: string[] | null;
   deals: { special: string; price: number; courses: number }[];
 }
 
@@ -149,8 +151,11 @@ export default function Home() {
             return (
               <a key={r.id} href={`/restaurants/${r.id}`}
                 className="block bg-white rounded-2xl border border-gray-200 hover:border-[#4A9FD5] hover:shadow-md transition-all no-underline">
-                <div className="h-44 rounded-t-2xl flex items-center justify-center text-6xl bg-gray-50">
-                  {r.emoji}
+                <div className="h-44 rounded-t-2xl overflow-hidden bg-gray-50">
+                  {r.photo_url
+                    ? <img src={r.photo_url} alt={r.name} className="w-full h-full object-cover" />
+                    : <div className="w-full h-full flex items-center justify-center text-6xl">{r.emoji}</div>
+                  }
                 </div>
                 <div className="p-4">
                   <div className="flex justify-between items-start mb-1">

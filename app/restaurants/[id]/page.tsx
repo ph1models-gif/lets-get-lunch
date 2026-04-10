@@ -16,6 +16,8 @@ interface Restaurant {
   rating: number;
   seats: number;
   hours: string;
+  photo_url: string | null;
+  photo_urls: string[] | null;
   deals: { special: string; price: number; courses: number }[];
 }
 
@@ -68,9 +70,24 @@ export default function RestaurantPage() {
       </nav>
 
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <div className="w-full h-56 bg-[#EEF6FC] rounded-2xl flex items-center justify-center text-8xl mb-6">
-          {r.emoji}
-        </div>
+        {r.photo_url ? (
+          <div className="w-full h-56 rounded-2xl overflow-hidden mb-4">
+            <img src={r.photo_url} alt={r.name} className="w-full h-full object-cover" />
+          </div>
+        ) : (
+          <div className="w-full h-56 bg-[#EEF6FC] rounded-2xl flex items-center justify-center text-8xl mb-4">
+            {r.emoji}
+          </div>
+        )}
+        {r.photo_urls && r.photo_urls.length > 0 && (
+          <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+            {r.photo_urls.map((url, i) => (
+              <div key={i} className="w-28 h-20 rounded-xl overflow-hidden flex-shrink-0 border border-gray-100">
+                <img src={url} alt={`${r.name} photo ${i + 2}`} className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="flex items-start justify-between mb-2">
           <div>
