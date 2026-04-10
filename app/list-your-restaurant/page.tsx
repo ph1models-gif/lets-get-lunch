@@ -59,9 +59,13 @@ export default function ListYourRestaurant() {
   };
 
   const handleExtraPhotos = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []).slice(0, 3);
-    setExtraPhotos(files);
-    setExtraPreviews(files.map(f => URL.createObjectURL(f)));
+    const newFiles = Array.from(e.target.files || []);
+    setExtraPhotos(prev => {
+      const combined = [...prev, ...newFiles].slice(0, 3);
+      setExtraPreviews(combined.map(f => URL.createObjectURL(f)));
+      return combined;
+    });
+    e.target.value = '';
   };
 
   const removeExtra = (i: number) => {
@@ -87,7 +91,6 @@ export default function ListYourRestaurant() {
 
     const finalCuisine = form.cuisine === 'Other' ? form.cuisineOther : form.cuisine;
 
-    // Upload main photo
     let photo_url = null;
     if (mainPhoto) {
       photo_url = await uploadFile(mainPhoto);
@@ -98,7 +101,6 @@ export default function ListYourRestaurant() {
       }
     }
 
-    // Upload extra photos
     const photo_urls: string[] = [];
     for (const file of extraPhotos) {
       const url = await uploadFile(file);
@@ -264,7 +266,6 @@ export default function ListYourRestaurant() {
           <div className="bg-gray-50 rounded-2xl p-6">
             <h2 className="font-semibold text-gray-900 mb-4">Food photos</h2>
 
-            {/* Main photo */}
             <div className="mb-6">
               <label className="block text-sm font-semibold text-gray-800 mb-1">Main photo <span className="text-[#4A9FD5]">★ Required</span></label>
               <p className="text-xs text-gray-500 mb-3">This is the hero image shown on your restaurant card. Pick your best dish.</p>
@@ -284,20 +285,14 @@ export default function ListYourRestaurant() {
               )}
             </div>
 
-            {/* Extra photos */}
             <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-1">Additional photos <span className="text-gray-400 font-normal">(up to 3, optional)</span></label>
-              <p className="text-xs text-gray-500 mb-3">Show off more dishes, your space, or the vibe. These appear in a gallery on your detail page.</p>
-              {extraPreviews.length < 3 && (
-                <label className="block w-full border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-[#4A9FD5] transition-colors mb-3">
-                  <input type="file" multiple accept="image/*" onChange={handleExtraPhotos} className="hidden" />
-                  <div className="text-2xl mb-1">📸</div>
-                  <div className="text-sm font-medium text-gray-700">Upload additional photos</div>
-                  <div className="text-xs text-gray-400 mt-1">Up to 3 photos, JPG or PNG</div>
-                </label>
-              )}
+              <label className="block text-sm font-semibold text-gray-800 mb-1">
+                Additional photos <span className="text-gray-400 font-normal">(up to 3, optional)</span>
+              </label>
+              <p className="text-xs text-gray-500 mb-3">Add one photo at a time. These appear in a gallery on your detail page.</p>
+
               {extraPreviews.length > 0 && (
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-3 mb-3">
                   {extraPreviews.map((p, i) => (
                     <div key={i} className="relative">
                       <Image src={p} alt={`Extra photo ${i+1}`} width={200} height={96} className="w-full h-24 object-cover rounded-xl" unoptimized />
@@ -305,6 +300,21 @@ export default function ListYourRestaurant() {
                     </div>
                   ))}
                 </div>
+              )}
+
+              {extraPreviews.length < 3 && (
+                <label className="block w-full border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-[#4A9FD5] transition-colors">
+                  <input type="file" accept="image/*" onChange={handleExtraPhotos} className="hidden" />
+                  <div className="text-2xl mb-1">📸</div>
+                  <div className="text-sm font-medium text-gray-700">
+                    {extraPreviews.length === 0 ? 'Add a photo' : `Add another photo (${3 - extraPreviews.length} remaining)`}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1">JPG or PNG up to 10MB</div>
+                </label>
+              )}
+
+              {extraPreviews.length === 3 && (
+                <p className="text-xs text-center text-gray-400 mt-2">Maximum 3 additional photos reached. Remove one to add another.</p>
               )}
             </div>
           </div>
