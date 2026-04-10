@@ -103,6 +103,22 @@ export default function AdminPage() {
   }
 
   async function approveVendor(vendor: Vendor) {
+    // Geocode the address to get lat/lng
+    let lat: number | null = null
+    let lng: number | null = null
+    try {
+      const geo = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(vendor.address + ', New York, NY')}&key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0`
+      )
+      const geoData = await geo.json()
+      if (geoData.results?.[0]?.geometry?.location) {
+        lat = geoData.results[0].geometry.location.lat
+        lng = geoData.results[0].geometry.location.lng
+      }
+    } catch (e) {
+      console.error('Geocoding failed:', e)
+    }
+
     const { data: rest } = await supabase
       .from('restaurants')
       .insert({
@@ -114,6 +130,8 @@ export default function AdminPage() {
         photo_url: vendor.photo_url,
         photo_urls: vendor.photo_urls,
         is_active: true,
+        lat,
+        lng,
       })
       .select()
       .single()
