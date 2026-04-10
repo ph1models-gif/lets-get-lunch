@@ -39,7 +39,7 @@ export default function MapInner({ onPanReady }: Props) {
 
     const { data: restaurants } = await supabase
       .from('restaurants')
-      .select('id, name, lat, lng, deals(price, special)')
+      .select('id, name, lat, lng, cuisine, bio, photo_url, deals(price, special)')
       .eq('is_active', true);
 
     if (!restaurants) return;
@@ -59,19 +59,36 @@ export default function MapInner({ onPanReady }: Props) {
         cursor: 'pointer',
       });
 
+      const photoHtml = r.photo_url
+        ? `<img src="${r.photo_url}" style="width:100%;height:100px;object-fit:cover;border-radius:8px;margin-bottom:8px;display:block" />`
+        : '';
+      const bioHtml = r.bio
+        ? `<div style="color:#555;font-size:11px;margin-bottom:4px;font-style:italic">${r.bio}</div>`
+        : '';
+
       const popup = new g.InfoWindow({
-        content: `<div style="padding:10px;min-width:180px;font-family:sans-serif;cursor:pointer" onclick="window.location.href='/restaurants/${r.id}'">
-          <div style="font-weight:600;font-size:14px;margin-bottom:4px">${r.name}</div>
-          <div style="color:#4A9FD5;font-weight:700;font-size:15px;margin-bottom:4px">${deal ? '$'+deal.price : ''}</div>
-          <div style="color:#666;font-size:12px;margin-bottom:8px">${deal?.special || ''}</div>
-          <div style="background:#4A9FD5;color:white;text-align:center;padding:6px;border-radius:8px;font-size:12px;font-weight:600">View deal →</div>
+        content: `<div style="padding:10px;min-width:200px;max-width:240px;font-family:sans-serif;cursor:pointer;border-radius:10px" onclick="window.location.href='/restaurants/${r.id}'">
+          ${photoHtml}
+          <div style="font-weight:600;font-size:14px;margin-bottom:2px">${r.name}</div>
+          <div style="color:#888;font-size:11px;margin-bottom:4px">${r.cuisine || ''}</div>
+          ${bioHtml}
+          <div style="color:#4A9FD5;font-weight:700;font-size:15px">${deal ? '$'+deal.price : ''}</div>
         </div>`
       });
 
-      mk.addListener('click', () => {
+      mk.addListener('mouseover', () => {
         if (openPopup) openPopup.close();
         openPopup = popup;
         popup.open(map, mk);
+      });
+
+      mk.addListener('mouseout', () => {
+        setTimeout(() => {
+          if (openPopup === popup) {
+            popup.close();
+            openPopup = null;
+          }
+        }, 300);
       });
     });
 
