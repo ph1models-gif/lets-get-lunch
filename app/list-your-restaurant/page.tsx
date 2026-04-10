@@ -34,8 +34,11 @@ export default function ListYourRestaurant() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [images, setImages] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
+
+  const [mainPhoto, setMainPhoto] = useState<File | null>(null);
+  const [mainPreview, setMainPreview] = useState<string | null>(null);
+  const [extraPhotos, setExtraPhotos] = useState<File[]>([]);
+  const [extraPreviews, setExtraPreviews] = useState<string[]>([]);
 
   const [form, setForm] = useState({
     restaurant: '', contact: '', email: '', phone: '',
@@ -48,15 +51,33 @@ export default function ListYourRestaurant() {
     setForm({...form, [e.target.name]: e.target.value});
   };
 
-  const handleImages = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setImages(files);
-    setPreviews(files.map(f => URL.createObjectURL(f)));
+  const handleMainPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setMainPhoto(file);
+    setMainPreview(URL.createObjectURL(file));
   };
 
-  const removeImage = (i: number) => {
-    setImages(imgs => imgs.filter((_,j)=>j!==i));
-    setPreviews(ps => ps.filter((_,j)=>j!==i));
+  const handleExtraPhotos = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []).slice(0, 3);
+    setExtraPhotos(files);
+    setExtraPreviews(files.map(f => URL.createObjectURL(f)));
+  };
+
+  const removeExtra = (i: number) => {
+    setExtraPhotos(ps => ps.filter((_,j)=>j!==i));
+    setExtraPreviews(ps => ps.filter((_,j)=>j!==i));
+  };
+
+  const uploadFile = async (file: File): Promise<string | null> => {
+    const ext = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage
+      .from('restaurant-photos')
+      .upload(fileName, file, { contentType: file.type });
+    if (error) return null;
+    const { data } = supabase.storage.from('restaurant-photos').getPublicUrl(fileName);
+    return data.publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,27 +87,22 @@ export default function ListYourRestaurant() {
 
     const finalCuisine = form.cuisine === 'Other' ? form.cuisineOther : form.cuisine;
 
-    // Upload first photo to Supabase Storage if provided
+    // Upload main photo
     let photo_url = null;
-    if (images.length > 0) {
-      const file = images[0];
-      const ext = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error: uploadErr } = await supabase.storage
-        .from('restaurant-photos')
-        .upload(fileName, file, { contentType: file.type });
-
-      if (uploadErr) {
-        setError('Photo upload failed. Please try again.');
+    if (mainPhoto) {
+      photo_url = await uploadFile(mainPhoto);
+      if (!photo_url) {
+        setError('Main photo upload failed. Please try again.');
         setLoading(false);
         return;
       }
+    }
 
-      const { data: urlData } = supabase.storage
-        .from('restaurant-photos')
-        .getPublicUrl(fileName);
-
-      photo_url = urlData.publicUrl;
+    // Upload extra photos
+    const photo_urls: string[] = [];
+    for (const file of extraPhotos) {
+      const url = await uploadFile(file);
+      if (url) photo_urls.push(url);
     }
 
     const { error: err } = await supabase.from('vendors').insert({
@@ -106,6 +122,7 @@ export default function ListYourRestaurant() {
       message: form.message,
       status: 'pending',
       photo_url,
+      photo_urls: photo_urls.length > 0 ? photo_urls : null,
     });
 
     setLoading(false);
@@ -246,23 +263,50 @@ export default function ListYourRestaurant() {
 
           <div className="bg-gray-50 rounded-2xl p-6">
             <h2 className="font-semibold text-gray-900 mb-4">Food photos</h2>
-            <p className="text-sm text-gray-500 mb-4">Upload photos of your lunch dishes. Food photos get 3x more clicks.</p>
-            <label className="block w-full border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-[#4A9FD5] transition-colors">
-              <input type="file" multiple accept="image/*" onChange={handleImages} className="hidden" />
-              <div className="text-3xl mb-2">📸</div>
-              <div className="text-sm font-medium text-gray-700">Click to upload food photos</div>
-              <div className="text-xs text-gray-400 mt-1">JPG, PNG up to 10MB each</div>
-            </label>
-            {previews.length > 0 && (
-              <div className="grid grid-cols-3 gap-3 mt-4">
-                {previews.map((p, i) => (
-                  <div key={i} className="relative">
-                    <Image src={p} alt="Food preview" width={300} height={96} className="w-full h-24 object-cover rounded-xl" unoptimized />
-                    <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
-                  </div>
-                ))}
-              </div>
-            )}
+
+            {/* Main photo */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-gray-800 mb-1">Main photo <span className="text-[#4A9FD5]">★ Required</span></label>
+              <p className="text-xs text-gray-500 mb-3">This is the hero image shown on your restaurant card. Pick your best dish.</p>
+              {mainPreview ? (
+                <div className="relative">
+                  <Image src={mainPreview} alt="Main photo" width={600} height={200} className="w-full h-48 object-cover rounded-xl" unoptimized />
+                  <button type="button" onClick={() => { setMainPhoto(null); setMainPreview(null); }} className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center">×</button>
+                  <span className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-lg">Main photo</span>
+                </div>
+              ) : (
+                <label className="block w-full border-2 border-dashed border-[#4A9FD5] rounded-xl p-8 text-center cursor-pointer hover:bg-blue-50 transition-colors">
+                  <input type="file" accept="image/*" onChange={handleMainPhoto} className="hidden" />
+                  <div className="text-3xl mb-2">🌟</div>
+                  <div className="text-sm font-medium text-gray-700">Upload your main photo</div>
+                  <div className="text-xs text-gray-400 mt-1">JPG, PNG up to 10MB</div>
+                </label>
+              )}
+            </div>
+
+            {/* Extra photos */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-800 mb-1">Additional photos <span className="text-gray-400 font-normal">(up to 3, optional)</span></label>
+              <p className="text-xs text-gray-500 mb-3">Show off more dishes, your space, or the vibe. These appear in a gallery on your detail page.</p>
+              {extraPreviews.length < 3 && (
+                <label className="block w-full border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-[#4A9FD5] transition-colors mb-3">
+                  <input type="file" multiple accept="image/*" onChange={handleExtraPhotos} className="hidden" />
+                  <div className="text-2xl mb-1">📸</div>
+                  <div className="text-sm font-medium text-gray-700">Upload additional photos</div>
+                  <div className="text-xs text-gray-400 mt-1">Up to 3 photos, JPG or PNG</div>
+                </label>
+              )}
+              {extraPreviews.length > 0 && (
+                <div className="grid grid-cols-3 gap-3">
+                  {extraPreviews.map((p, i) => (
+                    <div key={i} className="relative">
+                      <Image src={p} alt={`Extra photo ${i+1}`} width={200} height={96} className="w-full h-24 object-cover rounded-xl" unoptimized />
+                      <button type="button" onClick={() => removeExtra(i)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="bg-gray-50 rounded-2xl p-6">
