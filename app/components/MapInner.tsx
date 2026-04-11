@@ -30,6 +30,11 @@ export default function MapInner({ onPanReady }: Props) {
       streetViewControl: false,
     });
 
+    g.event.addListenerOnce(map, 'tilesloaded', () => {
+      const ph = document.getElementById('map-placeholder');
+      if (ph) { ph.style.opacity = '0'; setTimeout(() => ph.remove(), 400); }
+    });
+
     if (onPanReady) {
       onPanReady((lat: number, lng: number) => {
         map.panTo({lat, lng});
@@ -140,5 +145,18 @@ export default function MapInner({ onPanReady }: Props) {
     }
   }
 
-  return <div ref={ref} style={{width:'100%', height:'420px'}} />;
+  return (
+    <div style={{position:'relative', width:'100%', height:'420px'}}>
+      <div
+        id="map-placeholder"
+        style={{
+          position:'absolute', inset:0, zIndex:1,
+          backgroundImage:`url('https://maps.googleapis.com/maps/api/staticmap?center=40.7484,-73.984&zoom=13&size=800x420&scale=2&style=feature:poi|visibility:off&style=feature:transit|visibility:off&key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0')`,
+          backgroundSize:'cover', backgroundPosition:'center',
+          transition:'opacity 0.4s ease',
+        }}
+      />
+      <div ref={ref} style={{width:'100%', height:'420px', position:'relative', zIndex:2}} />
+    </div>
+  );
 }
