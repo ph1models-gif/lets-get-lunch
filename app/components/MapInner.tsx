@@ -144,5 +144,5 @@ export default function MapInner({ onPanReady }: Props) {
     }
   }
 
-  return <div ref={ref} style={{width:'100%', height:'420px'}} />;
+  return <div ref={ref} style={{width:'100%', height:'420px', background:'#e8eaed'}} />;
 }
