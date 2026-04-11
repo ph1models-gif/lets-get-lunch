@@ -144,24 +144,5 @@ export default function MapInner({ onPanReady }: Props) {
     }
   }
 
-  return (
-    <div style={{position:'relative', width:'100%', height:'420px', background:'#e8eaed'}}>
-      <div id="map-placeholder" style={{
-        position:'absolute', inset:0, zIndex:1,
-        background:'#e8eaed',
-        transition:'opacity 0.5s ease',
-      }}>
-        <div style={{position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', textAlign:'center'}}>
-          <div style={{
-            width:40, height:40, border:'3px solid #4A9FD5',
-            borderTopColor:'transparent', borderRadius:'50%',
-            animation:'spin 0.8s linear infinite', margin:'0 auto 8px'
-          }} />
-          <div style={{fontSize:12, color:'#888', fontFamily:'sans-serif'}}>Loading map…</div>
-        </div>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-      <div ref={ref} style={{width:'100%', height:'420px', position:'relative', zIndex:2}} />
-    </div>
-  );
+  return <div ref={ref} style={{width:'100%', height:'420px'}} />;
 }
