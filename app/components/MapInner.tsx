@@ -91,7 +91,7 @@ export default function MapInner({ onPanReady }: Props) {
           <div style="font-size:15px;font-weight:700;color:#4A9FD5">${deal ? '$' + deal.price : ''}</div>
         </div>
       `;
-      content.addEventListener('click', () => { window.location.href = `/restaurants/${r.id}`; });
+      content.addEventListener('click', () => { window.open(`/restaurants/${r.id}`, '_blank'); });
 
       const popup = new g.InfoWindow({ content, disableAutoPan: true });
 
@@ -121,7 +121,7 @@ export default function MapInner({ onPanReady }: Props) {
           const iwOuter = document.querySelector('.gm-style-iw');
           if (iwOuter) {
             (iwOuter as HTMLElement).addEventListener('click', () => {
-              window.location.href = `/restaurants/${r.id}`;
+              window.open(`/restaurants/${r.id}`, '_blank');
             });
           }
         });
@@ -144,7 +144,7 @@ export default function MapInner({ onPanReady }: Props) {
           if (iwOuter) {
             iwOuter.addEventListener('mouseover', () => { cardHovered = true; });
             iwOuter.addEventListener('mouseout', () => { cardHovered = false; maybeClose(); });
-            iwOuter.addEventListener('click', () => { window.location.href = `/restaurants/${r.id}`; });
+            iwOuter.addEventListener('click', () => { window.open(`/restaurants/${r.id}`, '_blank'); });
           }
         });
       }
