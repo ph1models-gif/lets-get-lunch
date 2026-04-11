@@ -146,16 +146,22 @@ export default function MapInner({ onPanReady }: Props) {
   }
 
   return (
-    <div style={{position:'relative', width:'100%', height:'420px'}}>
-      <div
-        id="map-placeholder"
-        style={{
-          position:'absolute', inset:0, zIndex:1,
-          backgroundImage:`url('https://maps.googleapis.com/maps/api/staticmap?center=40.7484,-73.984&zoom=13&size=800x420&scale=2&style=feature:poi|visibility:off&style=feature:transit|visibility:off&key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0')`,
-          backgroundSize:'cover', backgroundPosition:'center',
-          transition:'opacity 0.4s ease',
-        }}
-      />
+    <div style={{position:'relative', width:'100%', height:'420px', background:'#e8eaed'}}>
+      <div id="map-placeholder" style={{
+        position:'absolute', inset:0, zIndex:1,
+        background:'#e8eaed',
+        transition:'opacity 0.5s ease',
+      }}>
+        <div style={{position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', textAlign:'center'}}>
+          <div style={{
+            width:40, height:40, border:'3px solid #4A9FD5',
+            borderTopColor:'transparent', borderRadius:'50%',
+            animation:'spin 0.8s linear infinite', margin:'0 auto 8px'
+          }} />
+          <div style={{fontSize:12, color:'#888', fontFamily:'sans-serif'}}>Loading map…</div>
+        </div>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
       <div ref={ref} style={{width:'100%', height:'420px', position:'relative', zIndex:2}} />
     </div>
   );
