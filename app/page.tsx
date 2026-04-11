@@ -32,6 +32,7 @@ export default function Home() {
   const [maxPrice, setMaxPrice] = useState(35);
   const [laptopOnly, setLaptopOnly] = useState(false);
   const [walkInOnly, setWalkInOnly] = useState(false);
+  const [selectedHood, setSelectedHood] = useState('');
   const mapPanRef = useRef<((lat: number, lng: number) => void) | null>(null);
 
   useEffect(() => {
@@ -51,7 +52,9 @@ export default function Home() {
   const filtered = restaurants.filter(r => {
     const deal = r.deals?.[0];
     if (!deal) return false;
-    if (search) {
+    if (selectedHood) {
+      if (!r.neighborhood.toLowerCase().includes(selectedHood.toLowerCase())) return false;
+    } else if (search) {
       const s = search.toLowerCase();
       const keywords: Record<string, boolean> = {
         'laptop': r.work_friendly, 'wifi': r.wifi, 'wi-fi': r.wifi,
@@ -93,9 +96,10 @@ export default function Home() {
         </p>
         <div className="max-w-lg mx-auto flex gap-2 mb-4">
           <NeighborhoodSearch
-            onChange={val => setSearch(val)}
+            onChange={val => { setSearch(val); if (!val) setSelectedHood(''); }}
             onSelect={(hood, borough, coords) => {
               setSearch(hood);
+              setSelectedHood(hood);
               if (coords && mapPanRef.current) mapPanRef.current(coords.lat, coords.lng);
             }}
           />

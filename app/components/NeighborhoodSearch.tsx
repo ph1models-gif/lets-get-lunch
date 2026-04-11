@@ -71,6 +71,7 @@ export default function NeighborhoodSearch({ onChange, onSelect }: Props) {
   const results = query.length >= 1
     ? Object.entries(NEIGHBORHOODS)
         .filter(([name]) => name.toLowerCase().includes(query.toLowerCase()))
+        .sort(([a], [b]) => a.localeCompare(b))
         .slice(0, 8)
     : [];
 
