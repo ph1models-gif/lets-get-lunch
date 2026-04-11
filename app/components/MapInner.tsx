@@ -9,6 +9,18 @@ interface Props {
 
 export default function MapInner({ onPanReady, activeIds }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const markersRef = useRef<Map<string, any>>(new Map());
+
+  useEffect(() => {
+    if (markersRef.current.size === 0) return;
+    markersRef.current.forEach((mk, id) => {
+      if (!activeIds || activeIds.length === 0) {
+        mk.setVisible(true);
+      } else {
+        mk.setVisible(activeIds.includes(id));
+      }
+    });
+  }, [activeIds]);
 
   useEffect(() => {
     if ((window as any).google) { initMap(); return; }
@@ -65,7 +77,6 @@ export default function MapInner({ onPanReady, activeIds }: Props) {
     restaurants.forEach((r: any) => {
       const deal = r.deals?.[0];
       if (!r.lat || !r.lng) return;
-      if (activeIds && activeIds.length > 0 && !activeIds.includes(r.id)) { return; }
 
       const mk = new g.Marker({
         position: {lat: Number(r.lat), lng: Number(r.lng)},
@@ -75,6 +86,7 @@ export default function MapInner({ onPanReady, activeIds }: Props) {
         icon: {path:g.SymbolPath.CIRCLE, scale:18, fillColor:'#4A9FD5', fillOpacity:1, strokeColor:'white', strokeWeight:2},
         cursor: 'pointer',
       });
+      markersRef.current.set(r.id, mk);
 
       const content = document.createElement('div');
       content.style.cssText = 'width:220px;cursor:pointer;font-family:sans-serif;border-radius:12px;overflow:hidden';
