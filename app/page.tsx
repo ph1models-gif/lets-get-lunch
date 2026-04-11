@@ -131,7 +131,7 @@ export default function Home() {
         </div>
       </section>
 
-      <MapComponent onPanReady={(fn) => { mapPanRef.current = fn; }} />
+      <MapComponent onPanReady={(fn) => { mapPanRef.current = fn; }} activeIds={filtered.map(r => r.id)} />
 
       <section className="px-4 py-3">
         {loading
