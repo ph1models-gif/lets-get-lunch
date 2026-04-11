@@ -107,26 +107,47 @@ export default function MapInner({ onPanReady }: Props) {
         }, 200);
       }
 
-      mk.addListener('mouseover', () => {
-        pinHovered = true;
-        if (openPopup && openPopup !== popup) openPopup.close();
-        openPopup = popup;
-        popup.open(map, mk);
-      });
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-      mk.addListener('mouseout', () => {
-        pinHovered = false;
-        maybeClose();
-      });
+      if (isTouchDevice) {
+        // Mobile: tap pin to open popup, tap popup to navigate
+        mk.addListener('click', () => {
+          if (openPopup && openPopup !== popup) openPopup.close();
+          openPopup = popup;
+          popup.open(map, mk);
+        });
 
-      popup.addListener('domready', () => {
-        const iwOuter = document.querySelector('.gm-style-iw');
-        if (iwOuter) {
-          iwOuter.addEventListener('mouseover', () => { cardHovered = true; });
-          iwOuter.addEventListener('mouseout', () => { cardHovered = false; maybeClose(); });
-          iwOuter.addEventListener('click', () => { window.location.href = `/restaurants/${r.id}`; });
-        }
-      });
+        popup.addListener('domready', () => {
+          const iwOuter = document.querySelector('.gm-style-iw');
+          if (iwOuter) {
+            (iwOuter as HTMLElement).addEventListener('click', () => {
+              window.location.href = `/restaurants/${r.id}`;
+            });
+          }
+        });
+      } else {
+        // Desktop: hover pin to open, hover card to keep open, click to navigate
+        mk.addListener('mouseover', () => {
+          pinHovered = true;
+          if (openPopup && openPopup !== popup) openPopup.close();
+          openPopup = popup;
+          popup.open(map, mk);
+        });
+
+        mk.addListener('mouseout', () => {
+          pinHovered = false;
+          maybeClose();
+        });
+
+        popup.addListener('domready', () => {
+          const iwOuter = document.querySelector('.gm-style-iw');
+          if (iwOuter) {
+            iwOuter.addEventListener('mouseover', () => { cardHovered = true; });
+            iwOuter.addEventListener('mouseout', () => { cardHovered = false; maybeClose(); });
+            iwOuter.addEventListener('click', () => { window.location.href = `/restaurants/${r.id}`; });
+          }
+        });
+      }
     });
 
     if (navigator.geolocation) {
@@ -144,5 +165,21 @@ export default function MapInner({ onPanReady }: Props) {
     }
   }
 
-  return <div ref={ref} style={{width:'100%', height:'420px', background:'#e8eaed'}} />;
+  return (
+    <div style={{position:'relative', width:'100%', height:'420px'}}>
+      <style>{`
+        @keyframes shimmer {
+          0% { background-position: -800px 0; }
+          100% { background-position: 800px 0; }
+        }
+        .map-skeleton {
+          background: linear-gradient(90deg, #e8eaed 25%, #f0f2f5 50%, #e8eaed 75%);
+          background-size: 800px 100%;
+          animation: shimmer 1.5s infinite;
+        }
+      `}</style>
+      <div className="map-skeleton" style={{position:'absolute', inset:0, zIndex:0}} />
+      <div ref={ref} style={{width:'100%', height:'420px', position:'relative', zIndex:1, background:'transparent'}} />
+    </div>
+  );
 }
