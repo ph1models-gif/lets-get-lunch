@@ -72,8 +72,14 @@ export default function MapInner({ onPanReady }: Props) {
 
       const content = document.createElement('div');
       content.style.cssText = 'width:220px;cursor:pointer;font-family:sans-serif;border-radius:12px;overflow:hidden';
+
+      const photoUrl = r.photo_url || '';
+      const photoBlock = photoUrl
+        ? `<div style="width:100%;height:110px;background:#EEF6FC;background-image:url('${photoUrl}');background-size:cover;background-position:center"></div>`
+        : `<div style="width:100%;height:60px;background:#EEF6FC;display:flex;align-items:center;justify-content:center;font-size:24px">🍽️</div>`;
+
       content.innerHTML = `
-        ${r.photo_url ? `<img src="${r.photo_url}" style="width:100%;height:110px;object-fit:cover;display:block" crossorigin="anonymous" />` : '<div style="width:100%;height:60px;background:#EEF6FC;display:flex;align-items:center;justify-content:center;font-size:24px">🍽️</div>'}
+        ${photoBlock}
         <div style="padding:10px 12px 12px">
           <div style="font-weight:600;font-size:14px;color:#111;margin-bottom:2px">${r.name}</div>
           <div style="font-size:11px;color:#888;margin-bottom:${r.bio ? '4px' : '6px'}">${r.cuisine || ''}</div>
@@ -85,16 +91,37 @@ export default function MapInner({ onPanReady }: Props) {
 
       const popup = new g.InfoWindow({ content, disableAutoPan: true });
 
+      let pinHovered = false;
+      let cardHovered = false;
+
+      function maybeClose() {
+        setTimeout(() => {
+          if (!pinHovered && !cardHovered) {
+            popup.close();
+            openPopup = null;
+          }
+        }, 200);
+      }
+
       mk.addListener('mouseover', () => {
-        if (openPopup) openPopup.close();
+        pinHovered = true;
+        if (openPopup && openPopup !== popup) openPopup.close();
         openPopup = popup;
         popup.open(map, mk);
       });
 
       mk.addListener('mouseout', () => {
-        setTimeout(() => {
-          if (openPopup === popup) { popup.close(); openPopup = null; }
-        }, 400);
+        pinHovered = false;
+        maybeClose();
+      });
+
+      popup.addListener('domready', () => {
+        const iwOuter = document.querySelector('.gm-style-iw');
+        if (iwOuter) {
+          iwOuter.addEventListener('mouseover', () => { cardHovered = true; });
+          iwOuter.addEventListener('mouseout', () => { cardHovered = false; maybeClose(); });
+          iwOuter.addEventListener('click', () => { window.location.href = `/restaurants/${r.id}`; });
+        }
       });
     });
 
