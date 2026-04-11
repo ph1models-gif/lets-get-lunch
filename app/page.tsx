@@ -84,15 +84,14 @@ export default function Home() {
         </div>
       </nav>
 
-      <section className="bg-gradient-to-b from-[#EEF6FC] to-white px-4 py-12 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-          NYC&apos;s best lunch deals,<br />
-          <span className="text-[#4A9FD5]">at the table — not the desk.</span>
+      <section className="bg-gradient-to-b from-[#EEF6FC] to-white px-4 pt-6 pb-4 text-center">
+        <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">
+          NYC&apos;s best lunch deals, <span className="text-[#4A9FD5]">at the table.</span>
         </h1>
-        <p className="text-gray-500 text-lg max-w-xl mx-auto mb-8">
-          Prix-fixe lunch deals across NYC. Real tables, real service, all under $35.
+        <p className="text-gray-500 text-sm max-w-xl mx-auto mb-4">
+          Prix-fixe deals across NYC · Real tables · All under $35
         </p>
-        <div className="max-w-lg mx-auto flex gap-2">
+        <div className="max-w-lg mx-auto flex gap-2 mb-4">
           <NeighborhoodSearch
             onChange={val => setSearch(val)}
             onSelect={(hood, borough, coords) => {
@@ -104,34 +103,31 @@ export default function Home() {
             Search
           </button>
         </div>
-      </section>
-
-      <MapComponent onPanReady={(fn) => { mapPanRef.current = fn; }} />
-
-      <section className="px-4 py-4 border-b border-gray-100 sticky top-[57px] bg-white z-40">
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex gap-2 overflow-x-auto pb-2 justify-start md:justify-center">
           {filters.map(f => (
             <button key={f} onClick={() => setFilter(f)}
-              className={`whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${filter === f ? 'bg-[#4A9FD5] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+              className={`whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${filter === f ? 'bg-[#4A9FD5] text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
               {f}
             </button>
           ))}
-          <div className="flex items-center gap-2 ml-2 whitespace-nowrap">
-            <span className="text-sm text-gray-500">Max: ${maxPrice}</span>
-            <input type="range" min="20" max="35" value={maxPrice} onChange={e => setMaxPrice(Number(e.target.value))} className="w-20" />
-          </div>
         </div>
-        <div className="flex gap-4 mt-3">
-          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+        <div className="flex gap-4 mt-2 justify-center">
+          <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
             <input type="checkbox" checked={laptopOnly} onChange={e => setLaptopOnly(e.target.checked)} className="rounded" />
             💻 Laptop friendly
           </label>
-          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+          <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
             <input type="checkbox" checked={walkInOnly} onChange={e => setWalkInOnly(e.target.checked)} className="rounded" />
             🚶 Walk-ins
           </label>
+          <div className="flex items-center gap-2 text-xs text-gray-500">
+            <span>Max: ${maxPrice}</span>
+            <input type="range" min="20" max="35" value={maxPrice} onChange={e => setMaxPrice(Number(e.target.value))} className="w-16" />
+          </div>
         </div>
       </section>
+
+      <MapComponent onPanReady={(fn) => { mapPanRef.current = fn; }} />
 
       <section className="px-4 py-3">
         {loading
