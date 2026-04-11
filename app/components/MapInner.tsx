@@ -44,7 +44,55 @@ export default function MapInner({ onPanReady }: Props) {
 
     if (!restaurants) return;
 
-    let openPopup: any = null;
+    // Custom popup card — no X button, fully clickable, photo support
+    let activeCard: HTMLDivElement | null = null;
+
+    const overlay = new g.OverlayView();
+    overlay.onAdd = function() {};
+    overlay.draw = function() {};
+    overlay.onRemove = function() {};
+    overlay.setMap(map);
+
+    function showCard(r: any, deal: any, pixel: {x: number, y: number}) {
+      if (activeCard) { activeCard.remove(); activeCard = null; }
+
+      const card = document.createElement('div');
+      card.style.cssText = `
+        position:absolute;
+        background:white;
+        border-radius:12px;
+        box-shadow:0 4px 20px rgba(0,0,0,0.18);
+        width:220px;
+        cursor:pointer;
+        overflow:hidden;
+        z-index:9999;
+        left:${pixel.x - 110}px;
+        top:${pixel.y - 200}px;
+        font-family:sans-serif;
+      `;
+
+      card.innerHTML = `
+        ${r.photo_url ? `<img src="${r.photo_url}" style="width:100%;height:110px;object-fit:cover;display:block" />` : ''}
+        <div style="padding:10px 12px 12px">
+          <div style="font-weight:600;font-size:14px;color:#111;margin-bottom:2px">${r.name}</div>
+          <div style="font-size:11px;color:#888;margin-bottom:4px">${r.cuisine || ''}</div>
+          ${r.bio ? `<div style="font-size:11px;color:#555;font-style:italic;margin-bottom:6px;line-height:1.4">${r.bio}</div>` : ''}
+          <div style="font-size:15px;font-weight:700;color:#4A9FD5">${deal ? '$'+deal.price : ''}</div>
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        window.location.href = `/restaurants/${r.id}`;
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.remove();
+        if (activeCard === card) activeCard = null;
+      });
+
+      map.getDiv().appendChild(card);
+      activeCard = card;
+    }
 
     restaurants.forEach((r: any) => {
       const deal = r.deals?.[0];
@@ -59,36 +107,11 @@ export default function MapInner({ onPanReady }: Props) {
         cursor: 'pointer',
       });
 
-      const photoHtml = r.photo_url
-        ? `<img src="${r.photo_url}" style="width:100%;height:100px;object-fit:cover;border-radius:8px;margin-bottom:8px;display:block" />`
-        : '';
-      const bioHtml = r.bio
-        ? `<div style="color:#555;font-size:11px;margin-bottom:4px;font-style:italic">${r.bio}</div>`
-        : '';
-
-      const popup = new g.InfoWindow({
-        content: `<div style="padding:10px;min-width:200px;max-width:240px;font-family:sans-serif;cursor:pointer;border-radius:10px" onclick="window.location.href='/restaurants/${r.id}'">
-          ${photoHtml}
-          <div style="font-weight:600;font-size:14px;margin-bottom:2px">${r.name}</div>
-          <div style="color:#888;font-size:11px;margin-bottom:4px">${r.cuisine || ''}</div>
-          ${bioHtml}
-          <div style="color:#4A9FD5;font-weight:700;font-size:15px">${deal ? '$'+deal.price : ''}</div>
-        </div>`
-      });
-
       mk.addListener('mouseover', () => {
-        if (openPopup) openPopup.close();
-        openPopup = popup;
-        popup.open(map, mk);
-      });
-
-      mk.addListener('mouseout', () => {
-        setTimeout(() => {
-          if (openPopup === popup) {
-            popup.close();
-            openPopup = null;
-          }
-        }, 300);
+        const proj = overlay.getProjection();
+        if (!proj) return;
+        const pixel = proj.fromLatLngToContainerPixel(mk.getPosition()!);
+        if (pixel) showCard(r, deal, {x: pixel.x, y: pixel.y});
       });
     });
 
