@@ -11,11 +11,10 @@ export default function MapInner({ onPanReady }: Props) {
 
   useEffect(() => {
     if ((window as any).google) { initMap(); return; }
-    const s = document.createElement('script');
-    s.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0';
-    s.async = true;
-    s.onload = initMap;
-    document.head.appendChild(s);
+    const interval = setInterval(() => {
+      if ((window as any).google) { clearInterval(interval); initMap(); }
+    }, 50);
+    return () => clearInterval(interval);
   }, []);
 
   async function initMap() {
