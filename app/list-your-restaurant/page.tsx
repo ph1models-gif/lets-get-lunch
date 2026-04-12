@@ -44,7 +44,7 @@ export default function ListYourRestaurant() {
     restaurant: '', contact: '', email: '', phone: '',
     address: '', neighborhood: '', cuisine: '', cuisineOther: '',
     seats: '', hours: '', special: '', price: '',
-    workFriendly: 'no', wifi: 'no', message: ''
+    workFriendly: 'no', wifi: 'no', message: '', bio: ''
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -122,6 +122,7 @@ export default function ListYourRestaurant() {
       work_friendly: form.workFriendly,
       wifi: form.wifi,
       message: form.message,
+      bio: form.bio || null,
       status: 'pending',
       photo_url,
       photo_urls: photo_urls.length > 0 ? photo_urls : null,
@@ -252,6 +253,11 @@ export default function ListYourRestaurant() {
                     <option value="no">No — dining only</option>
                   </select>
                 </div>
+              </div>
+              <div className="col-span-2">
+                <label className={labelClass}>One-line restaurant bio</label>
+                <input name="bio" value={form.bio} onChange={handleChange} placeholder="e.g. Counter-serve restaurant with a terrace dishing up plant-based takes on burgers and gyros." className={inputClass} maxLength={160} />
+                <p className="text-xs text-gray-400 mt-1">One sentence describing your vibe and cuisine — shown on your map pin and listing card.</p>
               </div>
               <div>
                 <label className={labelClass}>Free WiFi available?</label>
