@@ -178,10 +178,12 @@ export default function AdminPage() {
     // Upload new main photo if selected
     if (editMainFile) {
       const ext = editMainFile.name.split('.').pop()
-      const path = `${r.id}-main-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-      const { error } = await supabase.storage.from('restaurant-photos').upload(path, editMainFile, { upsert: true })
-      if (!error) {
-        const { data: urlData } = supabase.storage.from('restaurant-photos').getPublicUrl(path)
+      const filePath = `${r.id}-main-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const { error: uploadError } = await supabase.storage.from('restaurant-photos').upload(filePath, editMainFile, { upsert: true })
+      if (uploadError) {
+        alert('Photo upload failed: ' + uploadError.message)
+      } else {
+        const { data: urlData } = supabase.storage.from('restaurant-photos').getPublicUrl(filePath)
         finalPhotoUrl = urlData.publicUrl
       }
     }
