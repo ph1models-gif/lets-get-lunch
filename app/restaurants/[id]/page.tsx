@@ -16,6 +16,7 @@ interface Restaurant {
   rating: number;
   seats: number;
   hours: string;
+  bio: string | null;
   photo_url: string | null;
   photo_urls: string[] | null;
   deals: { special: string; price: number; courses: number }[];
@@ -118,6 +119,9 @@ export default function RestaurantPage() {
           </div>
         </div>
 
+        {r.bio && (
+          <p className="text-gray-500 text-sm mb-4 leading-relaxed">{r.bio}</p>
+        )}
         <div className="flex items-center gap-1 mb-6">
           <span className="text-yellow-400">★</span>
           <span className="font-medium text-gray-800">{r.rating}</span>
