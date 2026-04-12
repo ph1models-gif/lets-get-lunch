@@ -35,19 +35,23 @@ export default function Home() {
   const [selectedHood, setSelectedHood] = useState('');
   const mapPanRef = useRef<((lat: number, lng: number) => void) | null>(null);
 
+  async function load() {
+    const { data, error } = await supabase
+      .from('restaurants')
+      .select('*, deals(*)')
+      .eq('is_active', true);
+    if (!error && data) setRestaurants(data);
+    setLoading(false);
+  }
+
   useEffect(() => {
-    async function load() {
-      const { data, error } = await supabase
-        .from('restaurants')
-        .select('*, deals(*)')
-        .eq('is_active', true);
-      if (!error && data) setRestaurants(data);
-      setLoading(false);
-    }
     load();
+    const handleFocus = () => load();
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
-  const filters = ['All','Italian','Japanese/Sushi','French','American','Seafood','Mediterranean','Latin/Mexican','Indian','Vegan-Friendly','Steakhouse','BBQ'];
+  const filters = ['All','Italian','Japanese/Sushi','Asian','French','American','Seafood','Mediterranean','Latin/Mexican','Indian','Vegan-Friendly','Steakhouse','BBQ'];
 
   const filtered = restaurants.filter(r => {
     const deal = r.deals?.[0];
@@ -67,7 +71,10 @@ export default function Home() {
     }
     if (filter === 'Vegan-Friendly' && !r.cuisine.toLowerCase().includes('vegan')) return false;
     if (filter === 'Seafood' && !r.cuisine.toLowerCase().includes('seafood')) return false;
-    if (!['All','Vegan-Friendly','Seafood'].includes(filter) && !r.cuisine.toLowerCase().includes(filter.toLowerCase().split('/')[0])) return false;
+    if (filter === 'Asian' && !r.cuisine.toLowerCase().includes('asian')) return false;
+    if (filter === 'Japanese/Sushi' && !r.cuisine.toLowerCase().includes('japanese') && !r.cuisine.toLowerCase().includes('sushi')) return false;
+    if (filter === 'Latin/Mexican' && !r.cuisine.toLowerCase().includes('latin') && !r.cuisine.toLowerCase().includes('mexican')) return false;
+    if (!['All','Vegan-Friendly','Seafood','Asian','Japanese/Sushi','Latin/Mexican'].includes(filter) && !r.cuisine.toLowerCase().includes(filter.toLowerCase().split('/')[0])) return false;
     if (deal.price > maxPrice) return false;
     if (laptopOnly && !r.work_friendly) return false;
     if (walkInOnly && !r.walk_in) return false;

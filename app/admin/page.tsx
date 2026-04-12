@@ -58,9 +58,9 @@ const NEIGHBORHOODS = [
 ]
 
 const CUISINES = [
-  'American', 'Chinese', 'French', 'Greek', 'Indian', 'Italian',
-  'Japanese', 'Korean', 'Mediterranean', 'Mexican', 'Middle Eastern',
-  'Pizza', 'Sandwiches/Deli', 'Seafood', 'Spanish', 'Thai', 'Vietnamese'
+  'American', 'Asian', 'Chinese', 'French', 'French Seafood', 'Greek', 'Indian', 'Italian',
+  'Japanese', 'Japanese/Sushi', 'Korean', 'Mediterranean', 'Mexican', 'Mexican/Latin', 'Middle Eastern',
+  'Pizza', 'Sandwiches/Deli', 'Seafood', 'Spanish', 'Thai', 'Vegan/Plant-Based', 'Vietnamese'
 ]
 
 export default function AdminPage() {
@@ -178,7 +178,7 @@ export default function AdminPage() {
     // Upload new main photo if selected
     if (editMainFile) {
       const ext = editMainFile.name.split('.').pop()
-      const path = `${r.id}-main-${Date.now()}.${ext}`
+      const path = `${r.id}-main-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
       const { error } = await supabase.storage.from('restaurant-photos').upload(path, editMainFile, { upsert: true })
       if (!error) {
         const { data: urlData } = supabase.storage.from('restaurant-photos').getPublicUrl(path)
@@ -274,7 +274,10 @@ export default function AdminPage() {
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Admin dashboard</h1>
-          <a href="/" className="text-sm text-orange-500 hover:underline">← Back to site</a>
+          <div className="flex items-center gap-3">
+            <button onClick={() => { fetchVendors(); fetchRestaurants(); }} className="text-sm px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50">↻ Refresh</button>
+            <a href="/" className="text-sm text-orange-500 hover:underline">← Back to site</a>
+          </div>
         </div>
 
         <div className="flex gap-2 mb-6 border-b border-gray-200">
