@@ -29,7 +29,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
-  const [maxPrice, setMaxPrice] = useState(35);
+  const [maxPrice, setMaxPrice] = useState(100);
   const [laptopOnly, setLaptopOnly] = useState(false);
   const [walkInOnly, setWalkInOnly] = useState(false);
   const [selectedHood, setSelectedHood] = useState('');
@@ -132,8 +132,8 @@ export default function Home() {
             🚶 Walk-ins
           </label>
           <div className="flex items-center gap-2 text-xs text-gray-500">
-            <span>Max: ${maxPrice}</span>
-            <input type="range" min="20" max="35" value={maxPrice} onChange={e => setMaxPrice(Number(e.target.value))} className="w-16" />
+            <span>Max: ${maxPrice === 100 ? "Any" : "$"+maxPrice}</span>
+            <input type="range" min="20" max="100" value={maxPrice} onChange={e => setMaxPrice(Number(e.target.value))} className="w-16" />
           </div>
         </div>
       </section>
