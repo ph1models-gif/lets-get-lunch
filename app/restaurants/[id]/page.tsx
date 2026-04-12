@@ -162,7 +162,7 @@ export default function RestaurantPage() {
         </div>
 
         <button className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors mb-3">
-          Reserve a table
+          Reserve this lunch special
         </button>
         <p className="text-center text-xs text-gray-400">Free to reserve · Cancel anytime</p>
       </div>
