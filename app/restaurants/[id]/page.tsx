@@ -123,9 +123,7 @@ export default function RestaurantPage() {
           <p className="text-gray-500 text-sm mb-4 leading-relaxed">{r.bio}</p>
         )}
         <div className="flex items-center gap-1 mb-6">
-          <span className="text-yellow-400">★</span>
-          <span className="font-medium text-gray-800">{r.rating}</span>
-          <span className="text-gray-400 text-sm">· Prix-fixe lunch</span>
+          <span className="text-gray-400 text-sm">Prix-fixe lunch</span>
         </div>
 
         <div className="bg-[#EEF6FC] rounded-2xl p-6 mb-6">

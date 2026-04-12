@@ -175,7 +175,6 @@ export default function Home() {
                     {r.work_friendly && <span className="text-xs bg-blue-50 text-[#4A9FD5] px-2 py-1 rounded-full font-medium">💻 Work-friendly</span>}
                     {r.wifi && <span className="text-xs bg-blue-50 text-[#4A9FD5] px-2 py-1 rounded-full font-medium">📶 WiFi</span>}
                     {r.walk_in && <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full font-medium">🚶 Walk-ins</span>}
-                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">⭐ {r.rating}</span>
                     <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full">{r.seats} seats left</span>
                   </div>
                   <div className="w-full py-2.5 bg-[#4A9FD5] text-white rounded-xl text-sm font-medium text-center">
