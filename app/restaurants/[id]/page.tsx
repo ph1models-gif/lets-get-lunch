@@ -59,18 +59,20 @@ export default function RestaurantPage() {
       setLoading(false);
 
       // Pre-fill if already signed in
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('name')
-          .eq('id', user.id)
-          .single();
-        if (profile?.name) {
-          setForm(f => ({ ...f, name: profile.name, email: user.email || '' }));
-          setUserName(profile.name);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('name')
+            .eq('id', user.id)
+            .single();
+          if (profile?.name) {
+            setForm(f => ({ ...f, name: profile.name, email: user.email || '' }));
+            setUserName(profile.name);
+          }
         }
-      }
+      } catch(e) { /* not signed in, that's fine */ }
     }
     load();
   }, [id]);
