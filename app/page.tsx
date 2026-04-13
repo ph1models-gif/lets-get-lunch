@@ -132,10 +132,7 @@ export default function Home() {
             <input type="checkbox" checked={laptopOnly} onChange={e => setLaptopOnly(e.target.checked)} className="rounded" />
             💻 Laptop friendly
           </label>
-          <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
-            <input type="checkbox" checked={walkInOnly} onChange={e => setWalkInOnly(e.target.checked)} className="rounded" />
-            🚶 Walk-ins
-          </label>
+
           <div className="flex items-center gap-2 text-xs text-gray-500">
             <span>Max: ${maxPrice === 100 ? "Any" : "$"+maxPrice}</span>
             <input type="range" min="20" max="100" value={maxPrice} onChange={e => setMaxPrice(Number(e.target.value))} className="w-16" />
