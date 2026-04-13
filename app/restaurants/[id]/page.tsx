@@ -309,7 +309,7 @@ export default function RestaurantPage() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
-          onClick={e => { if (e.target === e.currentTarget) setShowModal(false); }}>
+          onClick={e => e.stopPropagation()}>
           <div className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md max-h-[92vh] overflow-y-auto">
             <div className="p-6">
               {/* Handle bar for mobile */}
@@ -379,7 +379,7 @@ export default function RestaurantPage() {
                 <>
                   <button onClick={() => setStep('book')} className="text-[#4A9FD5] text-sm mb-4 block">← Back</button>
                   <h2 className="text-xl font-bold text-gray-900 mb-1">Almost done!</h2>
-                  <p className="text-sm text-gray-500 mb-6">Create a free account to confirm your reservation. Your code will be emailed instantly.</p>
+                  <p className="text-sm text-gray-500 mb-6">One last step — set a password so you can manage your reservations.</p>
 
                   {authError && <p className="text-red-500 text-sm bg-red-50 px-4 py-3 rounded-xl mb-4">{authError}</p>}
 
@@ -393,7 +393,7 @@ export default function RestaurantPage() {
                       className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50">
                       {submitting ? 'Confirming...' : 'Confirm Reservation'}
                     </button>
-                    <p className="text-center text-xs text-gray-400">Free forever · No credit card</p>
+
                   </div>
                 </>
               )}
