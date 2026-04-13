@@ -104,7 +104,7 @@ export default function Home() {
           NYC&apos;s best lunch deals, <span className="text-[#4A9FD5]">at the table.</span>
         </h1>
         <p className="text-gray-500 text-sm max-w-xl mx-auto mb-4">
-          Prix-fixe deals across NYC · Real tables · All under $35
+          Prix-fixe deals across NYC · Real tables · Most under $35
         </p>
         <div className="max-w-lg mx-auto flex gap-2 mb-4">
           <NeighborhoodSearch
