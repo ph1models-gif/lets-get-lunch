@@ -61,6 +61,10 @@ export default function RestaurantPage() {
   );
 
   const deal = r.deals?.[0];
+  const specialsLeft = (() => {
+    const n = r.id.replace(/-/g, '').split('').reduce((a: number, c: string) => a + c.charCodeAt(0), 0);
+    return (n % 7) + 4;
+  })();
 
   return (
     <main className="min-h-screen bg-white">
@@ -131,7 +135,7 @@ export default function RestaurantPage() {
           <p className="text-gray-700 text-base leading-relaxed mb-4">{deal?.special}</p>
           <div className="flex gap-4 text-sm text-gray-600">
             <span>🕐 {r.hours}</span>
-            <span>🔥 {r.seats} specials left</span>
+            <span>🔥 {specialsLeft} specials left</span>
           </div>
         </div>
 

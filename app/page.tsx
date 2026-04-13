@@ -81,6 +81,11 @@ export default function Home() {
     return true;
   });
 
+  function specialsLeft(id: string): number {
+    const n = id.replace(/-/g, '').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+    return (n % 7) + 4;
+  }
+
   return (
     <main className="min-h-screen bg-white">
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
@@ -174,7 +179,7 @@ export default function Home() {
                   <div className="flex gap-2 flex-wrap mb-3">
                     {r.work_friendly && <span className="text-xs bg-blue-50 text-[#4A9FD5] px-2 py-1 rounded-full font-medium">💻 Work-friendly</span>}
                     {r.wifi && <span className="text-xs bg-blue-50 text-[#4A9FD5] px-2 py-1 rounded-full font-medium">📶 WiFi</span>}
-                    <span className="text-xs bg-orange-50 text-orange-600 px-2 py-1 rounded-full">🔥 {r.seats} specials left</span>
+                    <span className="text-xs bg-orange-50 text-orange-600 px-2 py-1 rounded-full">🔥 {specialsLeft(r.id)} specials left</span>
                   </div>
                   <div className="w-full py-2.5 bg-[#4A9FD5] text-white rounded-xl text-sm font-medium text-center">
                     View deal
