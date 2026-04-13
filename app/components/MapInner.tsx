@@ -56,7 +56,7 @@ export default function MapInner({ onPanReady, activeIds }: Props) {
 
     const { data: restaurants } = await supabase
       .from('restaurants')
-      .select('id, name, lat, lng, cuisine, bio, photo_url, deals(price, special)')
+      .select('id, name, lat, lng, cuisine, photo_url, deals(price, special)')
       .eq('is_active', true);
 
     if (!restaurants) return;
@@ -100,8 +100,8 @@ export default function MapInner({ onPanReady, activeIds }: Props) {
         ${photoBlock}
         <div style="padding:10px 12px 12px">
           <div style="font-weight:600;font-size:14px;color:#111;margin-bottom:2px">${r.name}</div>
-          <div style="font-size:11px;color:#888;margin-bottom:${r.bio ? '4px' : '6px'}">${r.cuisine || ''}</div>
-          ${r.bio ? `<div style="font-size:11px;color:#555;font-style:italic;margin-bottom:6px;line-height:1.4">${r.bio}</div>` : ''}
+          <div style="font-size:11px;color:#888;margin-bottom:4px">${r.cuisine || ''}</div>
+          ${dealHtml}
           <div style="font-size:15px;font-weight:700;color:#4A9FD5">${deal ? '$' + deal.price : ''}</div>
         </div>
       `;

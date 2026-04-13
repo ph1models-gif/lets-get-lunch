@@ -136,16 +136,12 @@ export default function RestaurantPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-2 gap-3 mb-6">
           <div className={`rounded-xl p-4 text-sm font-medium flex flex-col items-center gap-1 ${r.work_friendly ? 'bg-blue-50 text-[#4A9FD5]' : 'bg-gray-50 text-gray-400'}`}>
             <span>💻</span>
             <span>{r.work_friendly ? 'Laptop ok' : 'No laptops'}</span>
           </div>
-          <div className={`rounded-xl p-4 text-sm font-medium flex flex-col items-center gap-1 ${r.walk_in ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-400'}`}>
-            <span>🚶</span>
-            <span>{r.walk_in ? 'Walk-ins' : 'Resy only'}</span>
-          </div>
-          <div className={`rounded-xl p-4 text-sm font-medium flex flex-col items-center gap-1 ${r.wifi ? 'bg-blue-50 text-[#4A9FD5]' : 'bg-gray-50 text-gray-400'}`}>
+<div className={`rounded-xl p-4 text-sm font-medium flex flex-col items-center gap-1 ${r.wifi ? 'bg-blue-50 text-[#4A9FD5]' : 'bg-gray-50 text-gray-400'}`}>
             <span>📶</span>
             <span>{r.wifi ? 'Free WiFi' : 'No WiFi'}</span>
           </div>
