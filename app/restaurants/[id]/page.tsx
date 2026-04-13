@@ -131,8 +131,7 @@ export default function RestaurantPage() {
           <p className="text-gray-700 text-base leading-relaxed mb-4">{deal?.special}</p>
           <div className="flex gap-4 text-sm text-gray-600">
             <span>🕐 {r.hours}</span>
-            <span>💺 {r.seats} seats left</span>
-            <span>🍽️ {deal?.courses}-course</span>
+            <span>🔥 {r.seats} specials left</span>
           </div>
         </div>
 
