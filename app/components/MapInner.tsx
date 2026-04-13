@@ -88,6 +88,10 @@ export default function MapInner({ onPanReady, activeIds }: Props) {
       });
       markersRef.current.set(r.id, mk);
 
+      const dealHtml = deal?.special
+        ? `<div style="color:#555;font-size:11px;margin-bottom:6px;line-height:1.4">${deal.special}</div>`
+        : '';
+
       const content = document.createElement('div');
       content.style.cssText = 'width:220px;cursor:pointer;font-family:sans-serif;border-radius:12px;overflow:hidden';
 
