@@ -45,6 +45,7 @@ export default function RestaurantPage() {
 
   // Auth
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [signInEmail, setSignInEmail] = useState('');
   const [signInPassword, setSignInPassword] = useState('');
 
@@ -104,6 +105,10 @@ export default function RestaurantPage() {
   async function handleCreateAndReserve() {
     if (!password || password.length < 8) {
       setAuthError('Password must be at least 8 characters.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setAuthError('Passwords do not match.');
       return;
     }
     setSubmitting(true);
@@ -391,7 +396,12 @@ export default function RestaurantPage() {
                       <input type="password" value={password} onChange={e => setPassword(e.target.value)}
                         placeholder="At least 8 characters" className={inputClass} />
                     </div>
-                    <button onClick={handleCreateAndReserve} disabled={submitting || !password}
+                    <div>
+                      <label className={labelClass}>Confirm password</label>
+                      <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                        placeholder="Type password again" className={inputClass} />
+                    </div>
+                    <button onClick={handleCreateAndReserve} disabled={submitting || !password || password !== confirmPassword}
                       className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50">
                       {submitting ? 'Confirming...' : 'Confirm Reservation'}
                     </button>
