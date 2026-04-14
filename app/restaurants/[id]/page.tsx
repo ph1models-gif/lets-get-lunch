@@ -22,6 +22,15 @@ interface Restaurant {
   deals: { special: string; price: number; courses: number }[];
 }
 
+
+function validatePassword(pw: string): string | null {
+  if (pw.length < 8) return 'Password must be at least 8 characters.';
+  if (!/[A-Z]/.test(pw)) return 'Password must include at least one uppercase letter.';
+  if (!/[0-9]/.test(pw)) return 'Password must include at least one number.';
+  if (!/[^A-Za-z0-9]/.test(pw)) return 'Password must include at least one symbol (e.g. !@#$).';
+  return null;
+}
+
 type ModalStep = 'book' | 'password' | 'signin' | 'success';
 
 export default function RestaurantPage() {
@@ -103,9 +112,10 @@ export default function RestaurantPage() {
   }
 
   async function handleCreateAndReserve() {
-    if (!password || password.length < 8) {
-      setAuthError('Password must be at least 8 characters.');
-      return;
+    const pwErr = validatePassword(password);
+    if (pwErr) { setAuthError(pwErr); return; }
+    if (password !== confirmPassword) {
+      setAuthError('Passwords do not match. Please try again.'); return;
     }
     if (password !== confirmPassword) {
       setAuthError('Passwords do not match.');
@@ -403,12 +413,15 @@ export default function RestaurantPage() {
                     <div>
                       <label className={labelClass}>Create a password</label>
                       <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-                        placeholder="At least 8 characters" className={inputClass} />
+                        placeholder="Min 8 chars, uppercase, number, symbol" className={inputClass} />
                     </div>
                     <div>
                       <label className={labelClass}>Confirm password</label>
                       <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
                         placeholder="Type password again" className={inputClass} />
+                      {confirmPassword && password !== confirmPassword && (
+                        <p className="text-red-500 text-xs mt-1">Passwords do not match.</p>
+                      )}
                     </div>
                     <button onClick={handleCreateAndReserve} disabled={submitting || !password || password !== confirmPassword}
                       className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50">

@@ -4,6 +4,15 @@ import { supabase } from '../../lib/supabase';
 
 const NEIGHBORHOODS = ['Midtown','Midtown East','Midtown West','Murray Hill','Flatiron','Gramercy','Chelsea','Union Square','Greenwich Village','West Village','SoHo','Tribeca','Lower East Side','Financial District','Upper East Side','Upper West Side','Harlem','Brooklyn','Williamsburg','DUMBO'];
 
+
+function validatePassword(pw: string): string | null {
+  if (pw.length < 8) return 'Password must be at least 8 characters.';
+  if (!/[A-Z]/.test(pw)) return 'Password must include at least one uppercase letter.';
+  if (!/[0-9]/.test(pw)) return 'Password must include at least one number.';
+  if (!/[^A-Za-z0-9]/.test(pw)) return 'Password must include at least one symbol (e.g. !@#$).';
+  return null;
+}
+
 export default function LoginPage() {
   const [tab, setTab] = useState<'signup'|'signin'>('signup');
   const [loading, setLoading] = useState(false);
@@ -11,7 +20,7 @@ export default function LoginPage() {
   const [success, setSuccess] = useState('');
   const [signInForm, setSignInForm] = useState({ email: '', password: '' });
   const [signUpForm, setSignUpForm] = useState({
-    firstName: '', lastName: '', email: '', password: '', neighborhood: ''
+    firstName: '', lastName: '', email: '', password: '', confirmPassword: '', neighborhood: ''
   });
 
   async function handleSignIn() {
@@ -27,6 +36,11 @@ export default function LoginPage() {
     setLoading(true); setError('');
     if (!signUpForm.firstName || !signUpForm.lastName || !signUpForm.email || !signUpForm.password) {
       setError('All fields except neighborhood are required.'); setLoading(false); return;
+    }
+    const pwError = validatePassword(signUpForm.password);
+    if (pwError) { setError(pwError); setLoading(false); return; }
+    if (signUpForm.password !== signUpForm.confirmPassword) {
+      setError('Passwords do not match. Please try again.'); setLoading(false); return;
     }
     const fullName = `${signUpForm.firstName.trim()} ${signUpForm.lastName.trim()}`;
     const { data, error } = await supabase.auth.signUp({
@@ -89,7 +103,15 @@ export default function LoginPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
               <input type="password" value={signUpForm.password} onChange={e => setSignUpForm(f => ({...f, password: e.target.value}))}
-                placeholder="At least 8 characters" className={inputClass} />
+                placeholder="Min 8 chars, uppercase, number, symbol" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm password</label>
+              <input type="password" value={signUpForm.confirmPassword} onChange={e => setSignUpForm(f => ({...f, confirmPassword: e.target.value}))}
+                placeholder="Type password again" className={inputClass} />
+              {signUpForm.confirmPassword && signUpForm.password !== signUpForm.confirmPassword && (
+                <p className="text-red-500 text-xs mt-1">Passwords do not match.</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Primary lunch neighborhood <span className="text-gray-400 font-normal">(optional)</span></label>
