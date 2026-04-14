@@ -13,7 +13,7 @@ const NEIGHBORHOODS = [
   'Bushwick','Greenpoint','Red Hook','Gowanus','Crown Heights','Downtown Brooklyn',
   'Astoria','Long Island City','Flushing','Jackson Heights','Forest Hills',
   'Sunnyside','Woodside','Ridgewood','Fordham','Riverdale','Mott Haven',
-  'St. George','Stapleton'
+  "St. George",'Stapleton'
 ];
 
 
