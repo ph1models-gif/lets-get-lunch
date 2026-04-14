@@ -86,7 +86,7 @@ export default function RestaurantPage() {
   }
 
   async function handleReserve() {
-    if (!form.name || !form.email) return;
+    if (!form.firstName || !form.lastName || !form.email) return;
     setSubmitting(true);
     setAuthError('');
 
