@@ -2,7 +2,19 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 
-const NEIGHBORHOODS = ['Midtown','Midtown East','Midtown West','Murray Hill','Flatiron','Gramercy','Chelsea','Union Square','Greenwich Village','West Village','SoHo','Tribeca','Lower East Side','Financial District','Upper East Side','Upper West Side','Harlem','Brooklyn','Williamsburg','DUMBO'];
+const NEIGHBORHOODS = [
+  'Midtown','Midtown East','Midtown West','Upper East Side','Upper West Side',
+  'Chelsea','West Village','Greenwich Village','SoHo','NoHo','Tribeca',
+  'Financial District','Lower East Side','East Village','Gramercy Park',
+  'Murray Hill','Harlem','Hell's Kitchen','Chinatown','Battery Park City',
+  'Union Square','Lenox Hill','Yorkville','Washington Heights','Inwood',
+  'Morningside Heights','Williamsburg','Dumbo','Brooklyn Heights','Park Slope',
+  'Cobble Hill','Carroll Gardens','Boerum Hill','Fort Greene','Clinton Hill',
+  'Bushwick','Greenpoint','Red Hook','Gowanus','Crown Heights','Downtown Brooklyn',
+  'Astoria','Long Island City','Flushing','Jackson Heights','Forest Hills',
+  'Sunnyside','Woodside','Ridgewood','Fordham','Riverdale','Mott Haven',
+  'St. George','Stapleton'
+];
 
 
 function validatePassword(pw: string): string | null {
@@ -14,7 +26,7 @@ function validatePassword(pw: string): string | null {
 }
 
 export default function LoginPage() {
-  const [tab, setTab] = useState<'signup'|'signin'>('signup');
+  const [tab, setTab] = useState<'signup'|'signin'>('signin');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
