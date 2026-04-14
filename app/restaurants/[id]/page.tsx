@@ -242,7 +242,7 @@ export default function RestaurantPage() {
     <main className="min-h-screen bg-white">
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
         <a href="/" className="text-[#4A9FD5] text-sm font-medium">&larr; Back to results</a>
-        <a href="/list-your-restaurant" className="text-sm text-gray-500">For restaurants</a>
+        <a href="/login" className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full font-medium hover:bg-[#3a8fc5]">Sign in</a>
       </nav>
 
       <div className="max-w-2xl mx-auto px-4 py-8">
