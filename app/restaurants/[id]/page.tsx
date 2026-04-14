@@ -135,7 +135,8 @@ export default function RestaurantPage() {
     if (data.user) {
       await supabase.from('profiles').insert({
         id: data.user.id,
-        name: form.name,
+        name: `${form.firstName} ${form.lastName}`,
+          contact: form.email,
       });
       await submitReservation(data.user.id);
     }
@@ -178,7 +179,8 @@ export default function RestaurantPage() {
           restaurant_name: r!.name,
           restaurant_email: null,
           user_id: userId,
-          name: form.name,
+          name: `${form.firstName} ${form.lastName}`,
+          contact: form.email,
           contact: form.email,
           party_size: parseInt(form.party_size),
           preferred_time: form.preferred_time,
@@ -334,10 +336,17 @@ export default function RestaurantPage() {
                   {authError && <p className="text-red-500 text-sm bg-red-50 px-4 py-3 rounded-xl mb-4">{authError}</p>}
 
                   <div className="space-y-4">
-                    <div>
-                      <label className={labelClass}>Your name</label>
-                      <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                        placeholder="First and last name" className={inputClass} />
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className={labelClass}>First name</label>
+                        <input value={form.firstName} onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))}
+                          placeholder="First" className={inputClass} />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Last name</label>
+                        <input value={form.lastName} onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))}
+                          placeholder="Last" className={inputClass} />
+                      </div>
                     </div>
                     <div>
                       <label className={labelClass}>Email</label>
@@ -363,7 +372,7 @@ export default function RestaurantPage() {
                       </select>
                     </div>
 
-                    <button onClick={handleReserve} disabled={submitting || !form.name || !form.email}
+                    <button onClick={handleReserve} disabled={submitting || !form.firstName || !form.lastName || !form.email}
                       className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50 mt-2">
                       {submitting ? 'One moment...' : 'Reserve Now'}
                     </button>
