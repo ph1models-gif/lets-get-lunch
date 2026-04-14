@@ -46,6 +46,7 @@ export default function RestaurantPage() {
   const [authError, setAuthError] = useState('');
   const [resCode, setResCode] = useState('');
   const [userName, setUserName] = useState('');
+  const [userFirstName, setUserFirstName] = useState('');
 
   // Book form
   const [form, setForm] = useState({
@@ -80,6 +81,7 @@ export default function RestaurantPage() {
           if (profile?.name) {
             setForm(f => ({ ...f, name: profile.name, email: user.email || '' }));
             setUserName(profile.name);
+          setUserFirstName(parts[0] || '');
           }
         }
       } catch(e) { /* not signed in, that's fine */ }
@@ -242,7 +244,15 @@ export default function RestaurantPage() {
     <main className="min-h-screen bg-white">
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
         <a href="/" className="text-[#4A9FD5] text-sm font-medium">&larr; Back to results</a>
-        <a href="/login" className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full font-medium hover:bg-[#3a8fc5]">Sign in</a>
+        {userFirstName ? (
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-600">Hi, {userFirstName}</span>
+            <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }}
+              className="text-sm text-gray-400 hover:text-gray-600">Sign out</button>
+          </div>
+        ) : (
+          <a href="/login" className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full font-medium hover:bg-[#3a8fc5]">Sign in</a>
+        )}
       </nav>
 
       <div className="max-w-2xl mx-auto px-4 py-8">

@@ -34,6 +34,7 @@ export default function Home() {
   const [walkInOnly, setWalkInOnly] = useState(false);
   const [selectedHood, setSelectedHood] = useState('');
   const mapPanRef = useRef<((lat: number, lng: number) => void) | null>(null);
+  const [userFirstName, setUserFirstName] = useState('');
 
   async function load() {
     const { data, error } = await supabase
@@ -48,6 +49,14 @@ export default function Home() {
     load();
     const handleFocus = () => load();
     window.addEventListener('focus', handleFocus);
+    // Check auth state
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        supabase.from('profiles').select('name').eq('id', user.id).single().then(({ data }) => {
+          if (data?.name) setUserFirstName(data.name.split(' ')[0]);
+        });
+      }
+    }).catch(() => {});
     return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
@@ -95,7 +104,15 @@ export default function Home() {
         </div>
         <div className="flex gap-3">
           <a href="/list-your-restaurant" className="text-sm text-[#4A9FD5] font-medium hover:underline">List your restaurant</a>
-          <a href="/login" className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full font-medium hover:bg-[#3a8fc5]">Sign in</a>
+          {userFirstName ? (
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-600">Hi, {userFirstName}</span>
+              <button onClick={async () => { await supabase.auth.signOut(); setUserFirstName(''); }}
+                className="text-sm text-gray-400 hover:text-gray-600">Sign out</button>
+            </div>
+          ) : (
+            <a href="/login" className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full font-medium hover:bg-[#3a8fc5]">Sign in</a>
+          )}
         </div>
       </nav>
 
