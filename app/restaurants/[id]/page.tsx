@@ -431,14 +431,23 @@ export default function RestaurantPage() {
               {/* STEP: success */}
               {step === 'success' && (
                 <div className="text-center py-4">
-                  <div className="text-5xl mb-4">🎉</div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">You&apos;re confirmed!</h2>
-                  <p className="text-gray-500 mb-6">Show this code at {r.name} to receive your lunch special</p>
-                  <div className="bg-[#EEF6FC] rounded-2xl py-6 px-8 mb-4">
-                    <p className="text-xs text-gray-500 mb-2">Your reservation code</p>
-                    <p className="text-4xl font-bold text-[#4A9FD5] tracking-widest">{resCode}</p>
+                  <div className="text-5xl mb-3">🎉</div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-1">You&apos;re confirmed!</h2>
+                  <p className="text-gray-500 mb-4">Show this at {r.name}</p>
+                  <div className="bg-[#EEF6FC] rounded-2xl py-5 px-6 mb-4">
+                    <p className="text-xs text-gray-500 mb-1">Your reservation code</p>
+                    <p className="text-4xl font-bold text-[#4A9FD5] tracking-widest mb-4">{resCode}</p>
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(resCode)}&color=4A9FD5&bgcolor=EEF6FC`}
+                      alt="QR Code"
+                      className="w-40 h-40 mx-auto rounded-xl"
+                    />
                   </div>
-                  <p className="text-sm text-gray-500 mb-6">A confirmation has been sent to {form.email}</p>
+                  <div className="text-left bg-gray-50 rounded-xl px-4 py-3 mb-4">
+                    <p className="text-xs text-gray-400 mb-1">Restaurant address</p>
+                    <p className="text-sm font-medium text-gray-900">{r.address}</p>
+                  </div>
+                  <p className="text-sm text-gray-500 mb-4">Confirmation sent to {form.email}</p>
                   <button onClick={() => setShowModal(false)}
                     className="w-full border border-gray-200 text-gray-700 py-4 rounded-xl font-medium text-lg hover:bg-gray-50">
                     Done
