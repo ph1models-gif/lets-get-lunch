@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: "Let's Get Lunch <onboarding@resend.dev>",
+            from: "Let's Get Lunch <hello@letsgetlunch.nyc>",
             to: userEmail,
             subject: `Your lunch reservation — ${restaurant_name}`,
             html: `
