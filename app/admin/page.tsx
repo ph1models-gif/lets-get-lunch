@@ -50,18 +50,7 @@ type Deal = {
   is_active: boolean
 }
 
-const NEIGHBORHOODS = [
-  'Chelsea', 'Chinatown', 'East Village', 'Financial District',
-  'Flatiron', 'Greenwich Village', "Hell's Kitchen", 'Lower East Side',
-  'Midtown', 'Murray Hill', 'NoHo', 'Nolita', 'SoHo', 'Tribeca',
-  'Upper East Side', 'Upper West Side', 'West Village', 'Williamsburg'
-]
 
-const CUISINES = [
-  'American', 'Asian', 'Chinese', 'French', 'French Seafood', 'Greek', 'Indian', 'Italian',
-  'Japanese', 'Japanese/Sushi', 'Korean', 'Mediterranean', 'Mexican', 'Mexican/Latin', 'Middle Eastern',
-  'Pizza', 'Sandwiches/Deli', 'Seafood', 'Spanish', 'Thai', 'Vegan/Plant-Based', 'Vietnamese'
-]
 
 
 const NEIGHBORHOODS = [
