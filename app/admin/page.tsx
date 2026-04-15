@@ -176,6 +176,9 @@ export default function AdminPage() {
   const [editExtraPreviews, setEditExtraPreviews] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [reservations, setReservations] = useState<any[]>([])
+  const [resLoading, setResLoading] = useState(true)
+  const [resView, setResView] = useState<'today' | 'all'>('today')
 
   useEffect(() => {
     if (authed && tab === 'pending') fetchVendors()
