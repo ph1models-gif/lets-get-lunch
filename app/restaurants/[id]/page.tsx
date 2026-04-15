@@ -97,7 +97,7 @@ export default function RestaurantPage() {
   }
 
   async function handleReserve() {
-    if (!form.firstName || !form.lastName || !form.email) return;
+    if (!form.email) return;
     setSubmitting(true);
     setAuthError('');
 
@@ -392,7 +392,7 @@ export default function RestaurantPage() {
                       </select>
                     </div>
 
-                    <button onClick={handleReserve} disabled={submitting || !form.firstName || !form.lastName || !form.email}
+                    <button onClick={handleReserve} disabled={submitting || !form.email}
                       className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50 mt-2">
                       {submitting ? 'One moment...' : 'Reserve Now'}
                     </button>
