@@ -386,7 +386,7 @@ export default function RestaurantPage() {
                       <label className={labelClass}>Preferred time</label>
                       <select value={form.preferred_time} onChange={e => setForm(f => ({ ...f, preferred_time: e.target.value }))}
                         className={inputClass}>
-                        {['11:30 am','12:00 pm','12:30 pm','1:00 pm','1:30 pm','2:00 pm'].map(t => (
+                        {['11:00 am','11:30 am','12:00 pm','12:30 pm','1:00 pm','1:30 pm','2:00 pm','2:30 pm','3:00 pm'].map(t => (
                           <option key={t}>{t}</option>
                         ))}
                       </select>
