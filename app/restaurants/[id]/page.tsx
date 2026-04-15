@@ -79,9 +79,12 @@ export default function RestaurantPage() {
             .eq('id', user.id)
             .single();
           if (profile?.name) {
-            setForm(f => ({ ...f, name: profile.name, email: user.email || '' }));
+            const parts = profile.name.split(' ');
+            const firstName = parts[0] || '';
+            const lastName = parts.slice(1).join(' ') || '';
+            setForm(f => ({ ...f, firstName, lastName, email: user.email || '' }));
             setUserName(profile.name);
-            setUserFirstName(parts[0] || '');
+            setUserFirstName(firstName);
           }
         }
       } catch(e) { /* not signed in, that's fine */ }
