@@ -81,7 +81,7 @@ export default function RestaurantPage() {
           if (profile?.name) {
             setForm(f => ({ ...f, name: profile.name, email: user.email || '' }));
             setUserName(profile.name);
-          setUserFirstName(parts[0] || '');
+            setUserFirstName(parts[0] || '');
           }
         }
       } catch(e) { /* not signed in, that's fine */ }
