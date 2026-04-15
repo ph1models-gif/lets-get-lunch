@@ -311,10 +311,10 @@ export default function AdminPage() {
         </div>
 
         <div className="flex gap-2 mb-6 border-b border-gray-200">
-          {(['pending', 'restaurants'] as const).map(t => (
+          {((['pending', 'restaurants', 'reservations'] as const)).map(t => (
             <button key={t} onClick={() => setTab(t as any)}
               className={`pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${tab === t ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
-              {t === 'pending' ? 'Pending submissions' : 'Active listings'}
+              {t === 'pending' ? 'Pending submissions' : t === 'restaurants' ? 'Active listings' : 'Reservations'}
             </button>
           ))}
         </div>
