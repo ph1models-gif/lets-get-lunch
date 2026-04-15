@@ -83,7 +83,7 @@ const HOURS_OPTIONS = [
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false)
   const [pw, setPw] = useState('')
-  const [tab, setTab] = useState<'pending' | 'restaurants'>('pending')
+  const [tab, setTab] = useState<'pending' | 'restaurants' | 'reservations'>('pending')
 
   const [vendors, setVendors] = useState<Vendor[]>([])
   const [vendorLoading, setVendorLoading] = useState(false)
@@ -103,6 +103,7 @@ export default function AdminPage() {
   useEffect(() => {
     if (authed && tab === 'pending') fetchVendors()
     if (authed && tab === 'restaurants') fetchRestaurants()
+    if (authed && tab === 'reservations') fetchReservations()
   }, [authed, tab])
 
   async function fetchVendors() {
@@ -121,6 +122,16 @@ export default function AdminPage() {
     setRestaurants(rests || [])
     setDeals(dealData || [])
     setRestLoading(false)
+  }
+
+  async function fetchReservations() {
+    setResLoading(true)
+    const { data } = await supabase
+      .from('reservations')
+      .select('*, restaurants(name)')
+      .order('created_at', { ascending: false })
+    setReservations(data || [])
+    setResLoading(false)
   }
 
   async function approveVendor(vendor: Vendor) {
@@ -301,7 +312,7 @@ export default function AdminPage() {
 
         <div className="flex gap-2 mb-6 border-b border-gray-200">
           {(['pending', 'restaurants'] as const).map(t => (
-            <button key={t} onClick={() => setTab(t)}
+            <button key={t} onClick={() => setTab(t as any)}
               className={`pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${tab === t ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
               {t === 'pending' ? 'Pending submissions' : 'Active listings'}
             </button>
@@ -350,6 +361,101 @@ export default function AdminPage() {
         )}
 
         {/* RESTAURANTS TAB */}
+        {tab === 'reservations' && (
+          <div>
+            {/* Today / All toggle */}
+            <div className="flex gap-2 mb-6">
+              {['today', 'all'].map(v => (
+                <button key={v} onClick={() => setResView(v as any)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${resView === v ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                  {v === 'today' ? "Today's bookings" : "All time"}
+                </button>
+              ))}
+            </div>
+
+            {resLoading ? (
+              <p className="text-sm text-gray-400">Loading reservations...</p>
+            ) : (() => {
+              const today = new Date().toDateString()
+              const filtered = resView === 'today'
+                ? reservations.filter(r => new Date(r.created_at).toDateString() === today)
+                : reservations
+
+              // Build repeat booker map
+              const contactCount: Record<string, number> = {}
+              const contactRestaurants: Record<string, Set<string>> = {}
+              reservations.forEach(r => {
+                const key = r.contact?.toLowerCase() || r.name
+                contactCount[key] = (contactCount[key] || 0) + 1
+                if (!contactRestaurants[key]) contactRestaurants[key] = new Set()
+                contactRestaurants[key].add(r.restaurant_id)
+              })
+
+              if (filtered.length === 0) return (
+                <div className="text-center py-12">
+                  <p className="text-4xl mb-3">🍽️</p>
+                  <p className="text-gray-400 text-sm">{resView === 'today' ? 'No reservations today yet' : 'No reservations yet'}</p>
+                </div>
+              )
+
+              return (
+                <div className="space-y-3">
+                  {/* Summary bar */}
+                  <div className="grid grid-cols-3 gap-3 mb-6">
+                    <div className="bg-orange-50 rounded-xl p-4 text-center">
+                      <p className="text-2xl font-bold text-orange-600">{filtered.length}</p>
+                      <p className="text-xs text-gray-500 mt-1">{resView === 'today' ? "Today's reservations" : 'Total reservations'}</p>
+                    </div>
+                    <div className="bg-blue-50 rounded-xl p-4 text-center">
+                      <p className="text-2xl font-bold text-[#4A9FD5]">{filtered.reduce((a, r) => a + (r.party_size || 1), 0)}</p>
+                      <p className="text-xs text-gray-500 mt-1">Total guests</p>
+                    </div>
+                    <div className="bg-green-50 rounded-xl p-4 text-center">
+                      <p className="text-2xl font-bold text-green-600">{Object.values(contactCount).filter(c => c > 1).length}</p>
+                      <p className="text-xs text-gray-500 mt-1">Repeat bookers</p>
+                    </div>
+                  </div>
+
+                  {filtered.map(r => {
+                    const key = r.contact?.toLowerCase() || r.name
+                    const bookCount = contactCount[key] || 1
+                    const isRepeat = bookCount > 1
+                    const multiRest = contactRestaurants[key]?.size > 1
+                    const bookedAt = new Date(r.created_at)
+                    const timeAgo = bookedAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+                    const dateStr = bookedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+
+                    return (
+                      <div key={r.id} className="bg-white border border-gray-200 rounded-xl p-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-gray-900">{r.name}</p>
+                              {isRepeat && (
+                                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">
+                                  🔁 {bookCount}x booker{multiRest ? ' · multiple restaurants' : ''}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 mt-0.5">{r.contact}</p>
+                          </div>
+                          <span className="text-xs font-mono bg-[#EEF6FC] text-[#4A9FD5] px-2 py-1 rounded-lg font-bold">{r.code || r.confirmation_code}</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-600">
+                          <span>🍽️ {r.restaurants?.name || '—'}</span>
+                          <span>👥 Party of {r.party_size}</span>
+                          <span>🕐 {r.preferred_time}</span>
+                          <span>📅 Booked {dateStr} at {timeAgo}</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })()}
+          </div>
+        )}
+
         {tab === 'restaurants' && (
           <>
             {restLoading && <p className="text-gray-500 text-sm">Loading…</p>}
