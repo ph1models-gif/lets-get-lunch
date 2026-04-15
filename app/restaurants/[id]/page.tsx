@@ -356,23 +356,27 @@ export default function RestaurantPage() {
                   {authError && <p className="text-red-500 text-sm bg-red-50 px-4 py-3 rounded-xl mb-4">{authError}</p>}
 
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className={labelClass}>First name</label>
-                        <input value={form.firstName} onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))}
-                          placeholder="First" className={inputClass} />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Last name</label>
-                        <input value={form.lastName} onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))}
-                          placeholder="Last" className={inputClass} />
-                      </div>
-                    </div>
-                    <div>
-                      <label className={labelClass}>Email</label>
-                      <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                        placeholder="your@email.com" className={inputClass} />
-                    </div>
+                    {!userName && (
+                      <>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className={labelClass}>First name</label>
+                            <input value={form.firstName} onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))}
+                              placeholder="First" className={inputClass} />
+                          </div>
+                          <div>
+                            <label className={labelClass}>Last name</label>
+                            <input value={form.lastName} onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))}
+                              placeholder="Last" className={inputClass} />
+                          </div>
+                        </div>
+                        <div>
+                          <label className={labelClass}>Email</label>
+                          <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                            placeholder="your@email.com" className={inputClass} />
+                        </div>
+                      </>
+                    )}
                     <div>
                       <label className={labelClass}>Party size</label>
                       <select value={form.party_size} onChange={e => setForm(f => ({ ...f, party_size: e.target.value }))}
