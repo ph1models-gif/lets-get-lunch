@@ -63,6 +63,34 @@ const CUISINES = [
   'Pizza', 'Sandwiches/Deli', 'Seafood', 'Spanish', 'Thai', 'Vegan/Plant-Based', 'Vietnamese'
 ]
 
+
+const NEIGHBORHOODS = [
+  "Midtown","Midtown East","Midtown West","Upper East Side","Upper West Side",
+  "Chelsea","West Village","Greenwich Village","SoHo","NoHo","Tribeca",
+  "Financial District","Lower East Side","East Village","Gramercy Park",
+  "Murray Hill","Kips Bay","Harlem","Hell's Kitchen","Chinatown","Little Italy",
+  "Battery Park City","Union Square","Lenox Hill","Yorkville","Washington Heights",
+  "Inwood","Morningside Heights","Williamsburg","Dumbo","Brooklyn Heights",
+  "Park Slope","Cobble Hill","Carroll Gardens","Boerum Hill","Fort Greene",
+  "Clinton Hill","Bushwick","Greenpoint","Red Hook","Crown Heights",
+  "Prospect Heights","Downtown Brooklyn","Astoria","Long Island City",
+  "Flushing","Jackson Heights","Forest Hills","Sunnyside","Ridgewood",
+  "Fordham","Riverdale","Mott Haven","St. George","Stapleton"
+];
+
+const CUISINES = [
+  "American","Italian","Japanese/Sushi","French","Mexican/Latin",
+  "Chinese","Indian","Mediterranean","Greek","Thai","Korean",
+  "Vietnamese","Middle Eastern","Seafood","Steakhouse","BBQ",
+  "Vegan/Plant-Based","Bakery/Cafe","Other"
+];
+
+const HOURS_OPTIONS = [
+  "11am–2pm","11am–2:30pm","11am–3pm","11:30am–2pm",
+  "11:30am–2:30pm","11:30am–3pm","12pm–2pm","12pm–2:30pm",
+  "12pm–3pm","12pm–3:30pm"
+];
+
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false)
   const [pw, setPw] = useState('')
@@ -390,18 +418,25 @@ export default function AdminPage() {
                         <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">Cuisine</label>
                           <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={editForm.cuisine || ''} onChange={e => setEditForm(f => ({ ...f, cuisine: e.target.value }))}>
+                            <option value="">Select cuisine...</option>
+                            {CUISINES.map(c => <option key={c} value={c}>{c}</option>)}
                             {CUISINES.map(c => <option key={c}>{c}</option>)}
                           </select>
                         </div>
                         <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">Neighborhood</label>
                           <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={editForm.neighborhood || ''} onChange={e => setEditForm(f => ({ ...f, neighborhood: e.target.value }))}>
+                            <option value="">Select neighborhood...</option>
+                            {NEIGHBORHOODS.map(n => <option key={n} value={n}>{n}</option>)}
                             {NEIGHBORHOODS.map(n => <option key={n}>{n}</option>)}
                           </select>
                         </div>
                         <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">Hours</label>
-                          <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={editForm.hours || ''} onChange={e => setEditForm(f => ({ ...f, hours: e.target.value }))} />
+                          <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={editForm.hours || ''} onChange={e => setEditForm(f => ({ ...f, hours: e.target.value }))}>
+                            <option value="">Select hours...</option>
+                            {HOURS_OPTIONS.map(h => <option key={h} value={h}>{h}</option>)}
+                          </select>
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                           <div>
