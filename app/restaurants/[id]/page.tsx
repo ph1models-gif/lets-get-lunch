@@ -104,13 +104,16 @@ export default function RestaurantPage() {
     setSubmitting(true);
     setAuthError('');
 
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (user) {
-      // Already signed in — go straight to reservation
-      await submitReservation(user.id);
-    } else {
-      // Not signed in — show password step to create account
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await submitReservation(user.id);
+      } else {
+        setStep('password');
+        setSubmitting(false);
+      }
+    } catch(e) {
+      // Not signed in — go to password step
       setStep('password');
       setSubmitting(false);
     }
