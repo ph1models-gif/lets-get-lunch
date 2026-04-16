@@ -103,8 +103,7 @@ export default function Home() {
           <span className="font-semibold text-gray-900 text-lg">Let&apos;s Get Lunch</span>
         </div>
         <div className="flex gap-3">
-          <a href="/list-your-restaurant" className="text-sm text-[#4A9FD5] font-medium hover:underline">List your restaurant</a>
-          {userFirstName ? (
+{userFirstName ? (
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-600">Hi, {userFirstName}</span>
               <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }}
