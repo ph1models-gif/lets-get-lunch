@@ -56,7 +56,8 @@ export async function POST(req: NextRequest) {
                 <p style="color:#444;font-size:16px">Your lunch reservation at <strong>${restaurant_name}</strong> is confirmed.</p>
                 <div style="background:#EEF6FC;border-radius:12px;padding:24px;margin:24px 0;text-align:center">
                   <p style="color:#666;font-size:14px;margin:0 0 8px">Your reservation code</p>
-                  <p style="color:#4A9FD5;font-size:36px;font-weight:700;letter-spacing:4px;margin:0">${code}</p>
+                  <p style="color:#4A9FD5;font-size:36px;font-weight:700;letter-spacing:4px;margin:0 0 16px">${code}</p>
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${code}" width="160" height="160" style="display:block;margin:0 auto 12px" alt="QR Code" />
                   <p style="color:#666;font-size:13px;margin:8px 0 0">Show this at the restaurant to receive your lunch special</p>
                 </div>
                 <div style="border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:24px">
@@ -66,6 +67,13 @@ export async function POST(req: NextRequest) {
                   <p style="margin:4px 0;font-size:15px"><strong>Party size:</strong> ${party_size} ${party_size === 1 ? 'person' : 'people'}</p>
                 </div>
                 <p style="color:#888;font-size:13px">— The Let's Get Lunch team</p>
+                <p style="margin-top:16px;text-align:center">
+                  <a href="https://www.letsgetlunch.nyc" style="color:#4A9FD5;font-size:13px;text-decoration:none">www.letsgetlunch.nyc</a>
+                </p>
+                <p style="color:#bbb;font-size:11px;text-align:center;margin-top:12px">
+                  Let's Get Lunch · New York, NY<br/>
+                  To unsubscribe, reply to this email with the word STOP.
+                </p>
               </div>
             `,
           }),

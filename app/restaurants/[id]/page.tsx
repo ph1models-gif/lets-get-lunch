@@ -45,6 +45,7 @@ export default function RestaurantPage() {
   const [submitting, setSubmitting] = useState(false);
   const [authError, setAuthError] = useState('');
   const [resCode, setResCode] = useState('');
+  const [isNewUser, setIsNewUser] = useState(false);
   const [userName, setUserName] = useState('');
   const [userFirstName, setUserFirstName] = useState('');
 
@@ -120,10 +121,6 @@ export default function RestaurantPage() {
     if (password !== confirmPassword) {
       setAuthError('Passwords do not match. Please try again.'); return;
     }
-    if (password !== confirmPassword) {
-      setAuthError('Passwords do not match.');
-      return;
-    }
     setSubmitting(true);
     setAuthError('');
 
@@ -153,6 +150,7 @@ export default function RestaurantPage() {
       });
       setUserFirstName(form.firstName);
       setUserName(`${form.firstName} ${form.lastName}`);
+      setIsNewUser(true);
       await submitReservation(data.user.id);
     }
   }
@@ -195,7 +193,6 @@ export default function RestaurantPage() {
           restaurant_email: null,
           user_id: userId,
           name: `${form.firstName} ${form.lastName}`,
-          contact: form.email,
           contact: form.email,
           party_size: parseInt(form.party_size),
           preferred_time: form.preferred_time,
