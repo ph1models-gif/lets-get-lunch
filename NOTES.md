@@ -81,3 +81,65 @@ See app/components/NeighborhoodSearch.tsx for canonical list
 ## Known Issues
 - 8 original seeded restaurants have no photo_url — emoji fallback shows
 - QR code on confirmation screen in modal may need verification
+
+## Auth & Reservation Flow — Detailed (backed up 2026-04-16)
+
+### New User Flow (not signed in):
+1. Clicks "Reserve this lunch special" → openModal() → step = 'book'
+2. Sees: First name, Last name, Email, Party size, Preferred time
+3. Clicks "Reserve Now" → handleReserve()
+4. handleReserve checks userName state:
+   - If userName is set → user is signed in → submitReservation() directly
+   - If userName is empty → not signed in → setStep('password')
+5. Password step shows: Create password + Confirm password fields
+6. Clicks submit → handleCreateAndReserve()
+7. Validates password with validatePassword() — min 8 chars, uppercase, number, symbol
+8. supabase.auth.signUp() creates account
+9. Inserts profile row with name + contact
+10. Sets setUserFirstName() and setUserName() so navbar updates immediately
+11. Sets setIsNewUser(true) so success screen shows "Check your email"
+12. submitReservation() saves to DB + sends email via /api/reserve
+13. Success screen shows code + "Check your email" message
+
+### Returning User Flow (signed in):
+1. Clicks "Reserve this lunch special" → openModal() → step = 'book'
+2. Sees ONLY: Party size, Preferred time (name/email hidden, pre-filled)
+3. Clicks "Reserve Now" → handleReserve()
+4. userName is set → goes straight to submitReservation()
+5. Success screen shows code + "Confirmation sent to [email]"
+
+### Sign In Flow (has account, not signed in):
+1. Clicks "Already have an account? Sign in"
+2. step = 'signin'
+3. Enters email + password → handleSignInAndReserve()
+4. supabase.auth.signInWithPassword()
+5. Loads profile, sets userName + userFirstName
+6. submitReservation() → success screen
+
+### Key State Variables:
+- userName: string — full name, set on page load if signed in
+- userFirstName: string — first name only, used in navbar
+- isNewUser: boolean — true after signup via modal, shows "check email" on success
+- step: 'book' | 'password' | 'signin' | 'success'
+- password, confirmPassword — for new account creation
+- signInEmail, signInPassword — for returning user signin
+
+### Password Rules (validatePassword function):
+- Min 8 characters
+- At least 1 uppercase letter  
+- At least 1 number
+- At least 1 symbol (e.g. !@#$)
+
+### Key Files:
+- app/restaurants/[id]/page.tsx — modal, all auth functions
+- app/login/page.tsx — standalone login/signup page
+- app/api/reserve/route.ts — saves reservation + sends email
+- backups/ — dated snapshots of above files
+
+### Known Working As Of 2026-04-16:
+- New user signup via modal ✅
+- Returning user fast booking ✅  
+- Navbar updates after signup ✅
+- Email sends from hello@letsgetlunch.nyc ✅
+- QR code in email ✅
+- Unsubscribe footer in email ✅
