@@ -107,7 +107,7 @@ export default function Home() {
           {userFirstName ? (
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-600">Hi, {userFirstName}</span>
-              <button onClick={async () => { await supabase.auth.signOut(); setUserFirstName(''); }}
+              <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }}
                 className="text-sm text-gray-400 hover:text-gray-600">Sign out</button>
             </div>
           ) : (
