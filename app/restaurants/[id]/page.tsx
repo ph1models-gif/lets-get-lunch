@@ -104,19 +104,20 @@ export default function RestaurantPage() {
     setSubmitting(true);
     setAuthError('');
 
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await submitReservation(user.id);
-      } else {
-        setStep('password');
-        setSubmitting(false);
-      }
-    } catch(e) {
-      // Not signed in — go to password step
-      setStep('password');
-      setSubmitting(false);
+    if (userName) {
+      // Already signed in — get user id and reserve
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await submitReservation(user.id);
+          return;
+        }
+      } catch(e) {}
     }
+
+    // Not signed in — go to password step
+    setStep('password');
+    setSubmitting(false);
   }
 
   async function handleCreateAndReserve() {
