@@ -100,24 +100,18 @@ export default function RestaurantPage() {
   }
 
   async function handleReserve() {
-    if (!form.email) return;
-    setSubmitting(true);
-    setAuthError('');
-
     if (userName) {
-      // Already signed in — get user id and reserve
+      // Signed in — submit directly
+      setSubmitting(true);
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          await submitReservation(user.id);
-          return;
-        }
+        if (user) { await submitReservation(user.id); return; }
       } catch(e) {}
+      setSubmitting(false);
+    } else {
+      // Not signed in — go to password step
+      setStep('password');
     }
-
-    // Not signed in — go to password step
-    setStep('password');
-    setSubmitting(false);
   }
 
   async function handleCreateAndReserve() {
@@ -403,7 +397,7 @@ export default function RestaurantPage() {
                       </select>
                     </div>
 
-                    <button onClick={handleReserve} disabled={submitting || !form.email}
+                    <button onClick={handleReserve} disabled={submitting}
                       className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50 mt-2">
                       {submitting ? 'One moment...' : 'Reserve Now'}
                     </button>
