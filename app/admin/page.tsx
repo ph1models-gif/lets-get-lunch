@@ -234,6 +234,7 @@ export default function AdminPage() {
       hours: vendor.hours,
       photo_url: vendor.photo_url,
       photo_urls: vendor.photo_urls,
+      bio: vendor.bio || null,
       is_active: true, lat, lng,
     }).select().single()
 
@@ -242,6 +243,7 @@ export default function AdminPage() {
         restaurant_id: rest.id,
         special: vendor.special,
         price: parseFloat(vendor.price.replace('$', '')) || 0,
+        days: vendor.days || ['Mon','Tue','Wed','Thu','Fri'],
         is_active: true,
       })
     }
@@ -673,6 +675,13 @@ export default function AdminPage() {
                       <div><span className="text-gray-400">Address</span><br />{r.address || '—'}</div>
                       <div><span className="text-gray-400">Hours</span><br />{r.hours || '—'}</div>
                       <div><span className="text-gray-400">Deal</span><br />{deal?.special || '—'}</div>
+                      <div><span className="text-gray-400">Days</span><br />{
+                        deal?.days && deal.days.length > 0
+                          ? deal.days.length === 7 ? 'Daily'
+                          : (deal.days.length === 5 && !deal.days.includes('Sat') && !deal.days.includes('Sun')) ? 'Mon–Fri'
+                          : deal.days.join(', ')
+                          : 'Mon–Fri'
+                      }</div>
                       <div><span className="text-gray-400">Price</span><br />{deal?.price ? `$${deal.price}` : '—'}</div>
                       <div><span className="text-gray-400">Bio</span><br />{r.bio || <span className="text-gray-300">None</span>}</div>
                       <div><span className="text-gray-400">Lat/lng</span><br />{r.lat && r.lng ? `${r.lat.toFixed(4)}, ${r.lng.toFixed(4)}` : <span className="text-amber-600">Missing — won't show on map</span>}</div>
