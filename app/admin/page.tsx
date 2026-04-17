@@ -235,6 +235,8 @@ export default function AdminPage() {
       photo_url: vendor.photo_url,
       photo_urls: vendor.photo_urls,
       bio: vendor.bio || null,
+      work_friendly: vendor.work_friendly === 'yes',
+      wifi: vendor.wifi === 'yes',
       is_active: true, lat, lng,
     }).select().single()
 
@@ -277,6 +279,8 @@ export default function AdminPage() {
       deal_special: deal?.special || '',
       deal_price: deal?.price?.toString() || '',
       deal_days: deal?.days || ['Mon','Tue','Wed','Thu','Fri'],
+      work_friendly: r.work_friendly || false,
+      wifi: r.wifi || false,
     })
   }
 
@@ -325,6 +329,8 @@ export default function AdminPage() {
       photo_urls: finalPhotoUrls,
       lat: editForm.lat || null,
       lng: editForm.lng || null,
+      work_friendly: editForm.work_friendly || false,
+      wifi: editForm.wifi || false,
     }).eq('id', r.id)
 
     const deal = deals.find(d => d.restaurant_id === r.id)
@@ -559,6 +565,16 @@ export default function AdminPage() {
                       <div>
                         <label className="block text-xs font-medium text-gray-600 mb-1">One-line bio</label>
                         <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={editForm.bio || ''} onChange={e => setEditForm(f => ({ ...f, bio: e.target.value }))} placeholder="e.g. Hip, airy eatery with Asian-inspired vegan dishes" maxLength={120} />
+                        <div className="flex gap-4 mt-3">
+                          <label className="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="checkbox" checked={!!editForm.work_friendly} onChange={e => setEditForm(f => ({ ...f, work_friendly: e.target.checked }))} />
+                            💻 Laptop friendly
+                          </label>
+                          <label className="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="checkbox" checked={!!editForm.wifi} onChange={e => setEditForm(f => ({ ...f, wifi: e.target.checked }))} />
+                            📶 Free WiFi
+                          </label>
+                        </div>
                       </div>
 
                       {/* Deal */}

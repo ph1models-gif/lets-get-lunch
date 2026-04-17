@@ -31,6 +31,7 @@ export default function Home() {
   const [filter, setFilter] = useState('All');
   const [maxPrice, setMaxPrice] = useState(100);
   const [laptopOnly, setLaptopOnly] = useState(false);
+  const [wifiOnly, setWifiOnly] = useState(false);
   const [walkInOnly, setWalkInOnly] = useState(false);
   const [selectedHood, setSelectedHood] = useState('');
   const mapPanRef = useRef<((lat: number, lng: number) => void) | null>(null);
@@ -90,6 +91,7 @@ export default function Home() {
     if (!['All','Vegan-Friendly','Seafood','Asian','Japanese/Sushi','Latin/Mexican'].includes(filter) && !r.cuisine.toLowerCase().includes(filter.toLowerCase().split('/')[0])) return false;
     if (deal.price > maxPrice) return false;
     if (laptopOnly && !r.work_friendly) return false;
+    if (wifiOnly && !r.wifi) return false;
     if (walkInOnly && !r.walk_in) return false;
     return true;
   });
@@ -151,6 +153,10 @@ export default function Home() {
           <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
             <input type="checkbox" checked={laptopOnly} onChange={e => setLaptopOnly(e.target.checked)} className="rounded" />
             💻 Laptop friendly
+          </label>
+          <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
+            <input type="checkbox" checked={wifiOnly} onChange={e => setWifiOnly(e.target.checked)} className="rounded" />
+            📶 Free WiFi
           </label>
 
           <div className="flex items-center gap-2 text-xs text-gray-500">
