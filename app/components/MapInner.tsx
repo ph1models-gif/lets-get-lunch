@@ -144,6 +144,9 @@ export default function MapInner({ onPanReady, activeIds }: Props) {
           }
         });
       } else {
+        // Desktop: click pin to navigate directly
+        mk.addListener('click', () => { window.open(`/restaurants/${r.id}`, '_blank'); });
+
         // Desktop: hover pin to open, hover card to keep open, click to navigate
         mk.addListener('mouseover', () => {
           pinHovered = true;
