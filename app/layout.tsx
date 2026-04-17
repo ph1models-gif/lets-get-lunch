@@ -6,6 +6,10 @@ import Script from "next/script";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+  },
   title: "Let's Get Lunch — NYC Prix-Fixe Lunch Deals",
   description: "Find the best prix-fixe lunch deals across NYC. Real tables, real service, all under $35.",
 };
