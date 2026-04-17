@@ -182,9 +182,14 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (authed && tab === 'pending') fetchVendors()
-    if (authed && tab === 'restaurants') fetchRestaurants()
+    if (authed && tab === 'restaurants') { fetchRestaurants(); fetchAllVendors(); }
     if (authed && tab === 'reservations') fetchReservations()
   }, [authed, tab])
+
+  async function fetchAllVendors() {
+    const { data } = await supabase.from('vendors').select('*').order('created_at', { ascending: false })
+    setVendors(data || [])
+  }
 
   async function fetchVendors() {
     setVendorLoading(true)
@@ -701,6 +706,16 @@ export default function AdminPage() {
                       <div><span className="text-gray-400">Price</span><br />{deal?.price ? `$${deal.price}` : '—'}</div>
                       <div><span className="text-gray-400">Bio</span><br />{r.bio || <span className="text-gray-300">None</span>}</div>
                       <div><span className="text-gray-400">Lat/lng</span><br />{r.lat && r.lng ? `${r.lat.toFixed(4)}, ${r.lng.toFixed(4)}` : <span className="text-amber-600">Missing — won't show on map</span>}</div>
+                      {(() => {
+                        const v = vendors.find(v => v.restaurant_name === r.name);
+                        return v ? (
+                          <>
+                            <div><span className="text-gray-400">Contact</span><br />{v.contact_name || '—'}</div>
+                            <div><span className="text-gray-400">Email</span><br /><a href={`mailto:${v.email}`} className="text-[#4A9FD5] hover:underline">{v.email || '—'}</a></div>
+                            <div><span className="text-gray-400">Phone</span><br /><a href={`tel:${v.phone}`} className="text-[#4A9FD5] hover:underline">{v.phone || '—'}</a></div>
+                          </>
+                        ) : null;
+                      })()}
                     </div>
                   )}
                 </div>
