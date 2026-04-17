@@ -67,7 +67,8 @@ export default function Home() {
     if (!deal) return false;
     // Filter by today's day
     const todayDay = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date().getDay()];
-    if (deal.days && deal.days.length > 0 && !deal.days.includes(todayDay)) return false;
+    const days = deal.days && deal.days.length > 0 ? deal.days : ['Mon','Tue','Wed','Thu','Fri'];
+    if (!days.includes(todayDay)) return false;
     if (selectedHood) {
       if (!r.neighborhood.toLowerCase().includes(selectedHood.toLowerCase())) return false;
     } else if (search) {
