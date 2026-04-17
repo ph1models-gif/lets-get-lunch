@@ -65,6 +65,9 @@ export default function Home() {
   const filtered = restaurants.filter(r => {
     const deal = r.deals?.[0];
     if (!deal) return false;
+    // Filter by today's day
+    const todayDay = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date().getDay()];
+    if (deal.days && deal.days.length > 0 && !deal.days.includes(todayDay)) return false;
     if (selectedHood) {
       if (!r.neighborhood.toLowerCase().includes(selectedHood.toLowerCase())) return false;
     } else if (search) {
@@ -190,6 +193,12 @@ export default function Home() {
                   <p className="text-xs text-gray-500 mb-2">{r.neighborhood} · {r.cuisine} · {r.hours}</p>
                   <p className="text-sm text-gray-700 mb-3 leading-relaxed">{deal?.special}</p>
                   <div className="flex gap-2 flex-wrap mb-3">
+                    {(() => {
+                      const days = deal?.days || ['Mon','Tue','Wed','Thu','Fri'];
+                      if (days.length === 7) return <span className="text-xs bg-gray-50 text-gray-500 px-2 py-1 rounded-full">Daily</span>;
+                      if (days.length === 5 && !days.includes('Sat') && !days.includes('Sun')) return <span className="text-xs bg-gray-50 text-gray-500 px-2 py-1 rounded-full">Mon–Fri</span>;
+                      return <span className="text-xs bg-gray-50 text-gray-500 px-2 py-1 rounded-full">{days.join(', ')}</span>;
+                    })()}
                     {r.work_friendly && <span className="text-xs bg-blue-50 text-[#4A9FD5] px-2 py-1 rounded-full font-medium">💻 Work-friendly</span>}
                     {r.wifi && <span className="text-xs bg-blue-50 text-[#4A9FD5] px-2 py-1 rounded-full font-medium">📶 WiFi</span>}
                     <span className="text-xs bg-orange-50 text-orange-600 px-2 py-1 rounded-full">🔥 {specialsLeft(r.id)} specials left</span>

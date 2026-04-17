@@ -44,7 +44,8 @@ export default function ListYourRestaurant() {
     restaurant: '', contact: '', email: '', phone: '',
     address: '', neighborhood: '', cuisine: '', cuisineOther: '',
     seats: '', hours: '', special: '', price: '',
-    workFriendly: 'no', wifi: 'no', message: '', bio: ''
+    workFriendly: 'no', wifi: 'no', message: '', bio: '',
+    days: ['Mon','Tue','Wed','Thu','Fri']
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -123,6 +124,7 @@ export default function ListYourRestaurant() {
       wifi: form.wifi,
       message: form.message,
       bio: form.bio || null,
+      days: form.days,
       status: 'pending',
       photo_url,
       photo_urls: photo_urls.length > 0 ? photo_urls : null,
@@ -234,6 +236,21 @@ export default function ListYourRestaurant() {
                   <input name="price" required value={form.price} onChange={handleChange} placeholder="e.g. $29" className={inputClass} />
                 </div>
                 <div>
+                  <label className={labelClass}>Days available *</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(day => (
+                      <label key={day} className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border-2 cursor-pointer text-sm font-medium transition-colors ${form.days.includes(day) ? 'border-[#4A9FD5] bg-[#EEF6FC] text-[#4A9FD5]' : 'border-gray-200 text-gray-500'}`}>
+                        <input type="checkbox" className="hidden" checked={form.days.includes(day)}
+                          onChange={e => {
+                            const next = e.target.checked
+                              ? [...form.days, day]
+                              : form.days.filter((d: string) => d !== day);
+                            setForm(f => ({ ...f, days: next }));
+                          }} />
+                        {day}
+                      </label>
+                    ))}
+                  </div>
                   <label className={labelClass}>Lunch service hours *</label>
                   <select name="hours" required value={form.hours} onChange={handleChange} className={inputClass}>
                     <option value="">Select hours...</option>

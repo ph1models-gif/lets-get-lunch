@@ -19,7 +19,7 @@ interface Restaurant {
   bio: string | null;
   photo_url: string | null;
   photo_urls: string[] | null;
-  deals: { special: string; price: number; courses: number }[];
+  deals: { special: string; price: number; courses: number; days: string[] }[];
 }
 
 
@@ -305,6 +305,9 @@ export default function RestaurantPage() {
           <div className="flex gap-4 text-sm text-gray-600">
             <span>🕐 {r.hours}</span>
             <span>🔥 {specialsLeft} specials left</span>
+            {deal?.days && deal.days.length < 7 && (
+              <span>📅 {deal.days.length === 5 && !deal.days.includes('Sat') && !deal.days.includes('Sun') ? 'Mon–Fri' : deal.days.join(', ')}</span>
+            )}
           </div>
         </div>
 

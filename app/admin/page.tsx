@@ -274,6 +274,7 @@ export default function AdminPage() {
       lng: r.lng,
       deal_special: deal?.special || '',
       deal_price: deal?.price?.toString() || '',
+      deal_days: deal?.days || ['Mon','Tue','Wed','Thu','Fri'],
     })
   }
 
@@ -329,12 +330,14 @@ export default function AdminPage() {
       await supabase.from('deals').update({
         special: editForm.deal_special,
         price: parseFloat(editForm.deal_price || '0'),
+        days: editForm.deal_days || ['Mon','Tue','Wed','Thu','Fri'],
       }).eq('id', deal.id)
     } else if (editForm.deal_special) {
       await supabase.from('deals').insert({
         restaurant_id: r.id,
         special: editForm.deal_special,
         price: parseFloat(editForm.deal_price || '0'),
+        days: editForm.deal_days || ['Mon','Tue','Wed','Thu','Fri'],
         is_active: true,
       })
     }
@@ -567,6 +570,22 @@ export default function AdminPage() {
                           <div>
                             <label className="block text-xs text-gray-500 mb-1">Price ($)</label>
                             <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={editForm.deal_price || ''} onChange={e => setEditForm(f => ({ ...f, deal_price: e.target.value }))} placeholder="e.g. 29" />
+                            <div className="mt-3">
+                              <p className="text-xs text-gray-500 mb-2">Days available</p>
+                              <div className="flex gap-2 flex-wrap">
+                                {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(day => (
+                                  <label key={day} className={`flex items-center gap-1 px-2 py-1 rounded-lg border cursor-pointer text-xs font-medium transition-colors ${(editForm.deal_days || []).includes(day) ? 'border-[#4A9FD5] bg-[#EEF6FC] text-[#4A9FD5]' : 'border-gray-200 text-gray-500'}`}>
+                                    <input type="checkbox" className="hidden" checked={(editForm.deal_days || []).includes(day)}
+                                      onChange={e => {
+                                        const curr = editForm.deal_days || [];
+                                        const next = e.target.checked ? [...curr, day] : curr.filter((d: string) => d !== day);
+                                        setEditForm(f => ({ ...f, deal_days: next }));
+                                      }} />
+                                    {day}
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
