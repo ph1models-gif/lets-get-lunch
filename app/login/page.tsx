@@ -7,7 +7,7 @@ const NEIGHBORHOODS = [
   'Chelsea','West Village','Greenwich Village','SoHo','NoHo','Tribeca',
   'Financial District','Lower East Side','East Village','Gramercy Park',
   'Murray Hill','Harlem','Hells Kitchen','Chinatown','Battery Park City',
-  'Union Square','Lenox Hill','Yorkville','Washington Heights','Inwood',
+  'Union Square','Flatiron','NoMad','Lenox Hill','Yorkville','Washington Heights','Inwood',
   'Morningside Heights','Williamsburg','Dumbo','Brooklyn Heights','Park Slope',
   'Cobble Hill','Carroll Gardens','Boerum Hill','Fort Greene','Clinton Hill',
   'Bushwick','Greenpoint','Red Hook','Gowanus','Crown Heights','Downtown Brooklyn',

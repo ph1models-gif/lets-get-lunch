@@ -21,6 +21,8 @@ const NEIGHBORHOODS: Record<string, {borough: string, lat: number, lng: number}>
   "Chinatown": {borough:"Manhattan",lat:40.7157,lng:-73.9970},
   "Battery Park City": {borough:"Manhattan",lat:40.7115,lng:-74.0155},
   "Union Square": {borough:"Manhattan",lat:40.7359,lng:-73.9906},
+  "Flatiron": {borough:"Manhattan",lat:40.7411,lng:-73.9897},
+  "NoMad": {borough:"Manhattan",lat:40.7448,lng:-73.9882},
   "Midtown East": {borough:"Manhattan",lat:40.7527,lng:-73.9772},
   "Midtown West": {borough:"Manhattan",lat:40.7614,lng:-73.9816},
   "Lenox Hill": {borough:"Manhattan",lat:40.7677,lng:-73.9592},
