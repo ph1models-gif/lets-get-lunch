@@ -64,7 +64,7 @@ const NEIGHBORHOODS = [
   "Clinton Hill","Bushwick","Greenpoint","Red Hook","Crown Heights",
   "Prospect Heights","Downtown Brooklyn","Astoria","Long Island City",
   "Flushing","Jackson Heights","Forest Hills","Sunnyside","Ridgewood",
-  "Fordham","Riverdale","Mott Haven","St. George","Stapleton"
+  "Fordham","Riverdale","Mott Haven","St. George","Stapleton","Nolita","Little Italy","Two Bridges","Turtle Bay","Sutton Place","Hudson Yards","Carnegie Hill","East Harlem","Hamilton Heights","Sugar Hill","Bed-Stuy","Bay Ridge","Sunset Park","Windsor Terrace","Prospect Lefferts Gardens","Flatbush","Woodside","Rego Park","Elmhurst","Corona"
 ];
 
 const CUISINES = [
