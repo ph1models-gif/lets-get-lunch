@@ -160,7 +160,7 @@ function ReservationsView({ reservations, resView }: { reservations: any[], resV
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false)
   const [pw, setPw] = useState('')
-  const [tab, setTab] = useState<'pending' | 'restaurants' | 'reservations'>('pending')
+  const [tab, setTab] = useState<'pending' | 'restaurants' | 'reservations' | 'add'>('pending')
 
   const [vendors, setVendors] = useState<Vendor[]>([])
   const [vendorLoading, setVendorLoading] = useState(false)
@@ -176,6 +176,16 @@ export default function AdminPage() {
   const [editExtraPreviews, setEditExtraPreviews] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [addForm, setAddForm] = useState({
+    name: '', address: '', neighborhood: '', cuisine: '', hours: '',
+    bio: '', special: '', price: '', work_friendly: false, wifi: false,
+    days: ['Mon','Tue','Wed','Thu','Fri']
+  })
+  const [addMainFile, setAddMainFile] = useState<File | null>(null)
+  const [addExtraFiles, setAddExtraFiles] = useState<File[]>([])
+  const [addSaving, setAddSaving] = useState(false)
+  const [addSuccess, setAddSuccess] = useState('')
+  const [addError, setAddError] = useState('')
   const [reservations, setReservations] = useState<any[]>([])
   const [resLoading, setResLoading] = useState(true)
   const [resView, setResView] = useState<'today' | 'all'>('today')
@@ -217,6 +227,84 @@ export default function AdminPage() {
       .order('created_at', { ascending: false })
     setReservations(data || [])
     setResLoading(false)
+  }
+
+  async function submitNewRestaurant() {
+    setAddSaving(true)
+    setAddError('')
+    setAddSuccess('')
+
+    if (!addForm.name || !addForm.address || !addForm.neighborhood || !addForm.cuisine || !addForm.hours || !addForm.special || !addForm.price) {
+      setAddError('Please fill in all required fields.')
+      setAddSaving(false)
+      return
+    }
+
+    // Geocode address
+    let lat = null, lng = null
+    try {
+      const geo = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(addForm.address + ', New York, NY')}&key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0`)
+      const geoData = await geo.json()
+      if (geoData.results?.[0]?.geometry?.location) {
+        lat = geoData.results[0].geometry.location.lat
+        lng = geoData.results[0].geometry.location.lng
+      }
+    } catch(e) {}
+
+    // Upload main photo
+    let photoUrl = null
+    let photoUrls: string[] = []
+    if (addMainFile) {
+      const ext = addMainFile.name.split('.').pop()
+      const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const { error } = await supabase.storage.from('restaurant-photos').upload(filePath, addMainFile, { upsert: true })
+      if (!error) {
+        const { data: urlData } = supabase.storage.from('restaurant-photos').getPublicUrl(filePath)
+        photoUrl = urlData.publicUrl
+      }
+    }
+    for (const file of addExtraFiles) {
+      const ext = file.name.split('.').pop()
+      const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const { error } = await supabase.storage.from('restaurant-photos').upload(filePath, file, { upsert: true })
+      if (!error) {
+        const { data: urlData } = supabase.storage.from('restaurant-photos').getPublicUrl(filePath)
+        photoUrls.push(urlData.publicUrl)
+      }
+    }
+
+    // Insert restaurant
+    const { data: rest } = await supabase.from('restaurants').insert({
+      name: addForm.name,
+      address: addForm.address,
+      neighborhood: addForm.neighborhood,
+      cuisine: addForm.cuisine,
+      hours: addForm.hours,
+      bio: addForm.bio || null,
+      work_friendly: addForm.work_friendly,
+      wifi: addForm.wifi,
+      photo_url: photoUrl,
+      photo_urls: photoUrls,
+      is_active: true,
+      lat, lng,
+    }).select().single()
+
+    if (rest) {
+      await supabase.from('deals').insert({
+        restaurant_id: rest.id,
+        special: addForm.special,
+        price: parseFloat(addForm.price),
+        days: addForm.days,
+        is_active: true,
+      })
+      setAddSuccess(`✅ ${addForm.name} added and live on the site!`)
+      setAddForm({ name: '', address: '', neighborhood: '', cuisine: '', hours: '', bio: '', special: '', price: '', work_friendly: false, wifi: false, days: ['Mon','Tue','Wed','Thu','Fri'] })
+      setAddMainFile(null)
+      setAddExtraFiles([])
+    } else {
+      setAddError('Failed to save restaurant. Try again.')
+    }
+    setAddSaving(false)
   }
 
   async function approveVendor(vendor: Vendor) {
@@ -407,10 +495,10 @@ export default function AdminPage() {
         </div>
 
         <div className="flex gap-2 mb-6 border-b border-gray-200">
-          {((['pending', 'restaurants', 'reservations'] as const)).map(t => (
+          {((['pending', 'restaurants', 'reservations', 'add'] as const)).map(t => (
             <button key={t} onClick={() => setTab(t as any)}
               className={`pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${tab === t ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
-              {t === 'pending' ? 'Pending submissions' : t === 'restaurants' ? 'Active listings' : 'Reservations'}
+              {t === 'pending' ? 'Pending submissions' : t === 'restaurants' ? 'Active listings' : t === 'reservations' ? 'Reservations' : '+ Add listing'}
             </button>
           ))}
         </div>
@@ -457,6 +545,114 @@ export default function AdminPage() {
         )}
 
         {/* RESTAURANTS TAB */}
+        {tab === 'add' && (
+          <div className="max-w-2xl">
+            <h2 className="text-lg font-semibold text-gray-900 mb-6">Add new restaurant listing</h2>
+            {addError && <p className="text-red-500 text-sm mb-4">{addError}</p>}
+            {addSuccess && <p className="text-green-600 text-sm mb-4">{addSuccess}</p>}
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Restaurant name *</label>
+                  <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={addForm.name} onChange={e => setAddForm(f => ({...f, name: e.target.value}))} placeholder="e.g. Joe's Pizza" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+                  <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={addForm.address} onChange={e => setAddForm(f => ({...f, address: e.target.value}))} placeholder="123 Main St, New York, NY" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Neighborhood *</label>
+                  <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={addForm.neighborhood} onChange={e => setAddForm(f => ({...f, neighborhood: e.target.value}))}>
+                    <option value="">Select...</option>
+                    {NEIGHBORHOODS.map(n => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Cuisine *</label>
+                  <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={addForm.cuisine} onChange={e => setAddForm(f => ({...f, cuisine: e.target.value}))}>
+                    <option value="">Select...</option>
+                    {CUISINES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Hours *</label>
+                <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={addForm.hours} onChange={e => setAddForm(f => ({...f, hours: e.target.value}))}>
+                  <option value="">Select...</option>
+                  {HOURS_OPTIONS.map(h => <option key={h} value={h}>{h}</option>)}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">One-line bio</label>
+                <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={addForm.bio} onChange={e => setAddForm(f => ({...f, bio: e.target.value}))} placeholder="e.g. Upscale Italian in the heart of Midtown" maxLength={120} />
+              </div>
+
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input type="checkbox" checked={addForm.work_friendly} onChange={e => setAddForm(f => ({...f, work_friendly: e.target.checked}))} />
+                  💻 Laptop friendly
+                </label>
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input type="checkbox" checked={addForm.wifi} onChange={e => setAddForm(f => ({...f, wifi: e.target.checked}))} />
+                  📶 Free WiFi
+                </label>
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="font-medium text-gray-800 mb-3">Lunch deal</h3>
+                <div className="grid grid-cols-2 gap-4 mb-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Deal description *</label>
+                    <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={addForm.special} onChange={e => setAddForm(f => ({...f, special: e.target.value}))} placeholder="e.g. Pasta + salad + dessert" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Price ($) *</label>
+                    <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={addForm.price} onChange={e => setAddForm(f => ({...f, price: e.target.value}))} placeholder="e.g. 29" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Days available</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(day => (
+                      <label key={day} className={`flex items-center gap-1 px-3 py-1.5 rounded-lg border cursor-pointer text-sm font-medium transition-colors ${addForm.days.includes(day) ? 'border-[#4A9FD5] bg-[#EEF6FC] text-[#4A9FD5]' : 'border-gray-200 text-gray-500'}`}>
+                        <input type="checkbox" className="hidden" checked={addForm.days.includes(day)}
+                          onChange={e => {
+                            const next = e.target.checked ? [...addForm.days, day] : addForm.days.filter(d => d !== day)
+                            setAddForm(f => ({...f, days: next}))
+                          }} />
+                        {day}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="font-medium text-gray-800 mb-3">Photos</h3>
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Main photo</label>
+                  <input type="file" accept="image/*" onChange={e => setAddMainFile(e.target.files?.[0] || null)} className="text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Extra photos (up to 3)</label>
+                  <input type="file" accept="image/*" multiple onChange={e => setAddExtraFiles(Array.from(e.target.files || []).slice(0, 3))} className="text-sm" />
+                </div>
+              </div>
+
+              <button onClick={submitNewRestaurant} disabled={addSaving}
+                className="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold hover:bg-orange-600 disabled:opacity-50 transition-colors">
+                {addSaving ? 'Adding...' : 'Add restaurant & go live'}
+              </button>
+            </div>
+          </div>
+        )}
+
         {tab === 'reservations' && (
           <div>
             {/* Today / All toggle */}
