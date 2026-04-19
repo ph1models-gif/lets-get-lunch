@@ -126,7 +126,7 @@ export default function LoginPage() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Primary lunch neighborhood <span className="text-gray-400 font-normal">(optional)</span></label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Your lunch neighborhood <span className="text-gray-400 font-normal">(optional)</span></label>
               <select value={signUpForm.neighborhood} onChange={e => setSignUpForm(f => ({...f, neighborhood: e.target.value}))}
                 className={inputClass}>
                 <option value="">Select neighborhood</option>

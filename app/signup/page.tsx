@@ -120,7 +120,7 @@ export default function SignupPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Your neighborhood <span className="text-gray-400 font-normal">(optional)</span></label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Your lunch neighborhood <span className="text-gray-400 font-normal">(optional)</span></label>
                 <select value={form.neighborhood} onChange={e => setForm(f => ({...f, neighborhood: e.target.value}))} className={inputClass}>
                   <option value="">Select neighborhood</option>
                   {NEIGHBORHOODS.map(n => <option key={n} value={n}>{n}</option>)}
