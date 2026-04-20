@@ -146,6 +146,7 @@ export default function RestaurantPage() {
       await supabase.from('profiles').insert({
         id: data.user.id,
         name: `${form.firstName} ${form.lastName}`,
+        email: form.email,
         contact: form.email,
       });
       setUserFirstName(form.firstName);

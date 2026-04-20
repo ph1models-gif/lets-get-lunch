@@ -706,7 +706,8 @@ export default function AdminPage() {
                       <div key={u.id} className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 text-sm">{u.name || '—'}</p>
-                          <p className="text-xs text-gray-500">{u.neighborhood || 'No neighborhood'}</p>
+                          <p className="text-xs text-gray-500">{u.email || '—'}</p>
+                          <p className="text-xs text-gray-400">{u.neighborhood || 'No neighborhood'}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-xs text-gray-500">{dateStr}</p>

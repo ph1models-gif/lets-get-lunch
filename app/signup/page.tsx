@@ -50,6 +50,7 @@ export default function SignupPage() {
     if (data.user) {
       await supabase.from('profiles').insert({
         id: data.user.id, name: fullName,
+        email: form.email,
         neighborhood: form.neighborhood || null,
       });
       setSuccess(true);
