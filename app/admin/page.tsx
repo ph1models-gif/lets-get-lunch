@@ -160,7 +160,7 @@ function ReservationsView({ reservations, resView }: { reservations: any[], resV
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false)
   const [pw, setPw] = useState('')
-  const [tab, setTab] = useState<'pending' | 'restaurants' | 'reservations' | 'add'>('pending')
+  const [tab, setTab] = useState<'pending' | 'restaurants' | 'reservations' | 'add' | 'users'>('pending')
 
   const [vendors, setVendors] = useState<Vendor[]>([])
   const [vendorLoading, setVendorLoading] = useState(false)
@@ -186,6 +186,8 @@ export default function AdminPage() {
   const [addSaving, setAddSaving] = useState(false)
   const [addSuccess, setAddSuccess] = useState('')
   const [addError, setAddError] = useState('')
+  const [users, setUsers] = useState<any[]>([])
+  const [usersLoading, setUsersLoading] = useState(true)
   const [reservations, setReservations] = useState<any[]>([])
   const [resLoading, setResLoading] = useState(true)
   const [resView, setResView] = useState<'today' | 'all'>('today')
@@ -194,6 +196,7 @@ export default function AdminPage() {
     if (authed && tab === 'pending') fetchVendors()
     if (authed && tab === 'restaurants') { fetchRestaurants(); fetchAllVendors(); }
     if (authed && tab === 'reservations') fetchReservations()
+    if (authed && tab === 'users') fetchUsers()
   }, [authed, tab])
 
   async function fetchAllVendors() {
@@ -217,6 +220,16 @@ export default function AdminPage() {
     setRestaurants(rests || [])
     setDeals(dealData || [])
     setRestLoading(false)
+  }
+
+  async function fetchUsers() {
+    setUsersLoading(true)
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false })
+    setUsers(data || [])
+    setUsersLoading(false)
   }
 
   async function fetchReservations() {
@@ -495,10 +508,10 @@ export default function AdminPage() {
         </div>
 
         <div className="flex gap-2 mb-6 border-b border-gray-200">
-          {((['pending', 'restaurants', 'reservations', 'add'] as const)).map(t => (
+          {((['pending', 'restaurants', 'reservations', 'add', 'users'] as const)).map(t => (
             <button key={t} onClick={() => setTab(t as any)}
               className={`pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${tab === t ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
-              {t === 'pending' ? 'Pending submissions' : t === 'restaurants' ? 'Active listings' : t === 'reservations' ? 'Reservations' : '+ Add listing'}
+              {t === 'pending' ? 'Pending submissions' : t === 'restaurants' ? 'Active listings' : t === 'reservations' ? 'Reservations' : t === 'add' ? '+ Add listing' : 'Users'}
             </button>
           ))}
         </div>
@@ -650,6 +663,61 @@ export default function AdminPage() {
                 {addSaving ? 'Adding...' : 'Add restaurant & go live'}
               </button>
             </div>
+          </div>
+        )}
+
+        {tab === 'users' && (
+          <div>
+            {usersLoading ? (
+              <p className="text-sm text-gray-400">Loading users...</p>
+            ) : (
+              <>
+                {/* Summary */}
+                <div className="grid grid-cols-3 gap-3 mb-6">
+                  <div className="bg-blue-50 rounded-xl p-4 text-center">
+                    <p className="text-2xl font-bold text-[#4A9FD5]">{users.length}</p>
+                    <p className="text-xs text-gray-500 mt-1">Total signups</p>
+                  </div>
+                  <div className="bg-green-50 rounded-xl p-4 text-center">
+                    <p className="text-2xl font-bold text-green-600">
+                      {users.filter(u => {
+                        const d = new Date(u.created_at)
+                        const now = new Date()
+                        return (now.getTime() - d.getTime()) < 7 * 24 * 60 * 60 * 1000
+                      }).length}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">Joined this week</p>
+                  </div>
+                  <div className="bg-purple-50 rounded-xl p-4 text-center">
+                    <p className="text-2xl font-bold text-purple-600">
+                      {users.filter(u => u.neighborhood).length}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">With neighborhood</p>
+                  </div>
+                </div>
+
+                {/* User list */}
+                <div className="space-y-2">
+                  {users.map(u => {
+                    const joined = new Date(u.created_at)
+                    const dateStr = joined.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                    const timeStr = joined.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+                    return (
+                      <div key={u.id} className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 text-sm">{u.name || '—'}</p>
+                          <p className="text-xs text-gray-500">{u.neighborhood || 'No neighborhood'}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-gray-500">{dateStr}</p>
+                          <p className="text-xs text-gray-400">{timeStr}</p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </>
+            )}
           </div>
         )}
 
