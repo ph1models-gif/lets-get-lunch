@@ -150,6 +150,9 @@ export default function LoginPage() {
               <input type="password" value={signInForm.password} onChange={e => setSignInForm(f => ({...f, password: e.target.value}))}
                 placeholder="Your password" className={inputClass} />
             </div>
+            <p className="text-right">
+              <a href="/reset-password" className="text-xs text-[#4A9FD5] hover:underline">Forgot password?</a>
+            </p>
             <button onClick={handleSignIn} disabled={loading}
               className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50">
               {loading ? 'Signing in...' : 'Sign in'}
