@@ -370,6 +370,7 @@ export default function ListYourRestaurant() {
             {loading ? 'Submitting...' : "Submit your restaurant — it's free"}
           </button>
           <p className="text-center text-xs text-gray-400">We review every submission and respond within 48 hours.</p>
+          <p className="text-center text-xs text-gray-400 mt-2">Questions? Email us at <a href="mailto:restaurants@letsgetlunch.nyc" className="text-[#4A9FD5] hover:underline">restaurants@letsgetlunch.nyc</a></p>
         </form>
       </div>
 

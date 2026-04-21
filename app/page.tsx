@@ -236,8 +236,8 @@ export default function Home() {
         </div>
         <div className="flex gap-6 text-sm text-gray-400">
           <a href="/list-your-restaurant" className="hover:text-gray-600">For Restaurants</a>
+          <a href="mailto:hello@letsgetlunch.nyc" className="hover:text-gray-600">Contact Us</a>
           <a href="/login" className="hover:text-gray-600">Sign In</a>
-          <a href="/admin" className="hover:text-gray-600">Admin</a>
         </div>
       </footer>
     </main>

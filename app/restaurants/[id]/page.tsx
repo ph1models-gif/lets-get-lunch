@@ -511,6 +511,7 @@ export default function RestaurantPage() {
 
       <footer className="px-4 py-8 border-t border-gray-100 text-center mt-8">
         <p className="text-sm text-gray-400">© 2026 Let&apos;s Get Lunch · NYC</p>
+        <p className="text-sm text-gray-400 mt-1"><a href="mailto:hello@letsgetlunch.nyc" className="hover:text-gray-600">hello@letsgetlunch.nyc</a></p>
       </footer>
     </main>
   );
