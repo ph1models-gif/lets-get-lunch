@@ -160,7 +160,7 @@ function ReservationsView({ reservations, resView }: { reservations: any[], resV
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false)
   const [pw, setPw] = useState('')
-  const [tab, setTab] = useState<'pending' | 'restaurants' | 'reservations' | 'add' | 'users'>('pending')
+  const [tab, setTab] = useState<'pending' | 'restaurants' | 'reservations' | 'add' | 'users' | 'contacts'>('pending')
 
   const [vendors, setVendors] = useState<Vendor[]>([])
   const [vendorLoading, setVendorLoading] = useState(false)
@@ -186,6 +186,8 @@ export default function AdminPage() {
   const [addSaving, setAddSaving] = useState(false)
   const [addSuccess, setAddSuccess] = useState('')
   const [addError, setAddError] = useState('')
+  const [allVendorContacts, setAllVendorContacts] = useState<any[]>([])
+  const [contactsLoading, setContactsLoading] = useState(true)
   const [users, setUsers] = useState<any[]>([])
   const [usersLoading, setUsersLoading] = useState(true)
   const [reservations, setReservations] = useState<any[]>([])
@@ -197,6 +199,7 @@ export default function AdminPage() {
     if (authed && tab === 'restaurants') { fetchRestaurants(); fetchAllVendors(); }
     if (authed && tab === 'reservations') fetchReservations()
     if (authed && tab === 'users') fetchUsers()
+    if (authed && tab === 'contacts') fetchContacts()
   }, [authed, tab])
 
   async function fetchAllVendors() {
@@ -220,6 +223,16 @@ export default function AdminPage() {
     setRestaurants(rests || [])
     setDeals(dealData || [])
     setRestLoading(false)
+  }
+
+  async function fetchContacts() {
+    setContactsLoading(true)
+    const { data } = await supabase
+      .from('vendors')
+      .select('*')
+      .order('created_at', { ascending: false })
+    setAllVendorContacts(data || [])
+    setContactsLoading(false)
   }
 
   async function fetchUsers() {
@@ -508,10 +521,10 @@ export default function AdminPage() {
         </div>
 
         <div className="flex gap-2 mb-6 border-b border-gray-200">
-          {((['pending', 'restaurants', 'reservations', 'add', 'users'] as const)).map(t => (
+          {((['pending', 'restaurants', 'reservations', 'add', 'users', 'contacts'] as const)).map(t => (
             <button key={t} onClick={() => setTab(t as any)}
               className={`pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${tab === t ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
-              {t === 'pending' ? 'Pending submissions' : t === 'restaurants' ? 'Active listings' : t === 'reservations' ? 'Reservations' : t === 'add' ? '+ Add listing' : 'Users'}
+              {t === 'pending' ? 'Pending submissions' : t === 'restaurants' ? 'Active listings' : t === 'reservations' ? 'Reservations' : t === 'add' ? '+ Add listing' : t === 'users' ? 'Users' : 'Contacts'}
             </button>
           ))}
         </div>
@@ -712,6 +725,81 @@ export default function AdminPage() {
                         <div className="text-right">
                           <p className="text-xs text-gray-500">{dateStr}</p>
                           <p className="text-xs text-gray-400">{timeStr}</p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {tab === 'contacts' && (
+          <div>
+            {contactsLoading ? (
+              <p className="text-sm text-gray-400">Loading contacts...</p>
+            ) : (
+              <>
+                <div className="grid grid-cols-3 gap-3 mb-6">
+                  <div className="bg-blue-50 rounded-xl p-4 text-center">
+                    <p className="text-2xl font-bold text-[#4A9FD5]">{allVendorContacts.length}</p>
+                    <p className="text-xs text-gray-500 mt-1">Total submissions</p>
+                  </div>
+                  <div className="bg-green-50 rounded-xl p-4 text-center">
+                    <p className="text-2xl font-bold text-green-600">{allVendorContacts.filter(v => v.status === 'approved').length}</p>
+                    <p className="text-xs text-gray-500 mt-1">Approved</p>
+                  </div>
+                  <div className="bg-orange-50 rounded-xl p-4 text-center">
+                    <p className="text-2xl font-bold text-orange-600">{allVendorContacts.filter(v => v.status === 'pending').length}</p>
+                    <p className="text-xs text-gray-500 mt-1">Pending</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {allVendorContacts.map(v => {
+                    const dateStr = new Date(v.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                    return (
+                      <div key={v.id} className="bg-white border border-gray-200 rounded-xl p-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <p className="font-semibold text-gray-900">{v.restaurant_name}</p>
+                            <p className="text-xs text-gray-500">{v.neighborhood} · {v.cuisine}</p>
+                          </div>
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                            v.status === 'approved' ? 'bg-green-100 text-green-700' :
+                            v.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                            'bg-orange-100 text-orange-700'
+                          }`}>{v.status}</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600 mb-2">
+                          <div>
+                            <span className="text-gray-400 text-xs">Contact name</span>
+                            <p>{v.contact_name || '—'}</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 text-xs">Email</span>
+                            <p><a href={"mailto:" + v.email} className="text-[#4A9FD5] hover:underline">{v.email || '—'}</a></p>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 text-xs">Phone</span>
+                            <p><a href={"tel:" + v.phone} className="text-[#4A9FD5] hover:underline">{v.phone || '—'}</a></p>
+                          </div>
+                          <div>
+                            <span className="text-gray-400 text-xs">Submitted</span>
+                            <p>{dateStr}</p>
+                          </div>
+                        </div>
+                        {v.message && (
+                          <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600">
+                            <span className="text-gray-400 text-xs block mb-1">Message</span>
+                            {v.message}
+                          </div>
+                        )}
+                        <div className="mt-2 text-xs text-gray-400">
+                          {v.special && <span>Deal: {v.special} · </span>}
+                          {v.price && <span>${v.price} · </span>}
+                          {v.hours && <span>{v.hours}</span>}
                         </div>
                       </div>
                     )
