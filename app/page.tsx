@@ -226,6 +226,17 @@ export default function Home() {
         <a href="/list-your-restaurant" className="inline-block bg-[#4A9FD5] text-white px-8 py-3 rounded-xl font-medium hover:bg-[#3a8fc5]">
           List your restaurant — it&apos;s free
         </a>
+        <button onClick={() => {
+          if (navigator.share) {
+            navigator.share({ title: 'Let\'s Get Lunch', text: 'Check out the best prix-fixe lunch deals in NYC!', url: 'https://www.letsgetlunch.nyc' }).catch(() => {});
+          } else {
+            navigator.clipboard.writeText('https://www.letsgetlunch.nyc');
+            alert('Link copied!');
+          }
+        }}
+          className="block mx-auto mt-3 text-sm text-gray-400 hover:text-gray-600 transition-colors">
+          📤 Know someone who&apos;d love this? Share it
+        </button>
       </section>
 
       <footer className="px-4 py-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">

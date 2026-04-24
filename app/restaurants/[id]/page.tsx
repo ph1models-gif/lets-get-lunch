@@ -232,6 +232,17 @@ export default function RestaurantPage() {
     </main>
   );
 
+  function handleShare() {
+    const url = window.location.href;
+    const text = `Check out this lunch deal at ${r?.name} — ${r?.deals?.[0]?.special} for $${r?.deals?.[0]?.price}!`;
+    if (navigator.share) {
+      navigator.share({ title: 'Let\'s Get Lunch', text, url }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url);
+      alert('Link copied!');
+    }
+  }
+
   const deal = r.deals?.[0];
   const specialsLeft = (() => {
     const n = r.id.replace(/-/g, '').split('').reduce((a: number, c: string) => a + c.charCodeAt(0), 0);
@@ -337,6 +348,11 @@ export default function RestaurantPage() {
           Reserve this lunch special
         </button>
         <p className="text-center text-xs text-gray-400">Free to reserve · Instant confirmation code</p>
+
+        <button onClick={handleShare}
+          className="w-full border border-gray-200 text-gray-600 py-3 rounded-xl font-medium text-sm hover:bg-gray-50 transition-colors mt-3 flex items-center justify-center gap-2">
+          📤 Share this deal with a friend
+        </button>
       </div>
 
       {/* Modal */}
@@ -504,6 +520,19 @@ export default function RestaurantPage() {
                   <button onClick={() => setShowModal(false)}
                     className="w-full border border-gray-200 text-gray-700 py-4 rounded-xl font-medium text-lg hover:bg-gray-50">
                     Done
+                  </button>
+                  <button onClick={() => {
+                    const text = `I just booked a lunch deal at ${r.name} on Let's Get Lunch! Check it out:`;
+                    const url = window.location.href;
+                    if (navigator.share) {
+                      navigator.share({ title: 'Let\'s Get Lunch', text, url }).catch(() => {});
+                    } else {
+                      navigator.clipboard.writeText(url);
+                      alert('Link copied!');
+                    }
+                  }}
+                    className="w-full text-[#4A9FD5] py-3 rounded-xl font-medium text-sm hover:bg-[#EEF6FC] transition-colors mt-2">
+                    📤 Tell a friend about this deal
                   </button>
                 </div>
               )}
