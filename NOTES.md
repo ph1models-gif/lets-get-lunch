@@ -1,22 +1,9 @@
 # Let's Get Lunch — Project Notes
 **Last updated: April 30, 2026**
 
-## ⚠️ ACTIVE BUG (UNRESOLVED)
-**Admin photo lightbox not consistently working.**
-- User reports clicking photos in admin panel sometimes opens lightbox, sometimes doesn't
-- Lightbox code IS in admin/page.tsx (verified at end of file with tail -20)
-- State variable `lightboxUrl` exists at line 189
-- Click handlers added to: vendor review photos, active listing photos
-- Photos enlarged from 96px to 160x128px
-- stopPropagation added
-- User screenshot showed right-click context menu — needs to confirm left-clicking
-- Last test was on Pending Submissions Review & Edit form
-- Console shows NO errors when clicking — clicks not reaching handler
-
-**Files involved:**
-- /home/ocuser/.openclaw/workspace/lets-get-lunch/app/admin/page.tsx
-- Lightbox modal at end of file (lines ~870)
-- Click handlers around lines 680-685
+## ✅ Recently Fixed (Apr 30, 2026)
+- Admin photo lightbox working — **left-click** any photo to enlarge (one-finger tap on Mac trackpad). Two-finger tap = right-click = browser context menu, which is normal browser behavior, not a bug.
+- Cleaned up duplicate lightbox modal that `sed -i` accidentally inserted in two places.
 
 ## Live URLs
 - Site: https://www.letsgetlunch.nyc
@@ -38,6 +25,7 @@
 - Vercel auto-deploys on push to main
 - python3 patches often get cut off in terminal — verify with grep after
 - When python heredocs fail, fall back to sed -i
+- ⚠️ sed -i with patterns like `</div>` can match in MANY places — always verify with `grep -c` after, or it will inject duplicates
 - Always cat existing file before editing
 
 ## Database
@@ -48,8 +36,8 @@
 - reservations: id, restaurant_id, user_id, name, contact, party_size, preferred_time, note, confirmation_code, code, status, created_at
 
 ## Admin Dashboard — 6 Tabs
-1. **Pending Submissions** — vendor cards, Review & Edit button (full editable form), Quick Approve, Reject. Photos clickable for lightbox (BUGGY)
-2. **Active Listings** — edit form with all fields. Hide/Delete. Shows contact info from vendors
+1. **Pending Submissions** — vendor cards, Review & Edit (full editable form), Quick Approve, Reject. Photos clickable for lightbox.
+2. **Active Listings** — edit form with all fields. Hide/Delete. Shows contact info from vendors.
 3. **Reservations** — Today/All toggle, summary stats, 🔁 repeat booker badges
 4. **+ Add Listing** — direct restaurant creation
 5. **Users** — total signups, joined this week, list with name/email/neighborhood/date
@@ -66,15 +54,15 @@
 - Vendor signup form
 - Confirmation email from hello@letsgetlunch.nyc with QR, address line, unsubscribe footer
 - Custom blue dot favicon
-- Hours range 10:30am-4:30pm
+- Hours range 10:30am–4:30pm
+- Admin photo lightbox (click thumbnails to enlarge full-size)
 
 ## V1 PENDING TODO
-1. **FIX ADMIN PHOTO LIGHTBOX** ← active bug above
-2. Photos on 8 original seeded restaurants
-3. QR code on success screen in modal
-4. Restaurant address in confirmation email
-5. Scannable /confirm/[code] page with security token
-6. Manual code lookup in admin
+1. Photos on 8 original seeded restaurants
+2. QR code on success screen in modal
+3. Restaurant address in confirmation email
+4. Scannable /confirm/[code] page with security token
+5. Manual code lookup in admin
 
 ## V2 ROADMAP
 - User profile page
