@@ -25,9 +25,10 @@ const CUISINES = [
 ];
 
 const HOURS_OPTIONS = [
-  "11am–2pm","11am–2:30pm","11am–3pm","11:30am–2pm",
-  "11:30am–2:30pm","11:30am–3pm","12pm–2pm","12pm–2:30pm",
-  "12pm–3pm","12pm–3:30pm"
+  "10:30am–2pm","10:30am–2:30pm","10:30am–3pm","10:30am–3:30pm",
+  "11am–2pm","11am–2:30pm","11am–3pm","11am–3:30pm","11am–4pm","11am–4:30pm",
+  "11:30am–2pm","11:30am–2:30pm","11:30am–3pm","11:30am–3:30pm","11:30am–4pm","11:30am–4:30pm",
+  "12pm–2pm","12pm–2:30pm","12pm–3pm","12pm–3:30pm","12pm–4pm","12pm–4:30pm"
 ];
 
 export default function ListYourRestaurant() {

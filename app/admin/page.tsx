@@ -75,9 +75,10 @@ const CUISINES = [
 ];
 
 const HOURS_OPTIONS = [
-  "11am–2pm","11am–2:30pm","11am–3pm","11:30am–2pm",
-  "11:30am–2:30pm","11:30am–3pm","12pm–2pm","12pm–2:30pm",
-  "12pm–3pm","12pm–3:30pm"
+  "10:30am–2pm","10:30am–2:30pm","10:30am–3pm","10:30am–3:30pm",
+  "11am–2pm","11am–2:30pm","11am–3pm","11am–3:30pm","11am–4pm","11am–4:30pm",
+  "11:30am–2pm","11:30am–2:30pm","11:30am–3pm","11:30am–3:30pm","11:30am–4pm","11:30am–4:30pm",
+  "12pm–2pm","12pm–2:30pm","12pm–3pm","12pm–3:30pm","12pm–4pm","12pm–4:30pm"
 ];
 
 
@@ -179,7 +180,8 @@ export default function AdminPage() {
   const [addForm, setAddForm] = useState({
     name: '', address: '', neighborhood: '', cuisine: '', hours: '',
     bio: '', special: '', price: '', work_friendly: false, wifi: false,
-    days: ['Mon','Tue','Wed','Thu','Fri']
+    days: ['Mon','Tue','Wed','Thu','Fri'],
+    contact_name: '', contact_email: '', contact_phone: ''
   })
   const [addMainFile, setAddMainFile] = useState<File | null>(null)
   const [addExtraFiles, setAddExtraFiles] = useState<File[]>([])
@@ -323,8 +325,26 @@ export default function AdminPage() {
         days: addForm.days,
         is_active: true,
       })
+      // Also save to vendors table for contact tracking
+      await supabase.from('vendors').insert({
+        restaurant_name: addForm.name,
+        contact_name: addForm.contact_name,
+        email: addForm.contact_email,
+        phone: addForm.contact_phone,
+        address: addForm.address,
+        neighborhood: addForm.neighborhood,
+        cuisine: addForm.cuisine,
+        hours: addForm.hours,
+        special: addForm.special,
+        price: addForm.price,
+        work_friendly: addForm.work_friendly ? 'yes' : 'no',
+        wifi: addForm.wifi ? 'yes' : 'no',
+        bio: addForm.bio || null,
+        days: addForm.days,
+        status: 'approved',
+      })
       setAddSuccess(`✅ ${addForm.name} added and live on the site!`)
-      setAddForm({ name: '', address: '', neighborhood: '', cuisine: '', hours: '', bio: '', special: '', price: '', work_friendly: false, wifi: false, days: ['Mon','Tue','Wed','Thu','Fri'] })
+      setAddForm({ name: '', address: '', neighborhood: '', cuisine: '', hours: '', bio: '', special: '', price: '', work_friendly: false, wifi: false, days: ['Mon','Tue','Wed','Thu','Fri'], contact_name: '', contact_email: '', contact_phone: '' })
       setAddMainFile(null)
       setAddExtraFiles([])
     } else {
@@ -668,6 +688,24 @@ export default function AdminPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Extra photos (up to 3)</label>
                   <input type="file" accept="image/*" multiple onChange={e => setAddExtraFiles(Array.from(e.target.files || []).slice(0, 3))} className="text-sm" />
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="font-medium text-gray-800 mb-3">Contact information</h3>
+                <div className="grid grid-cols-2 gap-4 mb-3">
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Contact name *</label>
+                    <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={addForm.contact_name} onChange={e => setAddForm(f => ({...f, contact_name: e.target.value}))} placeholder="Owner or manager name" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    <input type="email" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={addForm.contact_email} onChange={e => setAddForm(f => ({...f, contact_email: e.target.value}))} placeholder="your@email.com" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={addForm.contact_phone} onChange={e => setAddForm(f => ({...f, contact_phone: e.target.value}))} placeholder="(212) 555-0100" />
+                  </div>
                 </div>
               </div>
 
