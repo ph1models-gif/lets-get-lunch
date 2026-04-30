@@ -35,19 +35,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to save reservation' }, { status: 500 })
     }
 
-    // Fetch restaurant address for the confirmation email
-    let restaurantAddress = ''
-    try {
-      const { data: rest } = await supabase
-        .from('restaurants')
-        .select('address')
-        .eq('id', restaurant_id)
-        .single()
-      if (rest?.address) restaurantAddress = rest.address
-    } catch (addrErr) {
-      console.error('Address lookup error:', addrErr)
-    }
-
     // Send email — wrapped so failure does NOT block the code returning
     try {
       const userEmail = contact.includes('@') ? contact : null
@@ -76,7 +63,6 @@ export async function POST(req: NextRequest) {
                 <div style="border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:24px">
                   <p style="margin:0 0 8px;color:#666;font-size:13px">Reservation details</p>
                   <p style="margin:4px 0;font-size:15px"><strong>Restaurant:</strong> ${restaurant_name}</p>
-                  ${restaurantAddress ? `<p style="margin:4px 0;font-size:15px"><strong>Address:</strong> ${restaurantAddress}</p>` : ''}
                   <p style="margin:4px 0;font-size:15px"><strong>Time:</strong> ${preferred_time}</p>
                   <p style="margin:4px 0;font-size:15px"><strong>Party size:</strong> ${party_size} ${party_size === 1 ? 'person' : 'people'}</p>
                 </div>
