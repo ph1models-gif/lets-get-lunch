@@ -185,6 +185,8 @@ export default function AdminPage() {
   })
   const [addMainFile, setAddMainFile] = useState<File | null>(null)
   const [addExtraFiles, setAddExtraFiles] = useState<File[]>([])
+  const [editingVendorId, setEditingVendorId] = useState<string | null>(null)
+  const [vendorEditForm, setVendorEditForm] = useState<any>({})
   const [addSaving, setAddSaving] = useState(false)
   const [addSuccess, setAddSuccess] = useState('')
   const [addError, setAddError] = useState('')
@@ -581,10 +583,108 @@ export default function AdminPage() {
                   <p className="font-medium text-orange-800">{v.special}</p>
                   <p className="text-orange-700">{v.price}</p>
                 </div>
-                <div className="flex gap-3">
-                  <button onClick={() => approveVendor(v)} className="flex-1 bg-green-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-green-700">Approve</button>
-                  <button onClick={() => rejectVendor(v.id)} className="flex-1 bg-red-100 text-red-700 rounded-lg py-2 text-sm font-medium hover:bg-red-200">Reject</button>
-                </div>
+                {editingVendorId === v.id ? (
+                  <div className="border-t pt-4 mt-4 space-y-3">
+                    <h4 className="font-medium text-gray-800">Review & Edit before approving</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Restaurant name</label>
+                        <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={vendorEditForm.restaurant_name || ''} onChange={e => setVendorEditForm((f: any) => ({...f, restaurant_name: e.target.value}))} />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Address</label>
+                        <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={vendorEditForm.address || ''} onChange={e => setVendorEditForm((f: any) => ({...f, address: e.target.value}))} />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Neighborhood</label>
+                        <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={vendorEditForm.neighborhood || ''} onChange={e => setVendorEditForm((f: any) => ({...f, neighborhood: e.target.value}))}>
+                          <option value="">Select...</option>
+                          {NEIGHBORHOODS.map(n => <option key={n} value={n}>{n}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Cuisine</label>
+                        <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={vendorEditForm.cuisine || ''} onChange={e => setVendorEditForm((f: any) => ({...f, cuisine: e.target.value}))}>
+                          <option value="">Select...</option>
+                          {CUISINES.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Hours</label>
+                        <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={vendorEditForm.hours || ''} onChange={e => setVendorEditForm((f: any) => ({...f, hours: e.target.value}))}>
+                          <option value="">Select...</option>
+                          {HOURS_OPTIONS.map(h => <option key={h} value={h}>{h}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Price</label>
+                        <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={vendorEditForm.price || ''} onChange={e => setVendorEditForm((f: any) => ({...f, price: e.target.value}))} />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Deal description</label>
+                      <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={vendorEditForm.special || ''} onChange={e => setVendorEditForm((f: any) => ({...f, special: e.target.value}))} />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Bio</label>
+                      <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={vendorEditForm.bio || ''} onChange={e => setVendorEditForm((f: any) => ({...f, bio: e.target.value}))} maxLength={120} />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Contact name</label>
+                      <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={vendorEditForm.contact_name || ''} onChange={e => setVendorEditForm((f: any) => ({...f, contact_name: e.target.value}))} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Email</label>
+                        <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={vendorEditForm.email || ''} onChange={e => setVendorEditForm((f: any) => ({...f, email: e.target.value}))} />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Phone</label>
+                        <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={vendorEditForm.phone || ''} onChange={e => setVendorEditForm((f: any) => ({...f, phone: e.target.value}))} />
+                      </div>
+                    </div>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-2 text-sm cursor-pointer">
+                        <input type="checkbox" checked={vendorEditForm.work_friendly === 'yes'} onChange={e => setVendorEditForm((f: any) => ({...f, work_friendly: e.target.checked ? 'yes' : 'no'}))} />
+                        💻 Laptop friendly
+                      </label>
+                      <label className="flex items-center gap-2 text-sm cursor-pointer">
+                        <input type="checkbox" checked={vendorEditForm.wifi === 'yes'} onChange={e => setVendorEditForm((f: any) => ({...f, wifi: e.target.checked ? 'yes' : 'no'}))} />
+                        📶 Free WiFi
+                      </label>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-2">Days available</label>
+                      <div className="flex gap-2 flex-wrap">
+                        {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(day => (
+                          <label key={day} className={`flex items-center gap-1 px-2 py-1 rounded-lg border cursor-pointer text-xs font-medium transition-colors ${(vendorEditForm.days || []).includes(day) ? 'border-[#4A9FD5] bg-[#EEF6FC] text-[#4A9FD5]' : 'border-gray-200 text-gray-500'}`}>
+                            <input type="checkbox" className="hidden" checked={(vendorEditForm.days || []).includes(day)}
+                              onChange={e => {
+                                const curr = vendorEditForm.days || [];
+                                const next = e.target.checked ? [...curr, day] : curr.filter((d: string) => d !== day);
+                                setVendorEditForm((f: any) => ({...f, days: next}));
+                              }} />
+                            {day}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                      <button onClick={async () => {
+                        await supabase.from('vendors').update(vendorEditForm).eq('id', v.id);
+                        approveVendor({...v, ...vendorEditForm});
+                        setEditingVendorId(null);
+                      }} className="flex-1 bg-green-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-green-700">Save & Approve</button>
+                      <button onClick={() => setEditingVendorId(null)} className="flex-1 bg-gray-100 text-gray-600 rounded-lg py-2 text-sm font-medium hover:bg-gray-200">Cancel</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex gap-3">
+                    <button onClick={() => { setEditingVendorId(v.id); setVendorEditForm({...v}); }} className="flex-1 bg-blue-500 text-white rounded-lg py-2 text-sm font-medium hover:bg-blue-600">Review & Edit</button>
+                    <button onClick={() => approveVendor(v)} className="flex-1 bg-green-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-green-700">Quick Approve</button>
+                    <button onClick={() => rejectVendor(v.id)} className="flex-1 bg-red-100 text-red-700 rounded-lg py-2 text-sm font-medium hover:bg-red-200">Reject</button>
+                  </div>
+                )}
               </div>
             ))}
           </>
