@@ -20,7 +20,8 @@
 - Email IS saved correctly to auth.users (login works fine)
 - ~half of existing profile rows are missing emails — long-running bug
 - Cosmetic only — doesn't affect login/auth, but means we can't query users by email from profiles table
-- Fix likely in /signup or /login signup handler — need to add email to profile insert
+- LIKELY ROOT CAUSE: site has TWO signup paths (1) quick signup inside reservation modal on restaurant page (Resy-style), (2) standalone /signup page. They were built at different times and probably have different profile-insert code. One saves email, the other doesn't. Diff the two handlers first before patching.
+- Files to compare: app/restaurants/[id]/page.tsx (modal signup) vs app/signup/page.tsx (standalone) vs app/login/page.tsx (signup tab)
 
 ## Live URLs
 - Site: https://www.letsgetlunch.nyc
@@ -86,7 +87,8 @@ cat > /home/ocuser/.openclaw/workspace/lets-get-lunch/NOTES.md << 'NOTESEOF'
 - Email IS saved correctly to auth.users (login works fine)
 - ~half of existing profile rows are missing emails — long-running bug
 - Cosmetic only — doesn't affect login/auth, but means we can't query users by email from profiles table
-- Fix likely in /signup or /login signup handler — need to add email to profile insert
+- LIKELY ROOT CAUSE: site has TWO signup paths (1) quick signup inside reservation modal on restaurant page (Resy-style), (2) standalone /signup page. They were built at different times and probably have different profile-insert code. One saves email, the other doesn't. Diff the two handlers first before patching.
+- Files to compare: app/restaurants/[id]/page.tsx (modal signup) vs app/signup/page.tsx (standalone) vs app/login/page.tsx (signup tab)
 
 ## Live URLs
 - Site: https://www.letsgetlunch.nyc
