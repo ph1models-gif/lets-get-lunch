@@ -686,12 +686,12 @@ export default function AdminPage() {
                       <div className="flex gap-2 flex-wrap mb-3">
                         {vendorEditForm.photo_url && (
                           <div className="relative">
-                            <img src={vendorEditForm.photo_url} alt="Main" className="w-24 h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setLightboxUrl(vendorEditForm.photo_url)} />
+                            <img src={vendorEditForm.photo_url} alt="Main" className="w-40 h-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity border-2 border-transparent hover:border-[#4A9FD5]" onClick={(e) => { e.stopPropagation(); setLightboxUrl(vendorEditForm.photo_url); }} />
                             <span className="absolute top-1 left-1 bg-black bg-opacity-50 text-white text-[10px] px-1 rounded">Main</span>
                           </div>
                         )}
                         {vendorEditForm.photo_urls?.map((url: string, i: number) => (
-                          <img key={i} src={url} alt={`Extra ${i+1}`} className="w-24 h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setLightboxUrl(url)} />
+                          <img key={i} src={url} alt={`Extra ${i+1}`} className="w-40 h-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity border-2 border-transparent hover:border-[#4A9FD5]" onClick={(e) => { e.stopPropagation(); setLightboxUrl(url); }} />
                         ))}
                         {!vendorEditForm.photo_url && (!vendorEditForm.photo_urls || vendorEditForm.photo_urls.length === 0) && (
                           <p className="text-xs text-gray-400">No photos uploaded</p>
