@@ -155,14 +155,6 @@ function ReservationsView({ reservations, resView }: { reservations: any[], resV
         )
       })}
 
-      {lightboxUrl && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4" onClick={() => setLightboxUrl(null)}>
-          <div className="relative max-w-4xl max-h-[90vh]">
-            <img src={lightboxUrl} alt="Preview" className="max-w-full max-h-[90vh] object-contain rounded-xl" />
-            <button onClick={() => setLightboxUrl(null)} className="absolute top-2 right-2 bg-black bg-opacity-50 text-white w-8 h-8 rounded-full text-lg hover:bg-opacity-70">&times;</button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
