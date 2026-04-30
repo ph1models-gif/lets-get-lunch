@@ -50,24 +50,15 @@ export default function Home() {
     load();
     const handleFocus = () => load();
     window.addEventListener('focus', handleFocus);
-    // Check auth state and listen for changes
-    const checkUser = async (user: any) => {
+    // Check auth state
+    supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
-        const { data } = await supabase.from('profiles').select('name').eq('id', user.id).single();
-        if (data?.name) setUserFirstName(data.name.split(' ')[0]);
-        else setUserFirstName('there');
-      } else {
-        setUserFirstName('');
+        supabase.from('profiles').select('name').eq('id', user.id).single().then(({ data }) => {
+          if (data?.name) setUserFirstName(data.name.split(' ')[0]);
+        });
       }
-    };
-    supabase.auth.getUser().then(({ data: { user } }) => checkUser(user)).catch(() => {});
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      checkUser(session?.user ?? null);
-    });
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-      authListener.subscription.unsubscribe();
-    };
+    }).catch(() => {});
+    return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
   const filters = ['All','Italian','Japanese/Sushi','Asian','French','American','Seafood','Mediterranean','Latin/Mexican','Indian','Vegan-Friendly','Steakhouse','BBQ'];
@@ -257,14 +248,7 @@ export default function Home() {
         <div className="flex gap-6 text-sm text-gray-400">
           <a href="/list-your-restaurant" className="hover:text-gray-600">For Restaurants</a>
           <a href="mailto:hello@letsgetlunch.nyc" className="hover:text-gray-600">Contact Us</a>
-          {userFirstName ? (
-            <>
-              <span className="text-gray-600">Hi, {userFirstName}</span>
-              <button onClick={async () => { await supabase.auth.signOut(); setUserFirstName(''); }} className="hover:text-gray-600">Sign Out</button>
-            </>
-          ) : (
-            <a href="/login" className="hover:text-gray-600">Sign In</a>
-          )}
+          <a href="/login" className="hover:text-gray-600">Sign In</a>
         </div>
       </footer>
     </main>
