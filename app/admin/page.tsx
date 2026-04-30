@@ -186,6 +186,9 @@ export default function AdminPage() {
   const [addMainFile, setAddMainFile] = useState<File | null>(null)
   const [addExtraFiles, setAddExtraFiles] = useState<File[]>([])
   const [editingVendorId, setEditingVendorId] = useState<string | null>(null)
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
+  const [vendorMainFile, setVendorMainFile] = useState<File | null>(null)
+  const [vendorExtraFiles, setVendorExtraFiles] = useState<File[]>([])
   const [vendorEditForm, setVendorEditForm] = useState<any>({})
   const [addSaving, setAddSaving] = useState(false)
   const [addSuccess, setAddSuccess] = useState('')
@@ -669,11 +672,67 @@ export default function AdminPage() {
                         ))}
                       </div>
                     </div>
+                    <div className="border-t pt-3">
+                      <label className="block text-xs text-gray-500 mb-2">Photos (click to enlarge)</label>
+                      <div className="flex gap-2 flex-wrap mb-3">
+                        {vendorEditForm.photo_url && (
+                          <div className="relative">
+                            <img src={vendorEditForm.photo_url} alt="Main" className="w-24 h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setLightboxUrl(vendorEditForm.photo_url)} />
+                            <span className="absolute top-1 left-1 bg-black bg-opacity-50 text-white text-[10px] px-1 rounded">Main</span>
+                          </div>
+                        )}
+                        {vendorEditForm.photo_urls?.map((url: string, i: number) => (
+                          <img key={i} src={url} alt={`Extra ${i+1}`} className="w-24 h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setLightboxUrl(url)} />
+                        ))}
+                        {!vendorEditForm.photo_url && (!vendorEditForm.photo_urls || vendorEditForm.photo_urls.length === 0) && (
+                          <p className="text-xs text-gray-400">No photos uploaded</p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Replace main photo</label>
+                          <input type="file" accept="image/*" onChange={e => setVendorMainFile(e.target.files?.[0] || null)} className="text-xs" />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Replace extra photos</label>
+                          <input type="file" accept="image/*" multiple onChange={e => setVendorExtraFiles(Array.from(e.target.files || []).slice(0, 3))} className="text-xs" />
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="flex gap-3 pt-2">
                       <button onClick={async () => {
-                        await supabase.from('vendors').update(vendorEditForm).eq('id', v.id);
-                        approveVendor({...v, ...vendorEditForm});
+                        // Upload new photos if selected
+                        let photoUrl = vendorEditForm.photo_url;
+                        let photoUrls = vendorEditForm.photo_urls || [];
+                        if (vendorMainFile) {
+                          const ext = vendorMainFile.name.split('.').pop();
+                          const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+                          const { error } = await supabase.storage.from('restaurant-photos').upload(filePath, vendorMainFile, { upsert: true });
+                          if (!error) {
+                            const { data: urlData } = supabase.storage.from('restaurant-photos').getPublicUrl(filePath);
+                            photoUrl = urlData.publicUrl;
+                          }
+                        }
+                        if (vendorExtraFiles.length > 0) {
+                          const newUrls: string[] = [];
+                          for (const file of vendorExtraFiles) {
+                            const ext = file.name.split('.').pop();
+                            const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+                            const { error } = await supabase.storage.from('restaurant-photos').upload(filePath, file, { upsert: true });
+                            if (!error) {
+                              const { data: urlData } = supabase.storage.from('restaurant-photos').getPublicUrl(filePath);
+                              newUrls.push(urlData.publicUrl);
+                            }
+                          }
+                          photoUrls = newUrls;
+                        }
+                        const updatedVendor = {...vendorEditForm, photo_url: photoUrl, photo_urls: photoUrls};
+                        await supabase.from('vendors').update(updatedVendor).eq('id', v.id);
+                        approveVendor({...v, ...updatedVendor});
                         setEditingVendorId(null);
+                        setVendorMainFile(null);
+                        setVendorExtraFiles([]);
                       }} className="flex-1 bg-green-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-green-700">Save & Approve</button>
                       <button onClick={() => setEditingVendorId(null)} className="flex-1 bg-gray-100 text-gray-600 rounded-lg py-2 text-sm font-medium hover:bg-gray-200">Cancel</button>
                     </div>
