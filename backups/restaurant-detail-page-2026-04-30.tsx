@@ -71,9 +71,9 @@ export default function RestaurantPage() {
       setLoading(false);
 
       // Pre-fill if already signed in
-      const loadUser = async (user: any) => {
-        if (!user) { setUserFirstName(''); return; }
-        try {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
           const { data: profile } = await supabase
             .from('profiles')
             .select('name')
@@ -86,26 +86,9 @@ export default function RestaurantPage() {
             setForm(f => ({ ...f, firstName, lastName, email: user.email || '' }));
             setUserName(profile.name);
             setUserFirstName(firstName);
-          } else {
-            // Logged in but no profile row — fall back to email prefix
-            const emailPrefix = (user.email || 'there').split('@')[0];
-            setForm(f => ({ ...f, email: user.email || '' }));
-            setUserFirstName(emailPrefix);
           }
-        } catch(e) {
-          const emailPrefix = (user.email || 'there').split('@')[0];
-          setUserFirstName(emailPrefix);
         }
-      };
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        await loadUser(user);
-      } catch(e) {}
-      // Listen for auth changes (sign in / sign out while on this page)
-      const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-        loadUser(session?.user ?? null);
-      });
-      // Note: cleanup happens via useEffect return below
+      } catch(e) { /* not signed in, that's fine */ }
     }
     load();
   }, [id]);
