@@ -10,12 +10,6 @@ interface Props {
 export default function MapInner({ onPanReady, activeIds }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const markersRef = useRef<Map<string, any>>(new Map());
-  const activeIdsRef = useRef<string[] | undefined>(activeIds);
-
-  // Keep the ref synced with the latest prop so initMap (async) sees current value
-  useEffect(() => {
-    activeIdsRef.current = activeIds;
-  }, [activeIds]);
 
   useEffect(() => {
     if (markersRef.current.size === 0) return;
@@ -94,11 +88,6 @@ export default function MapInner({ onPanReady, activeIds }: Props) {
         icon: {path:g.SymbolPath.CIRCLE, scale:18, fillColor:'#4A9FD5', fillOpacity:1, strokeColor:'white', strokeWeight:2},
         cursor: 'pointer',
       });
-      // Apply initial visibility based on current activeIds (avoids race with useEffect)
-      const cur = activeIdsRef.current;
-      if (cur !== undefined) {
-        mk.setVisible(cur.includes(r.id));
-      }
       markersRef.current.set(r.id, mk);
 
       const dealHtml = deal?.special
