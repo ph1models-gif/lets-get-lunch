@@ -14,9 +14,7 @@ export default function MapInner({ onPanReady, activeIds }: Props) {
   useEffect(() => {
     if (markersRef.current.size === 0) return;
     markersRef.current.forEach((mk, id) => {
-      // If activeIds is undefined (component used without filtering), show all.
-      // If activeIds is provided (even if empty), only show those — empty array means hide all.
-      if (activeIds === undefined) {
+      if (!activeIds || activeIds.length === 0) {
         mk.setVisible(true);
       } else {
         mk.setVisible(activeIds.includes(id));
