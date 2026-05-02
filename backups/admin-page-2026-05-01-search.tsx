@@ -188,10 +188,6 @@ export default function AdminPage() {
   const [addExtraFiles, setAddExtraFiles] = useState<File[]>([])
   const [editingVendorId, setEditingVendorId] = useState<string | null>(null)
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
-  const [listingSearch, setListingSearch] = useState('')
-  const [listingHood, setListingHood] = useState('')
-  const [listingCuisine, setListingCuisine] = useState('')
-  const [showHidden, setShowHidden] = useState(false)
   const [vendorMainFile, setVendorMainFile] = useState<File | null>(null)
   const [vendorExtraFiles, setVendorExtraFiles] = useState<File[]>([])
   const [vendorEditForm, setVendorEditForm] = useState<any>({})
@@ -1049,48 +1045,11 @@ export default function AdminPage() {
           </div>
         )}
 
-        {tab === 'restaurants' && (() => {
-          const filteredRests = restaurants.filter(r => {
-            if (!showHidden && !r.is_active) return false;
-            if (listingHood && r.neighborhood !== listingHood) return false;
-            if (listingCuisine && r.cuisine !== listingCuisine) return false;
-            if (listingSearch) {
-              const q = listingSearch.toLowerCase();
-              if (!(r.name || '').toLowerCase().includes(q) && !(r.address || '').toLowerCase().includes(q)) return false;
-            }
-            return true;
-          });
-          return (
+        {tab === 'restaurants' && (
           <>
             {restLoading && <p className="text-gray-500 text-sm">Loading…</p>}
             {!restLoading && restaurants.length === 0 && <p className="text-gray-500 text-sm">No restaurants yet.</p>}
-            {!restLoading && restaurants.length > 0 && (
-              <div className="bg-white border border-gray-200 rounded-xl p-3 mb-4 flex flex-wrap items-center gap-2">
-                <input type="text" value={listingSearch} onChange={e => setListingSearch(e.target.value)} placeholder="Search by name or address..." className="flex-1 min-w-[200px] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#4A9FD5]" />
-                <select value={listingHood} onChange={e => setListingHood(e.target.value)} className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-[#4A9FD5]">
-                  <option value="">All neighborhoods</option>
-                  {Array.from(new Set(restaurants.map(r => r.neighborhood).filter(Boolean))).sort().map(n => <option key={n} value={n}>{n}</option>)}
-                </select>
-                <select value={listingCuisine} onChange={e => setListingCuisine(e.target.value)} className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-[#4A9FD5]">
-                  <option value="">All cuisines</option>
-                  {CUISINES.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-                <label className="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer">
-                  <input type="checkbox" checked={showHidden} onChange={e => setShowHidden(e.target.checked)} />
-                  Show hidden
-                </label>
-                {(listingSearch || listingHood || listingCuisine || showHidden) && (
-                  <button onClick={() => { setListingSearch(''); setListingHood(''); setListingCuisine(''); setShowHidden(false); }} className="text-xs text-gray-500 hover:text-gray-700 underline">Clear</button>
-                )}
-              </div>
-            )}
-            {!restLoading && restaurants.length > 0 && (
-              <p className="text-xs text-gray-500 mb-3">{filteredRests.length} of {restaurants.length} listings shown</p>
-            )}
-            {!restLoading && restaurants.length > 0 && filteredRests.length === 0 && (
-              <p className="text-gray-400 text-sm py-8 text-center">No listings match these filters.</p>
-            )}
-            {filteredRests.map(r => {
+            {restaurants.map(r => {
               const deal = deals.find(d => d.restaurant_id === r.id)
               const isEditing = editingId === r.id
               return (
@@ -1331,8 +1290,7 @@ export default function AdminPage() {
               )
             })}
           </>
-          );
-        })()}
+        )}
       </div>
 
       {lightboxUrl && (
