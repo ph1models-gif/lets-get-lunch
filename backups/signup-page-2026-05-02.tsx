@@ -2,7 +2,24 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 
-import { NEIGHBORHOODS, NEIGHBORHOOD_GROUPS } from '../../lib/neighborhoods';
+const NEIGHBORHOODS = [
+  'Midtown','Midtown East','Midtown West','Upper East Side','Upper West Side',
+  'Chelsea','West Village','Greenwich Village','SoHo','NoHo','Nolita','Tribeca',
+  'Financial District','Lower East Side','East Village','Gramercy Park',
+  'Murray Hill','Kips Bay','Flatiron','NoMad','Harlem',"Hell's Kitchen",
+  'Chinatown','Little Italy','Battery Park City','Union Square','Hudson Yards',
+  'Lenox Hill','Yorkville','Carnegie Hill','East Harlem','Washington Heights',
+  'Inwood','Morningside Heights','Hamilton Heights','Sugar Hill',
+  'Williamsburg','Dumbo','Brooklyn Heights','Park Slope','Cobble Hill',
+  'Carroll Gardens','Boerum Hill','Fort Greene','Clinton Hill','Bushwick',
+  'Greenpoint','Red Hook','Gowanus','Crown Heights','Bed-Stuy','Bay Ridge',
+  'Sunset Park','Windsor Terrace','Prospect Lefferts Gardens','Flatbush',
+  'Prospect Heights','Downtown Brooklyn','Astoria','Long Island City',
+  'Flushing','Jackson Heights','Woodside','Rego Park','Elmhurst','Corona',
+  'Forest Hills','Sunnyside','Ridgewood','Fordham','Riverdale','Mott Haven',
+  'St. George','Stapleton'
+];
+
 function validatePassword(pw: string): string | null {
   if (pw.length < 8) return 'Password must be at least 8 characters.';
   if (!/[A-Z]/.test(pw)) return 'Password must include at least one uppercase letter.';

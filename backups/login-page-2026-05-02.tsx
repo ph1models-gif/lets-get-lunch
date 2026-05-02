@@ -2,7 +2,21 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 
-import { NEIGHBORHOODS, NEIGHBORHOOD_GROUPS } from '../../lib/neighborhoods';
+const NEIGHBORHOODS = [
+  'Midtown','Midtown East','Midtown West','Upper East Side','Upper West Side',
+  'Chelsea','West Village','Greenwich Village','SoHo','NoHo','Tribeca',
+  'Financial District','Lower East Side','East Village','Gramercy Park',
+  'Murray Hill','Harlem','Hells Kitchen','Chinatown','Battery Park City',
+  'Union Square','Flatiron','NoMad','Lenox Hill','Yorkville','Washington Heights','Inwood',
+  'Morningside Heights','Williamsburg','Dumbo','Brooklyn Heights','Park Slope',
+  'Cobble Hill','Carroll Gardens','Boerum Hill','Fort Greene','Clinton Hill',
+  'Bushwick','Greenpoint','Red Hook','Gowanus','Crown Heights','Downtown Brooklyn',
+  'Astoria','Long Island City','Flushing','Jackson Heights','Forest Hills',
+  'Sunnyside','Woodside','Ridgewood','Fordham','Riverdale','Mott Haven',
+  'St George','Stapleton'
+];
+
+
 function validatePassword(pw: string): string | null {
   if (pw.length < 8) return 'Password must be at least 8 characters.';
   if (!/[A-Z]/.test(pw)) return 'Password must include at least one uppercase letter.';

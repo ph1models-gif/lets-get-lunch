@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 
-import { NEIGHBORHOODS, NEIGHBORHOOD_GROUPS } from '../../lib/neighborhoods';
 const PASSWORD = 'lunch2026'
 
 type Vendor = {
@@ -53,6 +52,20 @@ type Deal = {
 
 
 
+
+const NEIGHBORHOODS = [
+  "Midtown","Midtown East","Midtown West","Upper East Side","Upper West Side",
+  "Chelsea","West Village","Greenwich Village","SoHo","NoHo","Tribeca",
+  "Financial District","Lower East Side","East Village","Gramercy Park",
+  "Murray Hill","Kips Bay","Harlem","Hell's Kitchen","Chinatown","Little Italy",
+  "Battery Park City","Union Square","Flatiron","NoMad","Lenox Hill","Yorkville","Washington Heights",
+  "Inwood","Morningside Heights","Williamsburg","Dumbo","Brooklyn Heights",
+  "Park Slope","Cobble Hill","Carroll Gardens","Boerum Hill","Fort Greene",
+  "Clinton Hill","Bushwick","Greenpoint","Red Hook","Crown Heights",
+  "Prospect Heights","Downtown Brooklyn","Astoria","Long Island City",
+  "Flushing","Jackson Heights","Forest Hills","Sunnyside","Ridgewood",
+  "Fordham","Riverdale","Mott Haven","St. George","Stapleton","Nolita","Little Italy","Two Bridges","Turtle Bay","Sutton Place","Hudson Yards","Carnegie Hill","East Harlem","Hamilton Heights","Sugar Hill","Bed-Stuy","Bay Ridge","Sunset Park","Windsor Terrace","Prospect Lefferts Gardens","Flatbush","Woodside","Rego Park","Elmhurst","Corona"
+];
 
 const CUISINES = [
   "American","Italian","Japanese/Sushi","French","Mexican/Latin",
