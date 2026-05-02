@@ -398,14 +398,6 @@ export default function AdminPage() {
     fetchVendors()
   }
 
-  async function restoreVendor(id: string) {
-    if (!confirm('Restore this vendor to Pending Submissions for review?')) return
-    await supabase.from('vendors').update({ status: 'pending' }).eq('id', id)
-    fetchContacts()
-    fetchVendors()
-    alert('Restored — check the Pending Submissions tab')
-  }
-
   async function rejectVendor(id: string) {
     await supabase.from('vendors').update({ status: 'rejected' }).eq('id', id)
     fetchVendors()
@@ -972,20 +964,11 @@ export default function AdminPage() {
                             <p className="font-semibold text-gray-900">{v.restaurant_name}</p>
                             <p className="text-xs text-gray-500">{v.neighborhood} · {v.cuisine}</p>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                              v.status === 'approved' ? 'bg-green-100 text-green-700' :
-                              v.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                              'bg-orange-100 text-orange-700'
-                            }`}>{v.status}</span>
-                            {v.status === 'rejected' && (
-                              <button
-                                onClick={() => restoreVendor(v.id)}
-                                className="text-xs px-2 py-1 rounded-full font-medium bg-blue-100 text-blue-700 hover:bg-blue-200"
-                                title="Move back to Pending Submissions"
-                              >↻ Restore</button>
-                            )}
-                          </div>
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                            v.status === 'approved' ? 'bg-green-100 text-green-700' :
+                            v.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                            'bg-orange-100 text-orange-700'
+                          }`}>{v.status}</span>
                         </div>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600 mb-2">
                           <div>
