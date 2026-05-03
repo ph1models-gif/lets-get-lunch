@@ -30,7 +30,7 @@ export default function ListYourRestaurant() {
 
   const [form, setForm] = useState({
     restaurant: '', contact: '', email: '', phone: '',
-    address: '', website: '', neighborhood: '', cuisine: '', cuisineOther: '',
+    address: '', neighborhood: '', cuisine: '', cuisineOther: '',
     seats: '', hours: '', special: '', price: '',
     workFriendly: 'no', wifi: 'no', message: '', bio: '',
     days: ['Mon','Tue','Wed','Thu','Fri']
@@ -96,19 +96,12 @@ export default function ListYourRestaurant() {
       if (url) photo_urls.push(url);
     }
 
-    // Auto-prefix https:// if user typed bare domain
-    let cleanWebsite = form.website.trim();
-    if (cleanWebsite && !/^https?:\/\//i.test(cleanWebsite)) {
-      cleanWebsite = 'https://' + cleanWebsite;
-    }
-
     const { error: err } = await supabase.from('vendors').insert({
       restaurant_name: form.restaurant,
       contact_name: form.contact,
       email: form.email,
       phone: form.phone,
       address: form.address,
-      website: cleanWebsite,
       neighborhood: form.neighborhood,
       cuisine: finalCuisine,
       seats: form.seats,
@@ -214,10 +207,6 @@ export default function ListYourRestaurant() {
               <div>
                 <label className={labelClass}>Full address *</label>
                 <input name="address" required value={form.address} onChange={handleChange} placeholder="123 Main St, New York, NY" className={inputClass} />
-              </div>
-              <div>
-                <label className={labelClass}>Website *</label>
-                <input name="website" type="url" required value={form.website} onChange={handleChange} placeholder="joespizza.com" className={inputClass} />
               </div>
             </div>
           </div>
