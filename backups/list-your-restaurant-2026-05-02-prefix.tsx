@@ -217,7 +217,7 @@ export default function ListYourRestaurant() {
               </div>
               <div>
                 <label className={labelClass}>Website *</label>
-                <input name="website" type="text" required value={form.website} onChange={handleChange} placeholder="joespizza.com" className={inputClass} />
+                <input name="website" type="url" required value={form.website} onChange={handleChange} placeholder="joespizza.com" className={inputClass} />
               </div>
             </div>
           </div>
