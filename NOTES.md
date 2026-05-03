@@ -1,105 +1,100 @@
 # Let's Get Lunch — Project Notes
-**Last updated: May 2, 2026**
+**Last updated: May 2, 2026 (late evening)**
 
 ## ✅ Recently Fixed (May 2, 2026)
+- **Required Website field on vendor signup form** — `/list-your-restaurant` now requires a Website field (right after Address). Auto-prefixes `https://` if user types bare domain like `joespizza.com`. Saves to vendors.website column.
+- **`website` column added to vendors table** — Supabase column, type text, nullable (so existing 50 rows stay valid)
 - **Map race-condition bug fixed** — pins on homepage map now correctly match today's filtered list from initial load through every search/clear cycle. Root cause: async Google Maps load could finish AFTER React's first useEffect ran, so initMap created markers with default visibility and the visibility logic never re-ran. Fix: added activeIdsRef, applied initial visibility at marker creation time, kept existing useEffect for live updates. (app/components/MapInner.tsx)
 - **NEIGHBORHOODS unified** — created lib/neighborhoods.ts as single source of truth (76 neighborhoods, NYC-wide, with NEIGHBORHOOD_GROUPS for borough-grouped dropdowns). Patched 4 files (admin, login, signup, list-your-restaurant) to import from there. Added Meatpacking District. Resolved silent drift between previously-divergent local lists.
 - **Search + filter bar on Active Listings** — text search by name/address, neighborhood dropdown (auto-populated from existing listings), cuisine dropdown (canonical CUISINES list), Show hidden checkbox, Clear button, "X of Y listings shown" count
 - **Restore button on rejected vendors** — Contacts tab now has ↻ Restore button on rejected rows that moves them back to Pending Submissions for re-review
 
-## ✅ Recently Fixed (May 1, 2026)
-- (Same wins logged previous day — see git history)
+## 🎯 NEXT SESSION — START HERE
 
-## ✅ Recently Fixed (Apr 30, 2026)
-- Auth navbar bug (Bugs A + B) — homepage and restaurant page navbars now correctly show "Hi, [name]" when logged in, "Sign In" when not. Fix: supabase.auth.onAuthStateChange listener + conditional navbar
-- Restaurant address now appears in confirmation email
-- Admin photo lightbox working — left-click any photo to enlarge
-- Cleaned up duplicate lightbox modal that sed -i accidentally inserted twice
+The vendor signup form has Website field, but the rest of the website pipeline isn't built yet. Need to complete it:
+
+1. **Add `website` text column to `restaurants` table** in Supabase (parallel to vendors.website)
+2. **Add Website field to admin "+ Add listing" form** (app/admin/page.tsx)
+3. **Add Website field to admin Pending Review & Edit form** (app/admin/page.tsx) — so VAs can backfill websites for existing 50 vendors
+4. **Add Website field to admin Active Listings edit form** (app/admin/page.tsx) — so already-approved listings can get websites added
+5. **Update approval flow** — when admin approves vendor → restaurant, website should copy through (currently the approval logic doesn't include website because the column didn't exist before)
+6. **Backfill existing 50 vendors** with websites (manual VA work in admin Pending tab once #3 is done)
+
+Estimated 60-90 min for #1-5. Backfill (#6) is data work, not code.
+
+This work is a prerequisite for the partner/aggregator feature below, so do it first.
+
+## 🎯 PARTNER/AGGREGATOR FEATURE (BIG — plan documented, not yet built)
+
+Goal: differentiate "real partner" restaurants (full Resy-style booking) from "aggregator listings" (call/visit website only). This acknowledges current state honestly: most listings are aggregator scrapes, only Royal 35 is a true booking partner.
+
+### Sequenced plan
+**Phase 1 — Schema:**
+- Add `is_partner boolean default false` to restaurants
+- Add `phone text` to restaurants (currently only in vendors table)
+- Add `website text` to restaurants (see "next session" tasks above)
+- Backfill phone/website from vendors where possible
+- Manually flip `is_partner=true` for Royal 35
+
+**Phase 2 — Restaurant detail page** (app/restaurants/[id]/page.tsx):
+- If `is_partner=true`: show existing reservation modal (no change)
+- If `is_partner=false`: replace Reserve button with two CTAs — "Visit website" (links to website) and "Call to reserve" (tel: link to phone)
+- Show small "Aggregator listing — call directly" disclosure for non-partners
+
+**Phase 3 — Homepage map cards:**
+- Add small "✓ Book instantly" badge to partners only
+
+**Phase 4 — Server-side guard:**
+- In `/api/reserve/route.ts`: load restaurant by ID, return 403 if `is_partner=false`
+- Defense in depth — don't trust client-side hiding alone
+
+### Open questions to resolve before building
+- Do we have website for all aggregator listings? (Now collecting going forward via vendor form. Existing 50 need backfill.)
+- Do we have phone for all aggregator listings? (Yes for vendor-submitted ones — in vendors.phone. Need to surface to restaurants table.)
+- What's the copy on the "Aggregator listing" disclosure? (Brand-shaping language — should be discussed before coding.)
 
 ## ⚠️ ACTIVE BUGS (UNRESOLVED)
 
 ### Bug C — Confirmation emails landing in spam
-- Email DOES send successfully
-- Lands in Gmail spam folder, not inbox
-- Need to verify Resend SPF, DKIM, DMARC records on letsgetlunch.nyc DNS
-- Workaround: tell users to check spam and mark "Not Spam"
+- Email DOES send. Lands in Gmail spam.
+- Fix: verify Resend SPF, DKIM, DMARC records on letsgetlunch.nyc DNS
 
 ### Bug D — Signup not saving email to profiles table
-- Profile rows created on signup are missing email field (NULL)
-- Email IS saved correctly to auth.users (login works fine)
-- ~half of existing profile rows are missing emails
-- LIKELY ROOT CAUSE: site has TWO signup paths — (1) quick signup inside reservation modal on restaurant page (Resy-style), (2) standalone /signup page. Built at different times. One saves email, the other doesn't. Diff the two handlers first.
-- Files: app/restaurants/[id]/page.tsx (modal signup) vs app/signup/page.tsx vs app/login/page.tsx (signup tab)
+- Profile rows missing email field (NULL). ~half of existing rows.
+- Email IS in auth.users (login works fine).
+- LIKELY ROOT CAUSE: two signup paths (modal on restaurant page vs standalone /signup). One saves email, other doesn't. Diff handlers first.
 
 ### Bug E — Duplicate map() in admin edit form dropdowns
-- In app/admin/page.tsx Active Listings edit form, lines ~1107-1109 and ~1115-1117
-- Cuisine and Neighborhood select dropdowns each call CUISINES.map / NEIGHBORHOODS.map TWICE in a row
-- Result: every option appears twice in the dropdown
-- From an earlier sed that misfired
+- app/admin/page.tsx ~lines 1107-1109 and 1115-1117
+- Cuisine and Neighborhood selects each call `.map()` TWICE in a row → every option appears twice
 - Easy fix: delete the duplicate map line in each select
 
-### Bug F — CUISINES list still drifted
-- app/admin/page.tsx and app/page.tsx have different CUISINES lists ("Asian", "BBQ" only in homepage)
-- Should be unified into lib/cuisines.ts (same pattern as lib/neighborhoods.ts)
-- Lower priority than Bug E
+### Bug F — CUISINES list still drifted across files
+- admin/page.tsx and page.tsx have different CUISINES lists
+- Should mirror lib/neighborhoods.ts pattern → create lib/cuisines.ts
 
-### Bug G (NEW, May 2) — Photo preview wonky in vendor review form
-- Open Pending Submission → Review & Edit → Replace main photo → no preview shown until after Approve
-- Data IS saved correctly (photo appears in Active Listings post-approval)
-- Bug is purely cosmetic: form keeps showing old photo while new file is staged in vendorMainFile state
-- Fix needed: add vendorMainPreview / vendorExtraPreviews state, generate URL.createObjectURL(file) previews when files picked, render alongside/replacing old photos
-- Pattern already exists on Active Listings edit form (editMainPreview / editExtraPreviews) — copy that approach
-- Estimated 15-20 min
+### Bug G — Photo preview wonky in vendor review form
+- Replace main photo → no preview shown until after Approve
+- Data IS saved correctly (cosmetic only)
+- Fix: add vendorMainPreview / vendorExtraPreviews state, generate URL.createObjectURL(file) previews when files picked
+- Pattern already exists on Active Listings edit form — copy that approach
 
-## 🎯 V1 PRIORITY FEATURES
-
-### Duplicate detection for VAs (planned, ~20 min)
-- Onboarding 2nd VA. Two VAs may add same restaurant accidentally.
-- Real restaurants can also share names across locations (Sweetgreen, Joe's Pizza) — need to handle that
-- Plan: small ⚠️ "Possible duplicate of [existing restaurant]" badge in admin Pending tab when restaurant_name matches an existing active restaurant. Doesn't block.
-- Future: fuzzy address matching, or coordinate-based dedup using lat/lng (within 50m + same name = dup)
-- Process: VAs need lane assignment (geographic split recommended) + shared "claimed by" tracking
-
-### Guest invitation feature (high value — VIRAL LOOP, build after deck)
-- Vision: Brian books for 2 → after booking, "Invite a guest" → enter Damon's email → Damon gets "Brian invited you to lunch at Joe's"
-- Strategic value: every reservation can acquire 1-3 new users at $0 CAC. How Resy/OpenTable grew.
-- Design decisions captured:
-  1. Add guest AFTER booking (don't slow conversion). "Add a guest" on success screen + email
-  2. Brian holds QR. Damon's email is informational
-  3. Existing user → "Open in Let's Get Lunch." New user → "Sign up to claim your spot"
-  4. Multi-guest support up to (party_size - 1)
-- Database: add guest_emails text[] to reservations table
-- Estimated 2.5-3 focused hours. BUILD AFTER DECK.
-
-## 💭 OPEN PRODUCT QUESTIONS
-
-### Next-day specials cutover (decided to defer)
-- Idea: Sunday after some hour (5pm? 6pm?) homepage shows Monday's specials. Gives 12hr planning window.
-- Risks discussed: cognitive whiplash for users on time-based switchover, 5pm cutoff is a guess without data, could cannibalize today's late bookings
-- Counter-proposals if/when revisited:
-  1. Show today + tomorrow side-by-side after 3pm (no hard switchover)
-  2. Persistent "See tomorrow's deals →" link, all day, no automatic switching
-- Most lunch specials end at 4pm anyway (kitchens flip to dinner prep), so the urgency is real. Revisit when there's user data.
-
-### Investor dashboard (deferred — needs deck first)
-- Investors looking on weekends see empty homepage. Can't see the 30-40 restaurant inventory the VA built up.
-- Better than spoofing: just put Tuesday-noon screenshots in the deck.
-- /metrics or /all-restaurants page is also possible (unlisted URL, share in deck appendix). Deferred until deck exists.
-
-## 📋 V1 PENDING TODO
-1. FIX Bug C — email deliverability (SPF/DKIM/DMARC in Resend dashboard)
-2. FIX Bug D — signup needs to save email to profiles table
-3. FIX Bug E — duplicate map() lines in admin edit form dropdowns (15 min, easy win)
-4. FIX Bug F — unify CUISINES into shared lib/cuisines.ts (mirror lib/neighborhoods.ts pattern)
-5. FIX Bug G — photo preview in vendor review form
-6. Add duplicate-vendor detection badge in admin pending (~20 min)
-7. Photos on 8 original seeded restaurants
-8. QR code on success screen in modal
-9. Scannable /confirm/[code] page with security token
-10. Manual code lookup in admin
+## 📋 V1 PENDING TODO (priority order)
+1. **Complete website pipeline** — see "Next Session — Start Here" above
+2. **Partner/aggregator feature** — see plan above
+3. FIX Bug C — email deliverability (SPF/DKIM/DMARC in Resend dashboard)
+4. FIX Bug D — signup email to profiles table
+5. FIX Bug E — duplicate map() lines (5-min easy win)
+6. FIX Bug F — unify CUISINES into lib/cuisines.ts
+7. FIX Bug G — photo preview in vendor review form
+8. Add duplicate-vendor detection badge in admin pending (~20 min)
+9. Photos on 8 original seeded restaurants
+10. QR code on success screen in modal
+11. Scannable /confirm/[code] page with security token
+12. Manual code lookup in admin
 
 ## 🚀 V2 ROADMAP
-- Guest invitation feature (high priority post-deck)
+- Guest invitation feature (high priority post-deck — viral loop, $0 CAC)
 - User profile page
 - Restaurant notification emails
 - Redemption analytics
@@ -112,26 +107,15 @@
 - PWA wrapper (recommended path before native app)
 - Brunch as second deal type per restaurant (NOT a separate app)
 
+## 💭 OPEN PRODUCT QUESTIONS (deferred)
+- Next-day specials cutover (5pm? 6pm?). Risks: cognitive whiplash, no data to choose hour. Counter-proposal: today + tomorrow side-by-side after 3pm. Most lunch ends at 4pm anyway. Revisit when there's user data.
+- Investor dashboard / metrics page. Better short-term solution: Tuesday-noon screenshots in deck.
+
 ## 🧠 STRATEGIC DECISIONS (locked in)
-
-### Brunch / second daypart
-- Lunch is the flagship. Brunch is the upsell. letsgetbrunch.nyc owned defensively, parked.
-- Same database, same users, same admin. Brunch becomes a second deal type per restaurant later.
-- Customer is the asset, not the daypart.
-
-### Mobile app
-- PWA before native App Store launch.
-- Site already mobile-friendly + installable via "Add to Home Screen."
-- One app, not two. Daypart-aware UI.
-- Build native ONLY when there's data showing users want it.
-
-### Investor / fundraising readiness
-- USER NEEDS A DECK. Has business plan, no deck.
-- Deck = 10-15 slides. Different tool than business plan. Investors expect decks.
-- Free options: Pitch, Canva, Google Slides templates.
-- Outline: problem, solution, market size, product (screenshots), traction, business model, team, ask.
-- Use Tuesday-noon screenshots in deck (not site spoofing).
-- Current traction headline: 30-40 restaurants signed up via VA outreach.
+- **Lunch is flagship. Brunch is upsell.** letsgetbrunch.nyc owned defensively, parked. Same DB, same users, same admin. Brunch becomes a second deal type per restaurant later. Customer is the asset, not the daypart.
+- **PWA before native App Store launch.** One app, not two. Daypart-aware UI. Build native ONLY when there's data showing users want it.
+- **Investor / fundraising readiness.** USER NEEDS A DECK. Has business plan, no deck. Different tools. Use Tuesday-noon screenshots, not site spoofing. Current traction headline: 30-40 restaurants signed up via VA outreach.
+- **Map POI clicks left enabled** (Resy/OpenTable pattern, not DoorDash). Contextual richness > sterilized map.
 
 ## Live URLs
 - Site: https://www.letsgetlunch.nyc
@@ -158,20 +142,21 @@
 - Always cp file to backups/ before non-trivial edits
 - ALWAYS run `npm run build` and check for "Compiled successfully" before pushing major changes
 - Terminal display sometimes scrambles long pastes (cosmetic only — verify with wc -l and tail)
-- For React/Map/async race conditions: don't trust useEffect alone — set initial state at the moment of object creation, then use useEffect for live updates
+- For React/Map/async race conditions: don't trust useEffect alone — set initial state at object creation, then use useEffect for live updates
+- HTML5 input types like `type="url"` validate BEFORE JS submit handlers run. If you need JS-side massaging (like auto-prefix), use `type="text"` and validate in JS.
 
 ## Database
-- restaurants: id, name, neighborhood, address, cuisine, bio, work_friendly, walk_in, wifi, seats, hours, is_active, photo_url, photo_urls, lat, lng
+- restaurants: id, name, neighborhood, address, cuisine, bio, work_friendly, walk_in, wifi, seats, hours, is_active, photo_url, photo_urls, lat, lng (NEEDS: phone, website, is_partner)
 - deals: id, restaurant_id, special, price, courses, days (text[] DEFAULT Mon-Fri), is_active
-- vendors: id, restaurant_name, contact_name, email, phone, address, neighborhood, cuisine, seats, hours, special, price, work_friendly, wifi, bio, days, message, status, photo_url, photo_urls, created_at
+- vendors: id, restaurant_name, contact_name, email, phone, address, website, neighborhood, cuisine, seats, hours, special, price, work_friendly, wifi, bio, days, message, status, photo_url, photo_urls, created_at
 - profiles: id (→auth.users), name, email, phone, neighborhood, dietary_prefs, created_at
 - reservations: id, restaurant_id, user_id, name, contact, party_size, preferred_time, note, confirmation_code, code, status, created_at
 
 ## Admin Dashboard — 6 Tabs
-1. Pending Submissions — vendor cards, Review & Edit, Quick Approve, Reject. Photos clickable for lightbox.
-2. Active Listings — edit form, Hide/Delete. Search by name/address + filter by neighborhood/cuisine + show hidden toggle.
+1. Pending Submissions — vendor cards, Review & Edit, Quick Approve, Reject. Photos clickable for lightbox. (NEEDS: Website field in Review & Edit form)
+2. Active Listings — edit form, Hide/Delete. Search by name/address + filter by neighborhood/cuisine + show hidden. (NEEDS: Website field in edit form)
 3. Reservations — Today/All toggle, summary stats, 🔁 repeat booker badges
-4. + Add Listing — direct restaurant creation
+4. + Add Listing — direct restaurant creation. (NEEDS: Website field)
 5. Users — total signups, joined this week, list with name/email/neighborhood/date
 6. Contacts — all vendor submissions with clickable mailto/tel links. ↻ Restore button on rejected rows.
 
@@ -183,7 +168,7 @@
 - Login page with split First/Last name, strong password validation
 - /signup standalone page
 - /reset-password full flow
-- Vendor signup form
+- Vendor signup form (NEW: includes required Website field with auto-prefix)
 - Confirmation email with QR, restaurant address, unsubscribe footer
 - Custom blue dot favicon
 - Hours range 10:30am–4:30pm
@@ -192,7 +177,7 @@
 - Admin Restore rejected vendors
 
 ## Password Rules
-- Min 8 chars, 1 uppercase, 1 number, 1 symbol
+Min 8 chars, 1 uppercase, 1 number, 1 symbol
 
 ## Key Decisions
 - Two-step modal (book then password) for conversion
@@ -204,3 +189,4 @@
 - One product, one brand. Daypart variants via deal types, not separate apps.
 - PWA before native app
 - lib/neighborhoods.ts is the single source of truth — never define NEIGHBORHOODS locally again
+- New required fields use type="text" + JS validation (not type="url") so we can auto-prefix gracefully
