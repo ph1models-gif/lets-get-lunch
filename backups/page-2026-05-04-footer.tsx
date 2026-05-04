@@ -26,7 +26,6 @@ interface Restaurant {
 
 export default function Home() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
@@ -230,45 +229,23 @@ export default function Home() {
         )}
       </section>
 
-      <section className="bg-[#EEF6FC] px-4 py-12">
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-0 md:divide-x md:divide-gray-200">
-
-          {/* For diners */}
-          <div className="text-center md:px-8">
-            <p className="text-xs uppercase tracking-wider text-gray-400 mb-2">For diners</p>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">Know someone who&apos;d love this?</h2>
-            <p className="text-gray-500 max-w-md mx-auto mb-6">Share Let&apos;s Get Lunch with a friend who eats out often.</p>
-            <button onClick={async () => {
-              const shareData = { title: 'Let\'s Get Lunch', text: 'Check out the best prix-fixe lunch deals in NYC!', url: 'https://www.letsgetlunch.nyc' };
-              if (navigator.share) {
-                try { await navigator.share(shareData); } catch (e) { /* user cancelled */ }
-              } else {
-                try {
-                  await navigator.clipboard.writeText('https://www.letsgetlunch.nyc');
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 2000);
-                } catch (e) { /* clipboard failed */ }
-              }
-            }}
-              className="inline-block bg-white border border-[#4A9FD5] text-[#4A9FD5] px-8 py-3 rounded-xl font-medium hover:bg-blue-50 transition-colors">
-              {copied ? '✓ Link copied' : '📤 Share it'}
-            </button>
-          </div>
-
-          {/* Mobile-only divider */}
-          <div className="md:hidden border-t border-gray-200 my-2"></div>
-
-          {/* For restaurants */}
-          <div className="text-center md:px-8">
-            <p className="text-xs uppercase tracking-wider text-gray-400 mb-2">For restaurants</p>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">Got a great lunch special?</h2>
-            <p className="text-gray-500 max-w-md mx-auto mb-6">List it on Let&apos;s Get Lunch — free, takes 5 minutes.</p>
-            <a href="/list-your-restaurant" className="inline-block bg-[#4A9FD5] text-white px-8 py-3 rounded-xl font-medium hover:bg-[#3a8fc5] transition-colors">
-              List your lunch special
-            </a>
-          </div>
-
-        </div>
+      <section className="bg-[#EEF6FC] px-4 py-12 text-center">
+        <h2 className="text-2xl font-bold text-gray-900 mb-3">Empty tables at lunch?</h2>
+        <p className="text-gray-500 max-w-md mx-auto mb-6">Join Let&apos;s Get Lunch and fill your midday seats.</p>
+        <a href="/list-your-restaurant" className="inline-block bg-[#4A9FD5] text-white px-8 py-3 rounded-xl font-medium hover:bg-[#3a8fc5]">
+          List your restaurant — it&apos;s free
+        </a>
+        <button onClick={() => {
+          if (navigator.share) {
+            navigator.share({ title: 'Let\'s Get Lunch', text: 'Check out the best prix-fixe lunch deals in NYC!', url: 'https://www.letsgetlunch.nyc' }).catch(() => {});
+          } else {
+            navigator.clipboard.writeText('https://www.letsgetlunch.nyc');
+            alert('Link copied!');
+          }
+        }}
+          className="block mx-auto mt-3 text-sm text-gray-400 hover:text-gray-600 transition-colors">
+          📤 Know someone who&apos;d love this? Share it
+        </button>
       </section>
 
       <footer className="px-4 py-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
