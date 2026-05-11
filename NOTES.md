@@ -1,5 +1,11 @@
 # Let's Get Lunch — Project Notes
-**Last updated: May 2, 2026 (late evening)**
+**Last updated: May 10, 2026 (late evening)**
+
+## ✅ Recently Fixed (May 10, 2026)
+- **`website` column added to `restaurants` table** — type text, nullable, no CHECK constraint
+- **Backfilled 96 restaurants with websites** from vendors.website via SQL JOIN on normalized name match. Used dry-run preview first. No data overwrites — UPDATE clause protected existing values.
+- **Fixed Ako Sushi vendor row** — had two URLs glued together with a space (`...akosushi.com/menu.pdf https://instagram.com/...`). Cleaned to `https://www.akosushi.com`.
+- **Data hygiene insight**: vendor form should strip whitespace from website on insert; recommend single-URL validation pattern when we touch the vendor form again.
 
 ## ✅ Recently Fixed (May 2, 2026)
 - **Required Website field on vendor signup form** — `/list-your-restaurant` now requires a Website field (right after Address). Auto-prefixes `https://` if user types bare domain like `joespizza.com`. Saves to vendors.website column.
@@ -11,18 +17,16 @@
 
 ## 🎯 NEXT SESSION — START HERE
 
-The vendor signup form has Website field, but the rest of the website pipeline isn't built yet. Need to complete it:
+Schema + backfill done May 10 (96 restaurants have websites). Remaining code work:
 
-1. **Add `website` text column to `restaurants` table** in Supabase (parallel to vendors.website)
-2. **Add Website field to admin "+ Add listing" form** (app/admin/page.tsx)
-3. **Add Website field to admin Pending Review & Edit form** (app/admin/page.tsx) — so VAs can backfill websites for existing 50 vendors
-4. **Add Website field to admin Active Listings edit form** (app/admin/page.tsx) — so already-approved listings can get websites added
-5. **Update approval flow** — when admin approves vendor → restaurant, website should copy through (currently the approval logic doesn't include website because the column didn't exist before)
-6. **Backfill existing 50 vendors** with websites (manual VA work in admin Pending tab once #3 is done)
+1. **Update approval flow** (app/admin/page.tsx) — when vendor → restaurant, copy website through. Find the approve handler, add `website: vendor.website` to the insert.
+2. **Add Website field to admin Active Listings edit form** (app/admin/page.tsx) — so Olga can fill in the ~40 restaurants approved before the field existed, and edit existing ones.
+3. **Add Website field to admin Pending Review & Edit form** (app/admin/page.tsx) — so Olga can correct websites before approving.
+4. **Add Website field to admin "+ Add listing" form** (app/admin/page.tsx) — for consistency when adding directly.
 
-Estimated 60-90 min for #1-5. Backfill (#6) is data work, not code.
+Estimated 60-90 min total. All 4 are app/admin/page.tsx edits, so we can batch them in one session.
 
-This work is a prerequisite for the partner/aggregator feature below, so do it first.
+After this is done, partner/aggregator feature (below) is unblocked.
 
 ## 🎯 PARTNER/AGGREGATOR FEATURE (BIG — plan documented, not yet built)
 
@@ -111,6 +115,9 @@ Goal: differentiate "real partner" restaurants (full Resy-style booking) from "a
 - Next-day specials cutover (5pm? 6pm?). Risks: cognitive whiplash, no data to choose hour. Counter-proposal: today + tomorrow side-by-side after 3pm. Most lunch ends at 4pm anyway. Revisit when there's user data.
 - Investor dashboard / metrics page. Better short-term solution: Tuesday-noon screenshots in deck.
 
+
+- **Restaurant count**: 138 approved (up from 50 when notes started). One VA (Olga) doing all the work, second VA ghosted. 100+ is the inflection point where features like search/filter, duplicate detection, neighborhood SEO, and partner/aggregator UX matter much more.
+
 ## 🧠 STRATEGIC DECISIONS (locked in)
 - **Lunch is flagship. Brunch is upsell.** letsgetbrunch.nyc owned defensively, parked. Same DB, same users, same admin. Brunch becomes a second deal type per restaurant later. Customer is the asset, not the daypart.
 - **PWA before native App Store launch.** One app, not two. Daypart-aware UI. Build native ONLY when there's data showing users want it.
@@ -146,7 +153,7 @@ Goal: differentiate "real partner" restaurants (full Resy-style booking) from "a
 - HTML5 input types like `type="url"` validate BEFORE JS submit handlers run. If you need JS-side massaging (like auto-prefix), use `type="text"` and validate in JS.
 
 ## Database
-- restaurants: id, name, neighborhood, address, cuisine, bio, work_friendly, walk_in, wifi, seats, hours, is_active, photo_url, photo_urls, lat, lng (NEEDS: phone, website, is_partner)
+- restaurants: id, name, neighborhood, address, cuisine, bio, work_friendly, walk_in, wifi, seats, hours, is_active, photo_url, photo_urls, lat, lng, website (NEEDS: phone, is_partner)
 - deals: id, restaurant_id, special, price, courses, days (text[] DEFAULT Mon-Fri), is_active
 - vendors: id, restaurant_name, contact_name, email, phone, address, website, neighborhood, cuisine, seats, hours, special, price, work_friendly, wifi, bio, days, message, status, photo_url, photo_urls, created_at
 - profiles: id (→auth.users), name, email, phone, neighborhood, dietary_prefs, created_at
