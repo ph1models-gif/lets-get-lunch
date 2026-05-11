@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 
+import { NEIGHBORHOODS, NEIGHBORHOOD_GROUPS } from '../../lib/neighborhoods';
 const PASSWORD = 'lunch2026'
 
 type Vendor = {
@@ -52,20 +53,6 @@ type Deal = {
 
 
 
-
-const NEIGHBORHOODS = [
-  "Midtown","Midtown East","Midtown West","Upper East Side","Upper West Side",
-  "Chelsea","West Village","Greenwich Village","SoHo","NoHo","Tribeca",
-  "Financial District","Lower East Side","East Village","Gramercy Park",
-  "Murray Hill","Kips Bay","Harlem","Hell's Kitchen","Chinatown","Little Italy",
-  "Battery Park City","Union Square","Flatiron","NoMad","Lenox Hill","Yorkville","Washington Heights",
-  "Inwood","Morningside Heights","Williamsburg","Dumbo","Brooklyn Heights",
-  "Park Slope","Cobble Hill","Carroll Gardens","Boerum Hill","Fort Greene",
-  "Clinton Hill","Bushwick","Greenpoint","Red Hook","Crown Heights",
-  "Prospect Heights","Downtown Brooklyn","Astoria","Long Island City",
-  "Flushing","Jackson Heights","Forest Hills","Sunnyside","Ridgewood",
-  "Fordham","Riverdale","Mott Haven","St. George","Stapleton","Nolita","Little Italy","Two Bridges","Turtle Bay","Sutton Place","Hudson Yards","Carnegie Hill","East Harlem","Hamilton Heights","Sugar Hill","Bed-Stuy","Bay Ridge","Sunset Park","Windsor Terrace","Prospect Lefferts Gardens","Flatbush","Woodside","Rego Park","Elmhurst","Corona"
-];
 
 const CUISINES = [
   "American","Italian","Japanese/Sushi","French","Mexican/Latin",
@@ -188,6 +175,10 @@ export default function AdminPage() {
   const [addExtraFiles, setAddExtraFiles] = useState<File[]>([])
   const [editingVendorId, setEditingVendorId] = useState<string | null>(null)
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
+  const [listingSearch, setListingSearch] = useState('')
+  const [listingHood, setListingHood] = useState('')
+  const [listingCuisine, setListingCuisine] = useState('')
+  const [showHidden, setShowHidden] = useState(false)
   const [vendorMainFile, setVendorMainFile] = useState<File | null>(null)
   const [vendorExtraFiles, setVendorExtraFiles] = useState<File[]>([])
   const [vendorEditForm, setVendorEditForm] = useState<any>({})
@@ -382,6 +373,7 @@ export default function AdminPage() {
       bio: vendor.bio || null,
       work_friendly: vendor.work_friendly === 'yes',
       wifi: vendor.wifi === 'yes',
+      website: vendor.website || null,
       is_active: true, lat, lng,
     }).select().single()
 
@@ -396,6 +388,14 @@ export default function AdminPage() {
     }
     await supabase.from('vendors').update({ status: 'approved' }).eq('id', vendor.id)
     fetchVendors()
+  }
+
+  async function restoreVendor(id: string) {
+    if (!confirm('Restore this vendor to Pending Submissions for review?')) return
+    await supabase.from('vendors').update({ status: 'pending' }).eq('id', id)
+    fetchContacts()
+    fetchVendors()
+    alert('Restored — check the Pending Submissions tab')
   }
 
   async function rejectVendor(id: string) {
@@ -964,11 +964,20 @@ export default function AdminPage() {
                             <p className="font-semibold text-gray-900">{v.restaurant_name}</p>
                             <p className="text-xs text-gray-500">{v.neighborhood} · {v.cuisine}</p>
                           </div>
-                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                            v.status === 'approved' ? 'bg-green-100 text-green-700' :
-                            v.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                            'bg-orange-100 text-orange-700'
-                          }`}>{v.status}</span>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                              v.status === 'approved' ? 'bg-green-100 text-green-700' :
+                              v.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                              'bg-orange-100 text-orange-700'
+                            }`}>{v.status}</span>
+                            {v.status === 'rejected' && (
+                              <button
+                                onClick={() => restoreVendor(v.id)}
+                                className="text-xs px-2 py-1 rounded-full font-medium bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                title="Move back to Pending Submissions"
+                              >↻ Restore</button>
+                            )}
+                          </div>
                         </div>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600 mb-2">
                           <div>
@@ -1028,11 +1037,48 @@ export default function AdminPage() {
           </div>
         )}
 
-        {tab === 'restaurants' && (
+        {tab === 'restaurants' && (() => {
+          const filteredRests = restaurants.filter(r => {
+            if (!showHidden && !r.is_active) return false;
+            if (listingHood && r.neighborhood !== listingHood) return false;
+            if (listingCuisine && r.cuisine !== listingCuisine) return false;
+            if (listingSearch) {
+              const q = listingSearch.toLowerCase();
+              if (!(r.name || '').toLowerCase().includes(q) && !(r.address || '').toLowerCase().includes(q)) return false;
+            }
+            return true;
+          });
+          return (
           <>
             {restLoading && <p className="text-gray-500 text-sm">Loading…</p>}
             {!restLoading && restaurants.length === 0 && <p className="text-gray-500 text-sm">No restaurants yet.</p>}
-            {restaurants.map(r => {
+            {!restLoading && restaurants.length > 0 && (
+              <div className="bg-white border border-gray-200 rounded-xl p-3 mb-4 flex flex-wrap items-center gap-2">
+                <input type="text" value={listingSearch} onChange={e => setListingSearch(e.target.value)} placeholder="Search by name or address..." className="flex-1 min-w-[200px] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#4A9FD5]" />
+                <select value={listingHood} onChange={e => setListingHood(e.target.value)} className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-[#4A9FD5]">
+                  <option value="">All neighborhoods</option>
+                  {Array.from(new Set(restaurants.map(r => r.neighborhood).filter(Boolean))).sort().map(n => <option key={n} value={n}>{n}</option>)}
+                </select>
+                <select value={listingCuisine} onChange={e => setListingCuisine(e.target.value)} className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-[#4A9FD5]">
+                  <option value="">All cuisines</option>
+                  {CUISINES.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <label className="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer">
+                  <input type="checkbox" checked={showHidden} onChange={e => setShowHidden(e.target.checked)} />
+                  Show hidden
+                </label>
+                {(listingSearch || listingHood || listingCuisine || showHidden) && (
+                  <button onClick={() => { setListingSearch(''); setListingHood(''); setListingCuisine(''); setShowHidden(false); }} className="text-xs text-gray-500 hover:text-gray-700 underline">Clear</button>
+                )}
+              </div>
+            )}
+            {!restLoading && restaurants.length > 0 && (
+              <p className="text-xs text-gray-500 mb-3">{filteredRests.length} of {restaurants.length} listings shown</p>
+            )}
+            {!restLoading && restaurants.length > 0 && filteredRests.length === 0 && (
+              <p className="text-gray-400 text-sm py-8 text-center">No listings match these filters.</p>
+            )}
+            {filteredRests.map(r => {
               const deal = deals.find(d => d.restaurant_id === r.id)
               const isEditing = editingId === r.id
               return (
@@ -1273,7 +1319,8 @@ export default function AdminPage() {
               )
             })}
           </>
-        )}
+          );
+        })()}
       </div>
 
       {lightboxUrl && (

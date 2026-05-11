@@ -426,6 +426,7 @@ export default function AdminPage() {
       deal_days: deal?.days || ['Mon','Tue','Wed','Thu','Fri'],
       work_friendly: r.work_friendly || false,
       wifi: r.wifi || false,
+      website: r.website || '',
     })
   }
 
@@ -476,6 +477,7 @@ export default function AdminPage() {
       lng: editForm.lng || null,
       work_friendly: editForm.work_friendly || false,
       wifi: editForm.wifi || false,
+      website: editForm.website || null,
     }).eq('id', r.id)
 
     const deal = deals.find(d => d.restaurant_id === r.id)
@@ -1127,6 +1129,10 @@ export default function AdminPage() {
                         <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">Address</label>
                           <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={editForm.address || ''} onChange={e => setEditForm(f => ({ ...f, address: e.target.value }))} />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Website</label>
+                          <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={editForm.website || ''} onChange={e => setEditForm(f => ({ ...f, website: e.target.value }))} placeholder="https://example.com" />
                         </div>
                         <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">Cuisine</label>
