@@ -28,6 +28,23 @@ Estimated 60-90 min total. All 4 are app/admin/page.tsx edits, so we can batch t
 
 After this is done, partner/aggregator feature (below) is unblocked.
 
+## 🗺️ FEATURE IDEA — Map-driven list filtering (Airbnb pattern)
+
+**Problem**: 138 listings concentrated in Manhattan + a few in Brooklyn. Outer-borough users see sparse maps and may think site is dead. Beyond density, even in core areas the list doesn't sync with what's visible on the map.
+
+**Goal**: When user pans/zooms the map, the list below filters to "what's visible in current map bounds." Like Airbnb.
+
+**Three implementation options** (pick when revisiting):
+1. **"Search this area" button** (~1 hour) — appears after map moves; user clicks to refresh list. Less aggressive than auto-update. Strong UX, this is what Airbnb actually does.
+2. **Auto-sync** (~2-3 hours) — map pan triggers immediate list update. More magical but can feel jumpy. Needs Google Maps `bounds_changed` event + debouncing + filtering by lat/lng inside viewport.
+3. **Empty-state-only fix** (~15 min) — quick win: if filtered list is empty for the visible area, show "No listings here today — try Manhattan or check back."
+
+**Recommendation**: Option 1 (search-this-area button) when revisited. Matches user expectations from Airbnb/Zillow. Doesn't fight users who want to browse without re-filtering.
+
+**Worth flagging**: Resy and OpenTable do NOT do this — they show a fixed list next to a map. That's also a valid pattern for a directory site. Don't assume map-sync is universally better; test with real users before committing.
+
+**Priority**: Medium. Not blocking the deck. Real polish improvement once core features (partner/aggregator, remaining website forms) are done.
+
 ## 🎯 PARTNER/AGGREGATOR FEATURE (BIG — plan documented, not yet built)
 
 Goal: differentiate "real partner" restaurants (full Resy-style booking) from "aggregator listings" (call/visit website only). This acknowledges current state honestly: most listings are aggregator scrapes, only Royal 35 is a true booking partner.
