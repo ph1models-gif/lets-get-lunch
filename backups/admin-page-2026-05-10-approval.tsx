@@ -373,7 +373,6 @@ export default function AdminPage() {
       bio: vendor.bio || null,
       work_friendly: vendor.work_friendly === 'yes',
       wifi: vendor.wifi === 'yes',
-      website: vendor.website || null,
       is_active: true, lat, lng,
     }).select().single()
 
