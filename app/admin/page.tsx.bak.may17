@@ -169,7 +169,7 @@ export default function AdminPage() {
     name: '', address: '', neighborhood: '', cuisine: '', hours: '',
     bio: '', special: '', price: '', work_friendly: false, wifi: false,
     days: ['Mon','Tue','Wed','Thu','Fri'],
-    contact_name: '', contact_email: '', contact_phone: '', website: ''
+    contact_name: '', contact_email: '', contact_phone: ''
   })
   const [addMainFile, setAddMainFile] = useState<File | null>(null)
   const [addExtraFiles, setAddExtraFiles] = useState<File[]>([])
@@ -310,7 +310,6 @@ export default function AdminPage() {
       wifi: addForm.wifi,
       photo_url: photoUrl,
       photo_urls: photoUrls,
-      website: addForm.website || null,
       is_active: true,
       lat, lng,
     }).select().single()
@@ -342,7 +341,7 @@ export default function AdminPage() {
         status: 'approved',
       })
       setAddSuccess(`✅ ${addForm.name} added and live on the site!`)
-      setAddForm({ name: '', address: '', neighborhood: '', cuisine: '', hours: '', bio: '', special: '', price: '', work_friendly: false, wifi: false, days: ['Mon','Tue','Wed','Thu','Fri'], contact_name: '', contact_email: '', contact_phone: '', website: '' })
+      setAddForm({ name: '', address: '', neighborhood: '', cuisine: '', hours: '', bio: '', special: '', price: '', work_friendly: false, wifi: false, days: ['Mon','Tue','Wed','Thu','Fri'], contact_name: '', contact_email: '', contact_phone: '' })
       setAddMainFile(null)
       setAddExtraFiles([])
     } else {
@@ -650,10 +649,6 @@ export default function AdminPage() {
                         <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={vendorEditForm.phone || ''} onChange={e => setVendorEditForm((f: any) => ({...f, phone: e.target.value}))} />
                       </div>
                     </div>
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1">Website</label>
-                      <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={vendorEditForm.website || ''} onChange={e => setVendorEditForm((f: any) => ({...f, website: e.target.value}))} placeholder="https://example.com" />
-                    </div>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-2 text-sm cursor-pointer">
                         <input type="checkbox" checked={vendorEditForm.work_friendly === 'yes'} onChange={e => setVendorEditForm((f: any) => ({...f, work_friendly: e.target.checked ? 'yes' : 'no'}))} />
@@ -804,10 +799,6 @@ export default function AdminPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">One-line bio</label>
                 <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={addForm.bio} onChange={e => setAddForm(f => ({...f, bio: e.target.value}))} placeholder="e.g. Upscale Italian in the heart of Midtown" maxLength={120} />
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
-                  <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={addForm.website} onChange={e => setAddForm(f => ({...f, website: e.target.value}))} placeholder="https://example.com" />
-                </div>
               </div>
 
               <div className="flex gap-4">
