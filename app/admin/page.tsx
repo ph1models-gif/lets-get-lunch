@@ -1318,6 +1318,7 @@ export default function AdminPage() {
                       <div><span className="text-gray-400">Price</span><br />{deal?.price ? `$${deal.price}` : '—'}</div>
                       <div><span className="text-gray-400">Bio</span><br />{r.bio || <span className="text-gray-300">None</span>}</div>
                       <div><span className="text-gray-400">Lat/lng</span><br />{r.lat && r.lng ? `${r.lat.toFixed(4)}, ${r.lng.toFixed(4)}` : <span className="text-amber-600">Missing — won't show on map</span>}</div>
+                      <div><span className="text-gray-400">Website</span><br />{r.website ? <a href={r.website} target="_blank" rel="noopener noreferrer" className="text-[#4A9FD5] hover:underline">{r.website}</a> : <span className="text-gray-300">None</span>}</div>
                       {(() => {
                         const v = vendors.find(v => v.restaurant_name === r.name);
                         return v ? (
