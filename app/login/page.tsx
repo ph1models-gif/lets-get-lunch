@@ -49,6 +49,7 @@ export default function LoginPage() {
       await supabase.from('profiles').insert({
         id: data.user.id,
         name: fullName,
+        email: signUpForm.email,
         neighborhood: signUpForm.neighborhood || null,
       });
     }

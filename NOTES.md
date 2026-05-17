@@ -1,6 +1,14 @@
 # Let's Get Lunch — Project Notes
 **Last updated: May 10, 2026 (late evening)**
 
+## ✅ Recently Fixed (May 17, 2026)
+- **Website pipeline complete** — all 4 admin tasks done in app/admin/page.tsx:
+  1. Approval flow already had `website: vendor.website` (done May 10)
+  2. Active Listings edit form already had website field (done May 10)
+  3. Added Website input to Pending vendor Review & Edit form
+  4. Added Website field to + Add Listing form (state, insert, reset, UI)
+  5. Added Website display to Active Listings card view (clickable link, shows above Contact)
+
 ## ✅ Recently Fixed (May 10, 2026)
 - **`website` column added to `restaurants` table** — type text, nullable, no CHECK constraint
 - **Backfilled 96 restaurants with websites** from vendors.website via SQL JOIN on normalized name match. Used dry-run preview first. No data overwrites — UPDATE clause protected existing values.
@@ -17,16 +25,8 @@
 
 ## 🎯 NEXT SESSION — START HERE
 
-Schema + backfill done May 10 (96 restaurants have websites). Remaining code work:
+Partner/aggregator feature is now unblocked. Website pipeline is complete.
 
-1. **Update approval flow** (app/admin/page.tsx) — when vendor → restaurant, copy website through. Find the approve handler, add `website: vendor.website` to the insert.
-2. **Add Website field to admin Active Listings edit form** (app/admin/page.tsx) — so Olga can fill in the ~40 restaurants approved before the field existed, and edit existing ones.
-3. **Add Website field to admin Pending Review & Edit form** (app/admin/page.tsx) — so Olga can correct websites before approving.
-4. **Add Website field to admin "+ Add listing" form** (app/admin/page.tsx) — for consistency when adding directly.
-
-Estimated 60-90 min total. All 4 are app/admin/page.tsx edits, so we can batch them in one session.
-
-After this is done, partner/aggregator feature (below) is unblocked.
 
 ## 🗺️ FEATURE IDEA — Map-driven list filtering (Airbnb pattern)
 
