@@ -8,6 +8,9 @@
   3. Added Website input to Pending vendor Review & Edit form
   4. Added Website field to + Add Listing form (state, insert, reset, UI)
   5. Added Website display to Active Listings card view (clickable link, shows above Contact)
+- **Bug D fixed — signup not saving email to profiles** — /login signup tab was missing `email` field in profiles.insert (the other 2 signup paths /signup and reservation modal were already correct). Added the line. Verified, built clean, pushed.
+- **Backfilled 8 profile rows with NULL emails** — UPDATE profiles SET email = u.email FROM auth.users u WHERE profiles.id = u.id AND profiles.email IS NULL. All clean now.
+- **Personal cleanup** — deleted 3 test accounts of Brian's (brian@newyorkheadshots.com, ph1models@gmail.com, info@keith-photography.com). Kept brian@letsgetlunch.nyc. Note: accidentally deleted Brian's own profile row during cleanup — recreated via INSERT. Lesson: double-check UUIDs against email before bulk profile deletes.
 
 ## ✅ Recently Fixed (May 10, 2026)
 - **`website` column added to `restaurants` table** — type text, nullable, no CHECK constraint
@@ -80,11 +83,6 @@ Goal: differentiate "real partner" restaurants (full Resy-style booking) from "a
 - Email DOES send. Lands in Gmail spam.
 - Fix: verify Resend SPF, DKIM, DMARC records on letsgetlunch.nyc DNS
 
-### Bug D — Signup not saving email to profiles table
-- Profile rows missing email field (NULL). ~half of existing rows.
-- Email IS in auth.users (login works fine).
-- LIKELY ROOT CAUSE: two signup paths (modal on restaurant page vs standalone /signup). One saves email, other doesn't. Diff handlers first.
-
 ### Bug E — Duplicate map() in admin edit form dropdowns
 - app/admin/page.tsx ~lines 1107-1109 and 1115-1117
 - Cuisine and Neighborhood selects each call `.map()` TWICE in a row → every option appears twice
@@ -104,7 +102,6 @@ Goal: differentiate "real partner" restaurants (full Resy-style booking) from "a
 1. **Complete website pipeline** — see "Next Session — Start Here" above
 2. **Partner/aggregator feature** — see plan above
 3. FIX Bug C — email deliverability (SPF/DKIM/DMARC in Resend dashboard)
-4. FIX Bug D — signup email to profiles table
 5. FIX Bug E — duplicate map() lines (5-min easy win)
 6. FIX Bug F — unify CUISINES into lib/cuisines.ts
 7. FIX Bug G — photo preview in vendor review form
