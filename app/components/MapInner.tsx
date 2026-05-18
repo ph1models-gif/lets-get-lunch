@@ -44,7 +44,7 @@ export default function MapInner({ onPanReady, activeIds }: Props) {
 
     const map = new g.Map(ref.current, {
       center: {lat:40.7484, lng:-73.984},
-      zoom: 13,
+      zoom: 14,
       gestureHandling: 'cooperative',
       mapTypeControl: false,
       streetViewControl: false,
@@ -187,6 +187,9 @@ export default function MapInner({ onPanReady, activeIds }: Props) {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(pos => {
         const userLatLng = {lat: pos.coords.latitude, lng: pos.coords.longitude};
+        // NYC bounding box (rough): lat 40.49-40.92, lng -74.27 to -73.68
+        const inNYC = userLatLng.lat >= 40.49 && userLatLng.lat <= 40.92 &&
+                      userLatLng.lng >= -74.27 && userLatLng.lng <= -73.68;
         new g.Marker({
           position: userLatLng,
           map,
@@ -194,7 +197,11 @@ export default function MapInner({ onPanReady, activeIds }: Props) {
           icon: {path:g.SymbolPath.CIRCLE, scale:10, fillColor:'#4285F4', fillOpacity:1, strokeColor:'white', strokeWeight:3},
           zIndex: 999,
         });
-        map.panTo(userLatLng);
+        if (inNYC) {
+          map.panTo(userLatLng);
+          map.setZoom(15);
+        }
+        // If outside NYC, stay at Times Square default (already set)
       }, () => {});
     }
   }
