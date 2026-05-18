@@ -43,8 +43,8 @@ export default function MapInner({ onPanReady, activeIds }: Props) {
     const g = (window as any).google.maps;
 
     const map = new g.Map(ref.current, {
-      center: {lat:40.7484, lng:-73.984},
-      zoom: 14,
+      center: {lat:40.7425, lng:-73.9879},
+      zoom: 16,
       gestureHandling: 'cooperative',
       mapTypeControl: false,
       streetViewControl: false,
@@ -201,7 +201,7 @@ export default function MapInner({ onPanReady, activeIds }: Props) {
           map.panTo(userLatLng);
           map.setZoom(15);
         }
-        // If outside NYC, stay at Times Square default (already set)
+        // If outside NYC, stay at Madison Square Park default (already set)
       }, () => {});
     }
   }
