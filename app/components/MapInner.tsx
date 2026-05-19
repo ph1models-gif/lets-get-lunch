@@ -146,7 +146,7 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange }: Prop
       `;
       content.addEventListener('click', () => { window.open(`/restaurants/${r.id}`, '_blank'); });
 
-      const popup = new g.InfoWindow({ content, disableAutoPan: true });
+      const popup = new g.InfoWindow({ content, disableAutoPan: false });
 
       let pinHovered = false;
       let cardHovered = false;
