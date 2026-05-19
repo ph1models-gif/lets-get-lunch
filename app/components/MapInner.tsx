@@ -75,7 +75,7 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange }: Prop
     if (onPanReady) {
       onPanReady((lat: number, lng: number) => {
         map.panTo({lat, lng});
-        map.setZoom(14);
+        map.setZoom(16);
       });
     }
 
