@@ -207,7 +207,7 @@ export default function MapInner({ onPanReady, activeIds }: Props) {
   }
 
   return (
-    <div style={{position:'relative', width:'100%', height:'420px'}}>
+    <div style={{position:'relative', width:'100%', height:'65vh', maxHeight:'420px', minHeight:'320px'}}>
       <style>{`
         @keyframes shimmer {
           0% { background-position: -800px 0; }
@@ -220,7 +220,7 @@ export default function MapInner({ onPanReady, activeIds }: Props) {
         }
       `}</style>
       <div className="map-skeleton" style={{position:'absolute', inset:0, zIndex:0}} />
-      <div ref={ref} style={{width:'100%', height:'420px', position:'relative', zIndex:1, background:'transparent'}} />
+      <div ref={ref} style={{width:'100%', height:'100%', position:'relative', zIndex:1, background:'transparent'}} />
     </div>
   );
 }
