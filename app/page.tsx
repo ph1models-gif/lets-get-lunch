@@ -131,11 +131,11 @@ export default function Home() {
         </div>
       </nav>
 
-      <section className="bg-gradient-to-b from-[#EEF6FC] to-white px-4 pt-6 pb-4 text-center">
-        <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">
+      <section className="bg-gradient-to-b from-[#EEF6FC] to-white px-4 pt-3 pb-3 md:pt-6 md:pb-4 text-center">
+        <h1 className="hidden md:block text-2xl md:text-4xl font-bold text-gray-900 mb-2">
           NYC&apos;s best lunch deals, <span className="text-[#4A9FD5]">at the table.</span>
         </h1>
-        <p className="text-gray-500 text-sm max-w-xl mx-auto mb-4">
+        <p className="hidden md:block text-gray-500 text-sm max-w-xl mx-auto mb-4">
           Prix-fixe deals across NYC · Real tables · Most under $35
         </p>
         <div className="max-w-lg mx-auto flex gap-2 mb-4">
