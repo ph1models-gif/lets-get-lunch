@@ -147,9 +147,6 @@ export default function Home() {
               if (coords && mapPanRef.current) mapPanRef.current(coords.lat, coords.lng);
             }}
           />
-          <button className="bg-[#4A9FD5] text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-[#3a8fc5]">
-            Search
-          </button>
         </div>
         <div className="flex gap-2 overflow-x-auto pb-2 justify-start md:justify-center">
           {filters.map(f => (
