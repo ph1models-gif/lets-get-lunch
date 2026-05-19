@@ -465,6 +465,21 @@ export default function AdminPage() {
       finalPhotoUrls = [...(editForm.photo_urls || []), ...newUrls].slice(0, 3)
     }
 
+    // Auto-geocode the address — overwrite lat/lng with what Google returns.
+    // If geocoding fails (network/API issue), fall back to whatever was in the form so nothing breaks.
+    let geoLat: number | null = editForm.lat || null
+    let geoLng: number | null = editForm.lng || null
+    if (editForm.address) {
+      try {
+        const geo = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(editForm.address + ', New York, NY')}&key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0`)
+        const geoData = await geo.json()
+        if (geoData.results?.[0]?.geometry?.location) {
+          geoLat = geoData.results[0].geometry.location.lat
+          geoLng = geoData.results[0].geometry.location.lng
+        }
+      } catch (e) { console.error('Geocoding failed on edit:', e) }
+    }
+
     await supabase.from('restaurants').update({
       name: editForm.name,
       cuisine: editForm.cuisine,
@@ -474,8 +489,8 @@ export default function AdminPage() {
       bio: editForm.bio || null,
       photo_url: finalPhotoUrl,
       photo_urls: finalPhotoUrls,
-      lat: editForm.lat || null,
-      lng: editForm.lng || null,
+      lat: geoLat,
+      lng: geoLng,
       work_friendly: editForm.work_friendly || false,
       wifi: editForm.wifi || false,
       website: editForm.website || null,
