@@ -36,6 +36,7 @@ export default function Home() {
   const [walkInOnly, setWalkInOnly] = useState(false);
   const [selectedHood, setSelectedHood] = useState('');
   const mapPanRef = useRef<((lat: number, lng: number) => void) | null>(null);
+  const [mapBounds, setMapBounds] = useState<{north: number, south: number, east: number, west: number} | null>(null);
   const [userFirstName, setUserFirstName] = useState('');
 
   async function load() {
@@ -76,6 +77,11 @@ export default function Home() {
   const filtered = restaurants.filter(r => {
     const deal = r.deals?.[0];
     if (!deal) return false;
+    // Filter by map bounds (if map has reported them and restaurant has coords)
+    if (mapBounds && r.lat != null && r.lng != null) {
+      if (r.lat > mapBounds.north || r.lat < mapBounds.south) return false;
+      if (r.lng > mapBounds.east || r.lng < mapBounds.west) return false;
+    }
     // Filter by today's day
     const todayDay = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date().getDay()];
     const days = deal.days && deal.days.length > 0 ? deal.days : ['Mon','Tue','Wed','Thu','Fri'];
@@ -173,12 +179,12 @@ export default function Home() {
         </div>
       </section>
 
-      <MapComponent onPanReady={(fn) => { mapPanRef.current = fn; }} activeIds={filtered.map(r => r.id)} />
+      <MapComponent onPanReady={(fn) => { mapPanRef.current = fn; }} activeIds={filtered.map(r => r.id)} onBoundsChange={setMapBounds} />
 
       <section className="px-4 py-3">
         {loading
           ? <p className="text-sm text-gray-400">Loading restaurants...</p>
-          : <p className="text-sm text-gray-500">{filtered.length} lunch specials available today</p>
+          : <p className="text-sm text-gray-500">{filtered.length} lunch {filtered.length === 1 ? 'special' : 'specials'} in this area · Scroll for details ↓</p>
         }
       </section>
 

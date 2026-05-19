@@ -4,10 +4,11 @@ import { supabase } from '../../lib/supabase';
 
 interface Props {
   onPanReady?: (fn: (lat: number, lng: number) => void) => void;
+  onBoundsChange?: (bounds: {north: number, south: number, east: number, west: number}) => void;
   activeIds?: string[];
 }
 
-export default function MapInner({ onPanReady, activeIds }: Props) {
+export default function MapInner({ onPanReady, activeIds, onBoundsChange }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const markersRef = useRef<Map<string, any>>(new Map());
   const activeIdsRef = useRef<string[] | undefined>(activeIds);
@@ -54,6 +55,21 @@ export default function MapInner({ onPanReady, activeIds }: Props) {
       const ph = document.getElementById('map-placeholder');
       if (ph) { ph.style.opacity = '0'; setTimeout(() => ph.remove(), 400); }
     });
+
+    // Debounced bounds emitter — fires 300ms after pan/zoom stops
+    let boundsTimer: any = null;
+    const emitBounds = () => {
+      if (!onBoundsChange) return;
+      if (boundsTimer) clearTimeout(boundsTimer);
+      boundsTimer = setTimeout(() => {
+        const b = map.getBounds();
+        if (!b) return;
+        const ne = b.getNorthEast();
+        const sw = b.getSouthWest();
+        onBoundsChange({ north: ne.lat(), south: sw.lat(), east: ne.lng(), west: sw.lng() });
+      }, 300);
+    };
+    g.event.addListener(map, 'idle', emitBounds);
 
     if (onPanReady) {
       onPanReady((lat: number, lng: number) => {
