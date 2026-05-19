@@ -121,7 +121,7 @@ export default function NeighborhoodSearch({ onChange, onSelect }: Props) {
           onChange={e => { setQuery(e.target.value); setOpen(true); onChange(e.target.value); }}
           onFocus={() => setOpen(true)}
           placeholder='Neighborhood — try "Midtown"'
-          style={{flex:1,padding:'12px 0',background:'transparent',border:'none',outline:'none',fontSize:'14px',color:'#111'}}
+          style={{flex:1,padding:'12px 0',background:'transparent',border:'none',outline:'none',fontSize:'16px',color:'#111'}}
         />
         {query && (
           <button onClick={() => { setQuery(''); setOpen(false); onChange(''); }} style={{color:'#9ca3af',fontSize:'18px',background:'none',border:'none',cursor:'pointer'}}>×</button>
