@@ -223,7 +223,7 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange }: Prop
   }
 
   return (
-    <div style={{position:'relative', width:'100%', height:'65vh', maxHeight:'420px', minHeight:'320px'}}>
+    <div style={{position:'relative', width:'100%', height:'50vh', maxHeight:'420px', minHeight:'280px'}}>
       <style>{`
         @keyframes shimmer {
           0% { background-position: -800px 0; }
