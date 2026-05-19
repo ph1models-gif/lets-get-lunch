@@ -49,6 +49,7 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange }: Prop
       gestureHandling: 'cooperative',
       mapTypeControl: false,
       streetViewControl: false,
+      clickableIcons: false,
     });
 
     g.event.addListenerOnce(map, 'tilesloaded', () => {
@@ -97,6 +98,11 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange }: Prop
     document.head.appendChild(style);
 
     let openPopup: any = null;
+
+    // Tap map (anywhere not on a pin) closes the open restaurant popup
+    map.addListener('click', () => {
+      if (openPopup) { openPopup.close(); openPopup = null; }
+    });
 
     restaurants.forEach((r: any) => {
       const deal = r.deals?.[0];
