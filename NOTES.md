@@ -1,6 +1,90 @@
 # Let's Get Lunch — Project Notes
 **Last updated: May 10, 2026 (late evening)**
 
+## ✅ Recently Fixed (May 18-19, 2026 — long session)
+
+### Bug D — Signup not saving email to profiles (FIXED)
+- Root cause: /login signup tab was missing email field in profiles.insert. /signup and reservation modal were already correct.
+- One-line fix in app/login/page.tsx — added email field to the insert.
+- Backfilled 8 existing NULL email rows: UPDATE profiles SET email = u.email FROM auth.users u WHERE profiles.id = u.id AND profiles.email IS NULL.
+- Cleaned up Brian's test auth accounts (deleted 3, kept brian@letsgetlunch.nyc). Accidentally deleted Brian's profile row during cleanup, recreated via INSERT. Lesson: confirm UUIDs against emails before bulk profile deletes.
+
+### Bug C — Email deliverability (DNS DONE — reputation pending)
+- Resend domain verified with SPF + DKIM (Google + Resend DKIM records).
+- Added DMARC TXT record to GoDaddy: _dmarc = v=DMARC1; p=none; rua=mailto:brian@letsgetlunch.nyc.
+- Removed a pre-existing GoDaddy-default DMARC that pointed to onsecureserver.net with p=quarantine.
+- Brian trained his Gmail to inbox the address.
+- Future: after a few weeks of clean monitoring, bump p=none to p=quarantine.
+
+### Admin: auto-geocode address on edit save
+- saveEdit in app/admin/page.tsx now re-geocodes via Google's API when admin saves an edit. lat/lng are overwritten with whatever Google returns.
+- Falls back to whatever's in the form if geocoding fails (network/API issue) so a blip can't wipe coordinates.
+- Already proved its value — Brian caught a SoHo listing Olga had submitted with a wrong address; fix-and-save moved the pin to the right block automatically.
+
+### Map UX overhaul
+- Default map center moved from Times Square to Madison Square Park (40.7425, -73.9879). Default zoom raised from 13 to 16.
+- Auto-zoom to user when in NYC bounds. Geolocation block checks rough NYC bounding box (lat 40.49-40.92, lng -74.27 to -73.68). If user is in NYC: pan + zoom to 15. Outside NYC: stay at Madison Square Park default.
+- Mobile peek pattern. Map height shrunk to 50vh on mobile (was 420px fixed), capped at 420px on desktop via maxHeight, minHeight 280px. List count + first card now peek above the fold.
+- Hero (H1 + tagline) initially hidden on mobile via hidden md:block, then later redesigned (see Header redesign below).
+- Search button removed. Was redundant with autocomplete which already pans the map on selection.
+- Map-list sync (Airbnb auto-sync pattern). Map emits bounds via onBoundsChange callback debounced via the 'idle' event. Page holds mapBounds state and filters the visible list by lat/lng inside bounds. Both count text and list update live as user pans/zooms.
+- Dynamic count text now reads: "X lunch specials in this area · Scroll for details ↓".
+- iOS Safari zoom-on-input bug fixed. NeighborhoodSearch input fontSize raised from 14px to 16px. NEW RULE: every input/textarea/select with mobile usage must be ≥16px font, else Safari auto-zooms on focus and breaks layout.
+- Google POI clicks disabled (clickableIcons: false on map). Reverses the earlier "POI clicks left enabled" decision — popups confused users on mobile.
+- Map click closes restaurant popup. Standard Google Maps UX (tap map = close info window). Was missing.
+- Neighborhood search zoom fixed. Was hardcoded to setZoom(14) — felt like zooming OUT after we raised the default to 16. Changed to 16 to match.
+- InfoWindow disableAutoPan changed from true to false so Google centers the popup in view when user taps a pin near the edge of the visible area.
+
+### Header redesign (mobile-first brand identity)
+- Added Bebas Neue font via next/font/google in app/layout.tsx (Inter still default for body).
+- Top nav brand block restructured to two lines:
+  - Line 1: "Let's Get **Lunch**" in Bebas Neue, "Lunch" in brand blue (#4A9FD5)
+  - Line 2: "NYC's best lunch deals, **at the table.**" — small gray text, "at the table." in blue
+- Mirrors the logo aesthetic (heavy condensed sans-serif, blue Lunch accent).
+
+### Website pipeline (carried over from May 17)
+- All admin tasks done in app/admin/page.tsx:
+  - Approval flow had website: vendor.website (done May 10)
+  - Active Listings edit form had website field (done May 10)
+  - Added Website input to Pending vendor Review & Edit form
+  - Added Website field to + Add Listing form (state, insert, reset, UI)
+  - Added Website display to Active Listings card view (clickable link)
+
+### Workflow lesson — Safari mobile caching
+- Multiple times this session things "looked broken" on phone that were just browser cache. First mobile debug step: force-close the Safari/Chrome tab (swipe up dismiss, not just navigate away) and open letsgetlunch.nyc in a fresh tab.
+
+## 🎯 NEXT SESSION — START HERE
+
+Three big items, in priority order:
+
+### 1. Tier 1 / Tier 2 partner feature (HIGH — investor readiness)
+- Suppress QR code on Tier 1 reservation confirmations (success modal + confirmation email).
+- Replace "show this code at the door" copy with website + phone CTAs for Tier 1.
+- Tier 2 (Royal 35 only for now) keeps the existing QR + "show code" flow.
+- Schema work first:
+  - Add is_partner boolean default false to restaurants table.
+  - Flip Royal 35 to is_partner=true.
+  - Add phone text column to restaurants, backfill from vendors.phone.
+- Full plan in "Partner/Aggregator Feature" section below.
+- Brian flagged this as a blocker before angel investor outreach.
+
+### 2. lib/cuisines.ts refactor + "All" pill + Turkish + zip code search
+Three related front-end items that all touch cuisine/search UX. Best done together:
+- (a) Create lib/cuisines.ts as single source of truth (mirrors lib/neighborhoods.ts pattern). Closes Bug F. Currently three drifted lists: page.tsx filters array, list-your-restaurant CUISINES, admin CUISINES.
+- (b) Add Turkish to the list (lots of Turkish restaurants Olga is finding).
+- (c) Drop the "All" pill on mobile only (keep on desktop). Saves space and matches modern filter-chip UX.
+- (d) Add zip code search to NeighborhoodSearch autocomplete. Recommended approach: hardcoded lib/zipcodes.ts file with ~180 NYC zips + lat/lng. Update placeholder: "Neighborhood — try 'Midtown'" → "Neighborhood or zip code".
+
+### 3. iOS Safari zoom-on-input — apply rule everywhere
+We fixed it on NeighborhoodSearch (14px → 16px). Same bug almost certainly on:
+- Login page (email, password, name)
+- /signup standalone
+- /reset-password
+- Reservation modal
+- /list-your-restaurant vendor form
+- Admin forms
+Rule: every input/textarea/select on mobile must be ≥16px font (or Tailwind text-base).
+
 ## ✅ Recently Fixed (May 17, 2026)
 - **Website pipeline complete** — all 4 admin tasks done in app/admin/page.tsx:
   1. Approval flow already had `website: vendor.website` (done May 10)
@@ -25,10 +109,6 @@
 - **NEIGHBORHOODS unified** — created lib/neighborhoods.ts as single source of truth (76 neighborhoods, NYC-wide, with NEIGHBORHOOD_GROUPS for borough-grouped dropdowns). Patched 4 files (admin, login, signup, list-your-restaurant) to import from there. Added Meatpacking District. Resolved silent drift between previously-divergent local lists.
 - **Search + filter bar on Active Listings** — text search by name/address, neighborhood dropdown (auto-populated from existing listings), cuisine dropdown (canonical CUISINES list), Show hidden checkbox, Clear button, "X of Y listings shown" count
 - **Restore button on rejected vendors** — Contacts tab now has ↻ Restore button on rejected rows that moves them back to Pending Submissions for re-review
-
-## 🎯 NEXT SESSION — START HERE
-
-Partner/aggregator feature is now unblocked. Website pipeline is complete.
 
 
 ## 🗺️ FEATURE IDEA — Map-driven list filtering (Airbnb pattern)
@@ -79,10 +159,6 @@ Goal: differentiate "real partner" restaurants (full Resy-style booking) from "a
 
 ## ⚠️ ACTIVE BUGS (UNRESOLVED)
 
-### Bug C — Confirmation emails landing in spam
-- Email DOES send. Lands in Gmail spam.
-- Fix: verify Resend SPF, DKIM, DMARC records on letsgetlunch.nyc DNS
-
 ### Bug E — Duplicate map() in admin edit form dropdowns
 - app/admin/page.tsx ~lines 1107-1109 and 1115-1117
 - Cuisine and Neighborhood selects each call `.map()` TWICE in a row → every option appears twice
@@ -101,7 +177,6 @@ Goal: differentiate "real partner" restaurants (full Resy-style booking) from "a
 ## 📋 V1 PENDING TODO (priority order)
 1. **Complete website pipeline** — see "Next Session — Start Here" above
 2. **Partner/aggregator feature** — see plan above
-3. FIX Bug C — email deliverability (SPF/DKIM/DMARC in Resend dashboard)
 5. FIX Bug E — duplicate map() lines (5-min easy win)
 6. FIX Bug F — unify CUISINES into lib/cuisines.ts
 7. FIX Bug G — photo preview in vendor review form
