@@ -124,7 +124,7 @@ export default function Home() {
           <span className="text-xl">🍽️</span>
           <div className="flex flex-col leading-tight">
             <span className="font-[family-name:var(--font-bebas)] tracking-wide text-2xl text-gray-900">Let&apos;s Get <span className="text-[#4A9FD5]">Lunch</span></span>
-            <span className="text-[11px] text-gray-500 -mt-0.5">NYC&apos;s best lunch deals, <span className="text-[#4A9FD5]">at the table</span></span>
+            <span className="text-[11px] text-gray-500 -mt-0.5">NYC&apos;s best lunch deals, <span className="text-[#4A9FD5]">at the table.</span></span>
           </div>
         </div>
         <div className="flex gap-3">
