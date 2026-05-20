@@ -57,7 +57,9 @@
 
 Three big items, in priority order:
 
-### 1. Tier 1 / Tier 2 partner feature (HIGH — investor readiness)
+### 1. Tier 1 / Tier 2 partner feature + reservation modal close UX (HIGH — investor readiness)
+
+**Partner/Tier work:**
 - Suppress QR code on Tier 1 reservation confirmations (success modal + confirmation email).
 - Replace "show this code at the door" copy with website + phone CTAs for Tier 1.
 - Tier 2 (Royal 35 only for now) keeps the existing QR + "show code" flow.
@@ -67,6 +69,11 @@ Three big items, in priority order:
   - Add phone text column to restaurants, backfill from vendors.phone.
 - Full plan in "Partner/Aggregator Feature" section below.
 - Brian flagged this as a blocker before angel investor outreach.
+
+**Reservation modal close UX (bundle with Tier 1 work — same file, app/restaurants/[id]/page.tsx):**
+- Mobile users have no clear way to dismiss the "Reserve your lunch" bottom-sheet modal once it opens. Brian hit this himself testing on phone — "Back to results" is the only exit and it's not visible until you scroll up past the modal contents.
+- Fix: add an X close button top-right of the modal, AND make tapping the gray backdrop close the modal. Standard mobile modal pattern.
+- This is a real conversion blocker — if a user opens the modal then changes their mind, getting unstuck shouldn't require muscle memory.
 
 ### 2. lib/cuisines.ts refactor + "All" pill + Turkish + zip code search
 Three related front-end items that all touch cuisine/search UX. Best done together:
