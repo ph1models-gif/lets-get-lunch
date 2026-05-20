@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Bebas_Neue } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
+const bebas = Bebas_Neue({ subsets: ["latin"], weight: "400", variable: "--font-bebas" });
 
 export const metadata: Metadata = {
   icons: {
@@ -27,7 +28,7 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={`${inter.className} ${bebas.variable}`}>{children}</body>
     </html>
   );
 }
