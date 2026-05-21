@@ -375,14 +375,15 @@ export default function RestaurantPage() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
-          onClick={e => e.stopPropagation()}>
-          <div className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md max-h-[92vh] overflow-y-auto">
+          onClick={() => setShowModal(false)}>
+          <div className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md max-h-[92vh] overflow-y-auto relative"
+            onClick={e => e.stopPropagation()}>
             <div className="p-6">
               {/* Handle bar for mobile */}
               <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5 sm:hidden" />
 
-              <button onClick={() => setShowModal(false)}
-                className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 text-2xl hidden sm:block">×</button>
+              <button onClick={() => setShowModal(false)} aria-label="Close"
+                className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 text-xl leading-none z-10">×</button>
 
               {/* STEP: book */}
               {step === 'book' && (
