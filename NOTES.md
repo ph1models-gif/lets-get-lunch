@@ -53,6 +53,38 @@
 ### Workflow lesson — Safari mobile caching
 - Multiple times this session things "looked broken" on phone that were just browser cache. First mobile debug step: force-close the Safari/Chrome tab (swipe up dismiss, not just navigate away) and open letsgetlunch.nyc in a fresh tab.
 
+## ✅ Shipped (May 21, 2026 — Tier 1 hand-off session)
+
+### Honest non-partner reservation hand-off (DONE — on-screen + email)
+- Decision: keep the entire reservation flow/modal as-is. Only changed what happens AFTER "Reserve Now" — no QR for non-partners.
+- On-screen success (app/restaurants/[id]/page.tsx): "You're confirmed!" → "You're all set!". Removed QR code + reservation code + "show this at the restaurant". Replaced with honest box: "[restaurant] isn't a Let's Get Lunch partner yet, so we can't book your table directly. Call ahead or just walk in — and mention you saw the lunch special on Let's Get Lunch." Plus tap-to-call phone button (r.phone) and Visit website link (r.website), each only rendering if present. Address box, email line, Done, Tell a friend all kept. Share text "I just booked" → "I just found".
+- Email (app/api/reserve/route.ts): subject "Your lunch reservation —" → "Your lunch plan —". "You're confirmed!" → "You're all set!". Removed QR/code block. Same honest hand-off text + Call (tel:) + Website links. Reservation details box (restaurant/address/time/party size) and Add to Calendar KEPT. Extended the existing restaurant fetch to also select phone, website (route only received name/address before).
+- Reservation still saves to the reservations table as a lead (resCode still generated server-side) — preserves demand data for future partner sales pitch.
+
+### Phone column (schema + backfill)
+- restaurants table had NO phone column (phone lived only on vendors). Added it: ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS phone text;
+- Backfilled by name match: UPDATE restaurants r SET phone = v.phone FROM vendors v WHERE r.name = v.restaurant_name AND v.phone IS NOT NULL AND v.phone <> '' AND r.phone IS NULL;
+- Result: 255 of 258 active restaurants got a phone. 3 didn't match (admin-renamed listings like Le Coucou / "Starr restaurants"). Fill those 3 by hand once phone is added to the admin forms.
+- NOTE: vendors↔restaurants have NO foreign key — only matchable by name (vendors.restaurant_name = restaurants.name). Fuzzy link.
+- STILL TODO: add phone field to admin edit form + Add Listing form so Brian/Olga can fill the 3 gaps and future ones. (The reservation page already reads phone fine via select('*').)
+
+### Reservation modal close UX (DONE)
+- Old X was hidden on mobile (hidden sm:block) and a faint floating ×. Replaced with a visible gray circle X (top-right, shows on all screens), added relative to the card so it anchors correctly.
+- Added tap-the-backdrop-to-close (backdrop onClick closes; inner card stopPropagation so taps inside don't close).
+
+### Lincoln Square neighborhood (DONE)
+- Added "Lincoln Square" to lib/neighborhoods.ts (alphabetical, after Lenox Hill). Confirmed live in the dropdown.
+- WHY/sequence lesson: tagging happens at upload time from the dropdown. Add the label BEFORE sending Olga to source an area, so listings are tagged correctly from the start — avoids manual re-tagging cleanup. (Olga works one neighborhood at a time; Brian directs which.)
+- NEXT: send Olga to source the Lincoln Center / Columbus Circle / lower-UWS pocket (currently thin on the map) and tag them Lincoln Square.
+
+## 🎯 STILL OPEN / NEXT SESSION
+- Add phone field to admin edit + Add Listing forms (fill the 3 missing phones + future).
+- lib/cuisines.ts refactor (Bug F) + add "Turkish" + drop "All" pill on mobile + zip code search (lib/zipcodes.ts). All touch the taxonomy layer — batch together.
+- Partner/Tier 2 build: only when a real restaurant is ready to pay. is_partner flag, QR attribution, partner branch in reservation flow. Demand-logging table (count reservation intents per restaurant) is the warm-list/sales-pitch data.
+- Insiders/reviewer program (UGC + social content) — phased: social accounts now (no code) → curated admin-queue submissions → public reviews once volume exists. PICK A NAME.
+- Image optimization for egress (next/image or CDN + compress on upload) before traffic ramps.
+- iOS input ≥16px on all remaining forms (login, signup, reset-password, vendor form, admin).
+
 ## 💡 STRATEGY & GROWTH NOTES (May 21, 2026) — for deck + marketing
 
 ### TWO SEPARATE "TIER" CONCEPTS — do not conflate (naming matters)
@@ -187,6 +219,38 @@ Rule: every input/textarea/select on mobile must be ≥16px font (or Tailwind te
 ### Workflow lessons
 - Safari mobile caches aggressively. First mobile debug step: force-close the tab (swipe-up dismiss) and reopen — multiple "broken" reports this session were just cache.
 - Terminal heredoc gotcha: don't let stray text (like a pasted closing tag) land on the command line; it causes cascading syntax errors. Paste one clean block at a time.
+
+## ✅ Shipped (May 21, 2026 — Tier 1 hand-off session)
+
+### Honest non-partner reservation hand-off (DONE — on-screen + email)
+- Decision: keep the entire reservation flow/modal as-is. Only changed what happens AFTER "Reserve Now" — no QR for non-partners.
+- On-screen success (app/restaurants/[id]/page.tsx): "You're confirmed!" → "You're all set!". Removed QR code + reservation code + "show this at the restaurant". Replaced with honest box: "[restaurant] isn't a Let's Get Lunch partner yet, so we can't book your table directly. Call ahead or just walk in — and mention you saw the lunch special on Let's Get Lunch." Plus tap-to-call phone button (r.phone) and Visit website link (r.website), each only rendering if present. Address box, email line, Done, Tell a friend all kept. Share text "I just booked" → "I just found".
+- Email (app/api/reserve/route.ts): subject "Your lunch reservation —" → "Your lunch plan —". "You're confirmed!" → "You're all set!". Removed QR/code block. Same honest hand-off text + Call (tel:) + Website links. Reservation details box (restaurant/address/time/party size) and Add to Calendar KEPT. Extended the existing restaurant fetch to also select phone, website (route only received name/address before).
+- Reservation still saves to the reservations table as a lead (resCode still generated server-side) — preserves demand data for future partner sales pitch.
+
+### Phone column (schema + backfill)
+- restaurants table had NO phone column (phone lived only on vendors). Added it: ALTER TABLE restaurants ADD COLUMN IF NOT EXISTS phone text;
+- Backfilled by name match: UPDATE restaurants r SET phone = v.phone FROM vendors v WHERE r.name = v.restaurant_name AND v.phone IS NOT NULL AND v.phone <> '' AND r.phone IS NULL;
+- Result: 255 of 258 active restaurants got a phone. 3 didn't match (admin-renamed listings like Le Coucou / "Starr restaurants"). Fill those 3 by hand once phone is added to the admin forms.
+- NOTE: vendors↔restaurants have NO foreign key — only matchable by name (vendors.restaurant_name = restaurants.name). Fuzzy link.
+- STILL TODO: add phone field to admin edit form + Add Listing form so Brian/Olga can fill the 3 gaps and future ones. (The reservation page already reads phone fine via select('*').)
+
+### Reservation modal close UX (DONE)
+- Old X was hidden on mobile (hidden sm:block) and a faint floating ×. Replaced with a visible gray circle X (top-right, shows on all screens), added relative to the card so it anchors correctly.
+- Added tap-the-backdrop-to-close (backdrop onClick closes; inner card stopPropagation so taps inside don't close).
+
+### Lincoln Square neighborhood (DONE)
+- Added "Lincoln Square" to lib/neighborhoods.ts (alphabetical, after Lenox Hill). Confirmed live in the dropdown.
+- WHY/sequence lesson: tagging happens at upload time from the dropdown. Add the label BEFORE sending Olga to source an area, so listings are tagged correctly from the start — avoids manual re-tagging cleanup. (Olga works one neighborhood at a time; Brian directs which.)
+- NEXT: send Olga to source the Lincoln Center / Columbus Circle / lower-UWS pocket (currently thin on the map) and tag them Lincoln Square.
+
+## 🎯 STILL OPEN / NEXT SESSION
+- Add phone field to admin edit + Add Listing forms (fill the 3 missing phones + future).
+- lib/cuisines.ts refactor (Bug F) + add "Turkish" + drop "All" pill on mobile + zip code search (lib/zipcodes.ts). All touch the taxonomy layer — batch together.
+- Partner/Tier 2 build: only when a real restaurant is ready to pay. is_partner flag, QR attribution, partner branch in reservation flow. Demand-logging table (count reservation intents per restaurant) is the warm-list/sales-pitch data.
+- Insiders/reviewer program (UGC + social content) — phased: social accounts now (no code) → curated admin-queue submissions → public reviews once volume exists. PICK A NAME.
+- Image optimization for egress (next/image or CDN + compress on upload) before traffic ramps.
+- iOS input ≥16px on all remaining forms (login, signup, reset-password, vendor form, admin).
 
 ## 💡 STRATEGY & GROWTH NOTES (May 21, 2026) — for deck + marketing
 
