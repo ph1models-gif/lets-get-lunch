@@ -37,15 +37,19 @@ export async function POST(req: NextRequest) {
 
     // Fetch restaurant address for the confirmation email
     let restaurantAddress = ''
+    let restaurantPhone = ''
+    let restaurantWebsite = ''
     try {
       const { data: rest } = await supabase
         .from('restaurants')
-        .select('address')
+        .select('address, phone, website')
         .eq('id', restaurant_id)
         .single()
       if (rest?.address) restaurantAddress = rest.address
+      if (rest?.phone) restaurantPhone = rest.phone
+      if (rest?.website) restaurantWebsite = rest.website
     } catch (addrErr) {
-      console.error('Address lookup error:', addrErr)
+      console.error('Restaurant lookup error:', addrErr)
     }
 
     // Send email — wrapped so failure does NOT block the code returning
@@ -61,17 +65,16 @@ export async function POST(req: NextRequest) {
           body: JSON.stringify({
             from: "Let's Get Lunch <hello@letsgetlunch.nyc>",
             to: userEmail,
-            subject: `Your lunch reservation — ${restaurant_name}`,
+            subject: `Your lunch plan — ${restaurant_name}`,
             html: `
               <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
-                <h1 style="color:#4A9FD5;font-size:24px;margin-bottom:8px">You're confirmed! 🍽️</h1>
+                <h1 style="color:#4A9FD5;font-size:24px;margin-bottom:8px">You're all set! 🍽️</h1>
                 <p style="color:#444;font-size:16px">Hi ${name},</p>
-                <p style="color:#444;font-size:16px">Your lunch reservation at <strong>${restaurant_name}</strong> is confirmed.</p>
-                <div style="background:#EEF6FC;border-radius:12px;padding:24px;margin:24px 0;text-align:center">
-                  <p style="color:#666;font-size:14px;margin:0 0 8px">Your reservation code</p>
-                  <p style="color:#4A9FD5;font-size:36px;font-weight:700;letter-spacing:4px;margin:0 0 16px">${code}</p>
-                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${code}" width="160" height="160" style="display:block;margin:0 auto 12px" alt="QR Code" />
-                  <p style="color:#666;font-size:13px;margin:8px 0 0">Show this at the restaurant to receive your lunch special</p>
+                <p style="color:#444;font-size:16px">We've noted your interest in the lunch special at <strong>${restaurant_name}</strong>.</p>
+                <div style="background:#EEF6FC;border-radius:12px;padding:20px;margin:24px 0">
+                  <p style="color:#444;font-size:15px;margin:0 0 12px">${restaurant_name} isn't a Let's Get Lunch partner yet, so we can't book your table directly. Call ahead or just walk in — and mention you saw the lunch special on Let's Get Lunch.</p>
+                  ${restaurantPhone ? `<p style="margin:8px 0;font-size:16px"><strong>📞 Call:</strong> <a href="tel:${restaurantPhone.replace(/[^0-9+]/g, '')}" style="color:#4A9FD5;text-decoration:none">${restaurantPhone}</a></p>` : ''}
+                  ${restaurantWebsite ? `<p style="margin:8px 0;font-size:16px"><strong>🌐 Website:</strong> <a href="${restaurantWebsite}" style="color:#4A9FD5;text-decoration:none">${restaurantWebsite}</a></p>` : ''}
                 </div>
                 <div style="border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:24px">
                   <p style="margin:0 0 8px;color:#666;font-size:13px">Reservation details</p>
