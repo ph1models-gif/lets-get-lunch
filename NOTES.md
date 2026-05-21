@@ -53,6 +53,46 @@
 ### Workflow lesson — Safari mobile caching
 - Multiple times this session things "looked broken" on phone that were just browser cache. First mobile debug step: force-close the Safari/Chrome tab (swipe up dismiss, not just navigate away) and open letsgetlunch.nyc in a fresh tab.
 
+## 💡 STRATEGY & GROWTH NOTES (May 21, 2026) — for deck + marketing
+
+### TWO SEPARATE "TIER" CONCEPTS — do not conflate (naming matters)
+There are two unrelated systems that accidentally both got called "tier." Keep them distinct in all future docs:
+
+1. **Partner restaurants (the revenue model)** — paying restaurants. Get QR-code attribution proving Let's Get Lunch sent them customers, plus future tools. This is what we charge for.
+2. **Insiders / Reviewers (the community + content engine)** — power DINERS, not restaurants. They eat the lunches and leave real reviews + photos. Free user-generated content. NOT a revenue tier — a community/marketing program. Needs a non-confusing name (candidates: Insiders, Regulars, Tasters, LGL Locals). PICK A NAME before building.
+
+### BUSINESS MODEL LOGIC (marketplace sequencing)
+- Free listings = our inventory and our diner funnel. A directory at 20% coverage is a bad directory; removing free listings would gut both diner demand AND the value we sell to restaurants. So: LIST EVERYONE FREE.
+- The paid relationship is reserved for partners who want attribution + proof-of-referral (QR check-in) + tools.
+- The free tier is the flywheel; the partner tier is the revenue. Build the free side first, monetize once we have leverage (diner volume + demand data).
+- Deck framing: "We list every prix-fixe lunch in NYC free — inventory + diner funnel. Revenue = partner tier: restaurants pay for attribution/proof-of-referral via QR check-in + tools. Free flywheel is built + one pilot partner (Royal 35); paid tier rolls out as we sign restaurants."
+
+### TIER 1 (non-partner) RESERVATION — honest hand-off (DECISION)
+- KEEP the existing reservation modal/flow exactly as-is (party size, time, Reserve Now). Do NOT remove or redesign it — it's a big part of the site and works.
+- ONLY change what happens AFTER clicking Reserve Now for a non-partner restaurant: show an honest message — "This restaurant isn't a Let's Get Lunch partner yet, so call them directly or walk in to book" — with tap-to-call phone + website link.
+- Rationale: never imply we booked a table we didn't. A confirmation/QR for a restaurant not on our system would burn diners the first time the restaurant has no idea what the code is.
+- Partner restaurants (Royal 35) keep the QR confirmation flow.
+
+### DEMAND-LOGGING IDEA (high value — powers partner sales)
+- When a diner tries to reserve a non-partner restaurant, log the intent (restaurant id + timestamp). This becomes demand signal per restaurant.
+- Sales pitch later: "23 diners tried to book you through us last month — want to actually capture them?" Killer Tier-2/partner conversion tool and great deck data.
+- Not built yet. Needs a small table. Consider for next build once the honest hand-off is shipped.
+
+### INSIDERS / REVIEWER PROGRAM (content + growth engine) — phased
+- Concept: power diners leave real reviews + photos of the actual lunches. Authentic UGC = cheapest, most credible marketing for a local directory. Repost across social. Makes diners feel ownership.
+- COLD-START WARNING: review systems are a trap early — empty reviews look worse than none. Don't ship public reviews until there's diner volume to fill them.
+- PHASING:
+  - Phase 1 (NOW, no code): start Let's Get Lunch Instagram/TikTok. Brian + a few early Insiders eat lunches, photograph, post. Promotion engine starts now, tests the content idea, builds audience.
+  - Phase 2 (soon, light code): invited Insiders submit review + photo into an ADMIN QUEUE Brian approves (curated, not auto-live). Keeps quality high, avoids ghost town, Brian controls what becomes marketing content.
+  - Phase 3 (later, real feature): public reviews on listing pages, diner profiles, "Insider" badge — once volume makes it look alive.
+- Deck slide: "Growth & content: an Insiders program turns engaged diners into reviewers, generating authentic photo content we repurpose across social — community-driven marketing at near-zero cost."
+
+### FOR THE MARKETING CHAT (hand-off summary)
+- Start social accounts now (IG/TikTok), food-photo led.
+- Insiders program is the content flywheel — recruit a handful of early power diners.
+- Brand voice already established in header: "NYC's best lunch deals, at the table." (Bebas Neue, blue accent on "Lunch" and "at the table.")
+- Site is live at letsgetlunch.nyc, ~269 listings, mobile-first.
+
 ## 🎯 NEXT SESSION — START HERE
 
 Three big items, in priority order:
@@ -147,6 +187,46 @@ Rule: every input/textarea/select on mobile must be ≥16px font (or Tailwind te
 ### Workflow lessons
 - Safari mobile caches aggressively. First mobile debug step: force-close the tab (swipe-up dismiss) and reopen — multiple "broken" reports this session were just cache.
 - Terminal heredoc gotcha: don't let stray text (like a pasted closing tag) land on the command line; it causes cascading syntax errors. Paste one clean block at a time.
+
+## 💡 STRATEGY & GROWTH NOTES (May 21, 2026) — for deck + marketing
+
+### TWO SEPARATE "TIER" CONCEPTS — do not conflate (naming matters)
+There are two unrelated systems that accidentally both got called "tier." Keep them distinct in all future docs:
+
+1. **Partner restaurants (the revenue model)** — paying restaurants. Get QR-code attribution proving Let's Get Lunch sent them customers, plus future tools. This is what we charge for.
+2. **Insiders / Reviewers (the community + content engine)** — power DINERS, not restaurants. They eat the lunches and leave real reviews + photos. Free user-generated content. NOT a revenue tier — a community/marketing program. Needs a non-confusing name (candidates: Insiders, Regulars, Tasters, LGL Locals). PICK A NAME before building.
+
+### BUSINESS MODEL LOGIC (marketplace sequencing)
+- Free listings = our inventory and our diner funnel. A directory at 20% coverage is a bad directory; removing free listings would gut both diner demand AND the value we sell to restaurants. So: LIST EVERYONE FREE.
+- The paid relationship is reserved for partners who want attribution + proof-of-referral (QR check-in) + tools.
+- The free tier is the flywheel; the partner tier is the revenue. Build the free side first, monetize once we have leverage (diner volume + demand data).
+- Deck framing: "We list every prix-fixe lunch in NYC free — inventory + diner funnel. Revenue = partner tier: restaurants pay for attribution/proof-of-referral via QR check-in + tools. Free flywheel is built + one pilot partner (Royal 35); paid tier rolls out as we sign restaurants."
+
+### TIER 1 (non-partner) RESERVATION — honest hand-off (DECISION)
+- KEEP the existing reservation modal/flow exactly as-is (party size, time, Reserve Now). Do NOT remove or redesign it — it's a big part of the site and works.
+- ONLY change what happens AFTER clicking Reserve Now for a non-partner restaurant: show an honest message — "This restaurant isn't a Let's Get Lunch partner yet, so call them directly or walk in to book" — with tap-to-call phone + website link.
+- Rationale: never imply we booked a table we didn't. A confirmation/QR for a restaurant not on our system would burn diners the first time the restaurant has no idea what the code is.
+- Partner restaurants (Royal 35) keep the QR confirmation flow.
+
+### DEMAND-LOGGING IDEA (high value — powers partner sales)
+- When a diner tries to reserve a non-partner restaurant, log the intent (restaurant id + timestamp). This becomes demand signal per restaurant.
+- Sales pitch later: "23 diners tried to book you through us last month — want to actually capture them?" Killer Tier-2/partner conversion tool and great deck data.
+- Not built yet. Needs a small table. Consider for next build once the honest hand-off is shipped.
+
+### INSIDERS / REVIEWER PROGRAM (content + growth engine) — phased
+- Concept: power diners leave real reviews + photos of the actual lunches. Authentic UGC = cheapest, most credible marketing for a local directory. Repost across social. Makes diners feel ownership.
+- COLD-START WARNING: review systems are a trap early — empty reviews look worse than none. Don't ship public reviews until there's diner volume to fill them.
+- PHASING:
+  - Phase 1 (NOW, no code): start Let's Get Lunch Instagram/TikTok. Brian + a few early Insiders eat lunches, photograph, post. Promotion engine starts now, tests the content idea, builds audience.
+  - Phase 2 (soon, light code): invited Insiders submit review + photo into an ADMIN QUEUE Brian approves (curated, not auto-live). Keeps quality high, avoids ghost town, Brian controls what becomes marketing content.
+  - Phase 3 (later, real feature): public reviews on listing pages, diner profiles, "Insider" badge — once volume makes it look alive.
+- Deck slide: "Growth & content: an Insiders program turns engaged diners into reviewers, generating authentic photo content we repurpose across social — community-driven marketing at near-zero cost."
+
+### FOR THE MARKETING CHAT (hand-off summary)
+- Start social accounts now (IG/TikTok), food-photo led.
+- Insiders program is the content flywheel — recruit a handful of early power diners.
+- Brand voice already established in header: "NYC's best lunch deals, at the table." (Bebas Neue, blue accent on "Lunch" and "at the table.")
+- Site is live at letsgetlunch.nyc, ~269 listings, mobile-first.
 
 ## 🎯 NEXT SESSION — START HERE
 
