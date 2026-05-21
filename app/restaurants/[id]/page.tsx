@@ -518,16 +518,22 @@ export default function RestaurantPage() {
               {step === 'success' && (
                 <div className="text-center py-4">
                   <div className="text-5xl mb-3">🎉</div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-1">You&apos;re confirmed!</h2>
-                  <p className="text-gray-500 mb-4">Show this at {r.name}</p>
-                  <div className="bg-[#EEF6FC] rounded-2xl py-5 px-6 mb-4">
-                    <p className="text-xs text-gray-500 mb-1">Your reservation code</p>
-                    <p className="text-4xl font-bold text-[#4A9FD5] tracking-widest mb-4">{resCode}</p>
-                    <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(resCode)}&color=4A9FD5&bgcolor=EEF6FC`}
-                      alt="QR Code"
-                      className="w-40 h-40 mx-auto rounded-xl"
-                    />
+                  <h2 className="text-2xl font-bold text-gray-900 mb-1">You&apos;re all set!</h2>
+                  <p className="text-gray-500 mb-4">We&apos;ve noted your interest in this lunch deal at {r.name}</p>
+                  <div className="bg-[#EEF6FC] rounded-2xl py-5 px-6 mb-4 text-left">
+                    <p className="text-sm text-gray-700 mb-3">{r.name} isn&apos;t a Let&apos;s Get Lunch partner yet, so we can&apos;t book your table directly. Call ahead or just walk in — and mention you saw the lunch special on Let&apos;s Get Lunch.</p>
+                    {r.phone && (
+                      <a href={`tel:${r.phone.replace(/[^0-9+]/g, '')}`}
+                        className="block w-full bg-[#4A9FD5] text-white text-center py-3 rounded-xl font-semibold mb-2 hover:bg-[#3a8fc5] transition-colors">
+                        📞 Call {r.phone}
+                      </a>
+                    )}
+                    {r.website && (
+                      <a href={r.website} target="_blank" rel="noopener noreferrer"
+                        className="block w-full border border-[#4A9FD5] text-[#4A9FD5] text-center py-3 rounded-xl font-semibold hover:bg-white transition-colors">
+                        🌐 Visit website
+                      </a>
+                    )}
                   </div>
                   <div className="text-left bg-gray-50 rounded-xl px-4 py-3 mb-4">
                     <p className="text-xs text-gray-400 mb-1">Restaurant address</p>
@@ -539,7 +545,7 @@ export default function RestaurantPage() {
                     Done
                   </button>
                   <button onClick={() => {
-                    const text = `I just booked a lunch deal at ${r.name} on Let's Get Lunch! Check it out:`;
+                    const text = `I just found a lunch deal at ${r.name} on Let's Get Lunch! Check it out:`;
                     const url = window.location.href;
                     if (navigator.share) {
                       navigator.share({ title: 'Let\'s Get Lunch', text, url }).catch(() => {});
