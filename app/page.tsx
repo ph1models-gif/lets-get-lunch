@@ -122,10 +122,11 @@ export default function Home() {
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-xl">🍽️</span>
-          <div className="flex flex-col leading-tight">
+          <div className="flex flex-col leading-tight md:hidden">
             <span className="font-[family-name:var(--font-bebas)] tracking-wide text-2xl text-gray-900">Let&apos;s Get <span className="text-[#4A9FD5]">Lunch</span></span>
             <span className="text-[11px] text-gray-500 -mt-0.5">NYC&apos;s best lunch deals, <span className="text-[#4A9FD5]">at the table.</span></span>
           </div>
+          <span className="hidden md:block font-semibold text-gray-900 text-lg">Let&apos;s Get Lunch</span>
         </div>
         <div className="flex gap-3">
 {userFirstName ? (
