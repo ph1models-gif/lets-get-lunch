@@ -92,6 +92,81 @@ We fixed it on NeighborhoodSearch (14px → 16px). Same bug almost certainly on:
 - Admin forms
 Rule: every input/textarea/select on mobile must be ≥16px font (or Tailwind text-base).
 
+## ✅ Recently Fixed (May 18-20, 2026 — multi-day session)
+
+### CRITICAL INCIDENT — "no listings" was Supabase egress quota (May 20)
+- Symptom: site showed map with zero pins and "0 lunch specials," looked location-related (Brian was in East Hampton). It was NOT location.
+- Real cause: Supabase project hit its free-tier egress (bandwidth) quota and got restricted. The data fetch returned "exceed_cached_egress_quota" error, so restaurants array stayed empty. Map still rendered (Google Maps is independent of the data).
+- Fix: upgraded Supabase to Pro plan ($25/month). Restriction lifted within minutes, site came back.
+- Lesson: empty listings + working map = check the data fetch / Supabase status FIRST, before touching filter code. The map rendering does not mean the data loaded.
+- Diagnostic that nailed it: a small node script (check.mjs) querying the DB directly returned the egress error. (Supabase creds are hardcoded in lib/supabase.ts, not in .env.local.)
+
+### SCALING / COST NOTES (future work, not urgent)
+- At ~1000 active users, expected Supabase cost is roughly $25-60/month depending on engagement and photo sizes. Pro includes 250GB egress; overage ~$0.09/GB.
+- Almost all egress is restaurant PHOTOS served from Supabase storage on every page load. Two optimizations would massively cut cost and allow scaling to 10k+ users on the $25 plan:
+  1. Put a CDN (e.g. Cloudflare free tier) in front of images, OR use Next.js next/image so Vercel serves optimized images and takes load off Supabase.
+  2. Compress/resize on upload — cards need ~100KB thumbnails, not 2-3MB phone photos. Load full image only on detail page.
+- Do these BEFORE real traffic ramps.
+
+### Bug D — Signup not saving email to profiles (FIXED)
+- Root cause: /login signup tab was missing email field in profiles.insert. /signup and reservation modal were already correct.
+- Fix in app/login/page.tsx — added email field to the insert.
+- Backfilled 8 NULL email rows: UPDATE profiles SET email = u.email FROM auth.users u WHERE profiles.id = u.id AND profiles.email IS NULL.
+- Cleaned up Brian's test auth accounts (deleted 3, kept brian@letsgetlunch.nyc). Accidentally deleted then recreated Brian's profile row. Lesson: confirm UUIDs against emails before bulk profile deletes.
+
+### Bug C — Email deliverability (DNS DONE — reputation pending)
+- Resend domain verified with SPF + DKIM (Google + Resend records).
+- Added DMARC TXT to GoDaddy: _dmarc = v=DMARC1; p=none; rua=mailto:brian@letsgetlunch.nyc. Removed old GoDaddy-default DMARC (onsecureserver.net, p=quarantine).
+- First Google DMARC report (May 18) confirmed SPF + DKIM both PASS, disposition none. Working.
+- Future: after weeks of clean reports, bump p=none to p=quarantine.
+
+### Admin: auto-geocode address on edit save
+- saveEdit in app/admin/page.tsx re-geocodes via Google API on save; lat/lng overwritten with Google's result. Falls back to form values if geocoding fails.
+- Proven: fixed a mislocated SoHo listing (Le Coucou / "Starr restaurants", 138 Lafayette St) that was pinned out near Staten Island.
+
+### Map UX overhaul
+- Default center moved to Madison Square Park (40.7425, -73.9879), zoom raised 13 to 16.
+- Auto-zoom to user when inside NYC bounding box (lat 40.49-40.92, lng -74.27 to -73.68): pan + zoom 15. Outside NYC: stays at default.
+- Mobile peek pattern: map 50vh (was 420px fixed), maxHeight 420px desktop, minHeight 280px. Count + first card peek above fold.
+- Search button removed (autocomplete pans map on select).
+- Map-list sync (Airbnb auto-sync): map emits bounds via onBoundsChange (debounced via 'idle'), page filters list by lat/lng inside bounds.
+- Dynamic count text: "X lunch specials in this area · Scroll for details ↓".
+- iOS Safari zoom-on-input fixed: NeighborhoodSearch input 14px to 16px. RULE: every mobile input must be ≥16px font.
+- Google POI clicks disabled (clickableIcons: false). Map click closes restaurant popup. InfoWindow disableAutoPan true to false (popup centers in view on tap).
+- Neighborhood search zoom fixed: was setZoom(14) which zoomed OUT after default became 16; now setZoom(16).
+
+### Header redesign (mobile + desktop split)
+- Added Bebas Neue via next/font/google in app/layout.tsx (Inter still body default; bebas as --font-bebas variable).
+- MOBILE: two-line brand — "Let's Get **Lunch**" (Bebas, Lunch in blue #4A9FD5) + small "NYC's best lunch deals, **at the table.**" (at the table. in blue). md:hidden.
+- DESKTOP: reverted to the old plain "Let's Get Lunch" (Inter, font-semibold text-lg) in the nav, with the big centered hero below unchanged. hidden md:block.
+- Net: mobile gets the new branded look, desktop looks like it did pre-May-20.
+
+### Website pipeline (carried over from May 17)
+- All admin tasks done in app/admin/page.tsx: approval insert, edit form, pending review form, + Add Listing form, and Active Listings card display all handle website field.
+
+### Workflow lessons
+- Safari mobile caches aggressively. First mobile debug step: force-close the tab (swipe-up dismiss) and reopen — multiple "broken" reports this session were just cache.
+- Terminal heredoc gotcha: don't let stray text (like a pasted closing tag) land on the command line; it causes cascading syntax errors. Paste one clean block at a time.
+
+## 🎯 NEXT SESSION — START HERE
+
+### 1. Tier 1 / Tier 2 partner feature + reservation modal close UX (HIGH — investor readiness)
+Both touch app/restaurants/[id]/page.tsx — do together.
+- Partner/Tier: suppress QR on Tier 1 reservation confirmations (success modal + email); replace "show code at door" with website + phone CTAs; Tier 2 (Royal 35) keeps QR. Schema first: add is_partner boolean default false to restaurants, flip Royal 35 true, add phone text to restaurants and backfill from vendors.phone.
+- Reservation modal close UX: mobile users can't dismiss the "Reserve your lunch" bottom-sheet. Add X button top-right + tap-backdrop-to-close. Brian hit this himself.
+
+### 2. lib/cuisines.ts refactor + Turkish + drop "All" on mobile + zip search
+- Create lib/cuisines.ts as single source of truth (mirrors lib/neighborhoods.ts). Closes Bug F. Three drifted lists today: page.tsx filters (line 75), list-your-restaurant CUISINES (line 7), admin CUISINES (line 57).
+- Add "Turkish" (lots of Turkish spots Olga is finding).
+- Drop the "All" pill on mobile only (keep desktop).
+- Zip code search: hardcoded lib/zipcodes.ts (~180 NYC zips + lat/lng). Placeholder to "Neighborhood or zip code".
+
+### 3. Image optimization for egress (see SCALING NOTES above)
+- next/image or CDN + compress-on-upload. Real cost-saver before traffic grows.
+
+### 4. iOS Safari zoom-on-input everywhere else
+- Login, /signup, /reset-password, reservation modal, /list-your-restaurant, admin forms — all inputs ≥16px.
+
 ## ✅ Recently Fixed (May 17, 2026)
 - **Website pipeline complete** — all 4 admin tasks done in app/admin/page.tsx:
   1. Approval flow already had `website: vendor.website` (done May 10)
