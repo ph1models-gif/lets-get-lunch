@@ -11,7 +11,7 @@ export const NEIGHBORHOOD_GROUPS: { borough: string; names: string[] }[] = [
       'East Harlem', 'East Village', 'Financial District', 'Flatiron',
       'Gramercy Park', 'Greenwich Village', 'Hamilton Heights', 'Harlem',
       "Hell's Kitchen", 'Hudson Yards', 'Inwood', 'Kips Bay',
-      'Lenox Hill', 'Little Italy', 'Lower East Side', 'Meatpacking District',
+      'Lenox Hill', 'Lincoln Square', 'Little Italy', 'Lower East Side', 'Meatpacking District',
       'Midtown', 'Midtown East', 'Midtown West', 'Morningside Heights',
       'Murray Hill', 'NoHo', 'Nolita', 'NoMad',
       'SoHo', 'Sugar Hill', 'Sutton Place', 'Tribeca',
