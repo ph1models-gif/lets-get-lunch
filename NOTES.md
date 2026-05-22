@@ -53,6 +53,28 @@
 ### Workflow lesson — Safari mobile caching
 - Multiple times this session things "looked broken" on phone that were just browser cache. First mobile debug step: force-close the Safari/Chrome tab (swipe up dismiss, not just navigate away) and open letsgetlunch.nyc in a fresh tab.
 
+## 🐛🔴 DUPLICATE-CREATION BUG — CONFIRMED SYSTEM BUG (fix first thing next session)
+
+CONCLUSION: the SYSTEM is creating duplicate restaurant rows, NOT Olga. Two independent pieces of proof:
+1. "Sarabeth's Central Park South" — 3 rows, identical address, created within 0.8 SECONDS (May 20 21:11:20.8 / .3 / .6). Impossible by hand = one approval action fired the insert 3x.
+2. Mission Ceviche (Brian watched it happen live): had 1 listing → learned there are 2 real locations (UES 1400 2nd Ave + Union Square 7 E 17th St, both legit) → EDITED one listing's ADDRESS → a THIRD row appeared. So editing an address INSERTED a new row instead of UPDATING the existing one.
+
+### TWO suspected code paths to investigate (app/admin/page.tsx):
+A) APPROVAL flow double-insert: the "Approve" action on a pending vendor isn't disabled during submit and/or doesn't guard against re-fire → multiple inserts (explains Sarabeth's sub-second triple). FIX: disable button while submitting; guard by checking name+address exists before insert; ensure insert can't run on re-render.
+B) EDIT-ADDRESS-creates-row: editing an existing listing's address may be INSERTing instead of UPDATEing (explains Mission Ceviche 3rd row). Check saveEdit — confirm it does .update().eq('id', r.id) and is NOT falling into an insert path. (Possibly related to the auto-geocode-on-save change from May 18? Verify saveEdit still updates the same row id and didn't start creating new rows.)
+
+### Mission Ceviche current state (3 rows — worked example for the fix):
+- "Mission Ceviche" — 1400 2nd Ave UES — CORRECT Peruvian bio — currently HIDDEN — id starts (see admin)
+- "Mission Ceviche Union Square" — 7 E 17th St — WRONG bio (says "Rustic Italian...pasta, pizza") — phone 212-680-4067 — this is the only row for the US location, KEEP but FIX BIO
+- "Mission Ceviche Upper East Side" — 1400 2nd Ave UES (dup of #1) — WRONG "Rustic Italian" bio — phone 212-650-0014
+- Resolution: UES has TWO rows (true dup) → keep one, fix its bio/website/phone, make visible, delete the other. US location → keep, fix bio. NOTE the wrong "Rustic Italian" bios appeared on the system-created rows — clue that duplication also copied/garbled data.
+
+### CLEANUP PLAN (next session, AFTER fixing the bug so it stops recurring):
+1. Fix bug paths A and B above first.
+2. Then dedupe true same-address dups, keeping the row with correct data / any attached reservations (check reservations table before deleting — don't orphan). True dups: Fushimi (475 Driggs), Felice on Hudson (615 Hudson), Sarabeth's (40 W 59th x3), Mission Ceviche UES (1400 2nd Ave x2).
+3. Human-review name collisions that are actually DISTINCT locations — do NOT delete: Arte Cafe (Chelsea vs UWS), Tacombi (FiDi 74 Broad vs the Amsterdam Ave one which is MISLABELED "Financial District" — fix its name+neighborhood).
+4. Consider a DB unique constraint or pre-insert existence check on (name, address) to prevent future dups at the data layer.
+
 ## 🐛 DUPLICATE LISTINGS — diagnosed May 21, NOT yet cleaned (DO CAREFULLY NEXT SESSION)
 
 280 active restaurants; 5 names appear more than once. Timestamp analysis shows TWO different causes — so do NOT bulk-delete (3 of the rows are legit/distinct):
