@@ -72,7 +72,8 @@
 
 ### REFERENCE: Olga's master sheet
 - Brian has a master tracking spreadsheet (NYC_Lunch_Restaurants_.xlsx): 281 approved rows, columns include Status, Uploaded By, Name, Address, Neighborhood, Cuisine, "Category (A or B)", deal, price, days, hours, phone, email, website, Instagram, 4 photo URLs, source URL, date verified, notes. This is the source-of-truth list to reconcile the DB against.
-- QUESTION TO RESOLVE: what is "Category (A or B)"? Possibly the partner-tier marker (A = partner / B = free?). If so it's directly relevant to the future partner feature — confirm with Brian and wire it to is_partner when building Tier 2.
+- "Category (A or B)" MEANING (confirmed by Brian): A = open for lunch AND has a defined prix-fixe lunch special (these go live on the site — they fit the premise). B = open for lunch but NO lunch special (not uploaded). Olga was told to focus on uploading A's only, to move fast and make the site look full.
+- STRATEGIC VALUE: the B list is a pre-qualified OUTREACH PIPELINE — restaurants already known to serve lunch that could be pitched to create a lunch special (list free) and later upgrade to partner. Warm sales list for growing inventory AND the partner program. Don't lose it. Revisit for outreach once the A inventory is solid.
 
 ## ✅ Shipped (May 21, 2026 — Tier 1 hand-off session)
 
@@ -260,7 +261,8 @@ Rule: every input/textarea/select on mobile must be ≥16px font (or Tailwind te
 
 ### REFERENCE: Olga's master sheet
 - Brian has a master tracking spreadsheet (NYC_Lunch_Restaurants_.xlsx): 281 approved rows, columns include Status, Uploaded By, Name, Address, Neighborhood, Cuisine, "Category (A or B)", deal, price, days, hours, phone, email, website, Instagram, 4 photo URLs, source URL, date verified, notes. This is the source-of-truth list to reconcile the DB against.
-- QUESTION TO RESOLVE: what is "Category (A or B)"? Possibly the partner-tier marker (A = partner / B = free?). If so it's directly relevant to the future partner feature — confirm with Brian and wire it to is_partner when building Tier 2.
+- "Category (A or B)" MEANING (confirmed by Brian): A = open for lunch AND has a defined prix-fixe lunch special (these go live on the site — they fit the premise). B = open for lunch but NO lunch special (not uploaded). Olga was told to focus on uploading A's only, to move fast and make the site look full.
+- STRATEGIC VALUE: the B list is a pre-qualified OUTREACH PIPELINE — restaurants already known to serve lunch that could be pitched to create a lunch special (list free) and later upgrade to partner. Warm sales list for growing inventory AND the partner program. Don't lose it. Revisit for outreach once the A inventory is solid.
 
 ## ✅ Shipped (May 21, 2026 — Tier 1 hand-off session)
 
