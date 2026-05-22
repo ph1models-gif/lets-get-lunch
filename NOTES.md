@@ -53,6 +53,27 @@
 ### Workflow lesson — Safari mobile caching
 - Multiple times this session things "looked broken" on phone that were just browser cache. First mobile debug step: force-close the Safari/Chrome tab (swipe up dismiss, not just navigate away) and open letsgetlunch.nyc in a fresh tab.
 
+## 🐛 DUPLICATE LISTINGS — diagnosed May 21, NOT yet cleaned (DO CAREFULLY NEXT SESSION)
+
+280 active restaurants; 5 names appear more than once. Timestamp analysis shows TWO different causes — so do NOT bulk-delete (3 of the rows are legit/distinct):
+
+### TRUE duplicates (same name + SAME address) — safe to dedupe, keep OLDEST:
+- Fushimi — both 475 Driggs Ave, created 6 days apart (May 2 & May 8). Human re-submission. Keep 18b37fad (older), remove 9e9421e6.
+- Felice on Hudson — both 615 Hudson St, created 2 days apart (May 4 & May 6). Human re-submission. Keep dcb07076 (older), remove a127766d.
+- Sarabeth's Central Park South — THREE rows, same address (40 W 59th St), created within 0.8 SECONDS of each other (May 20 21:11:20.8 / 21.3 / 21.6). Keep one (e.g. 355ea3a9), remove the other two.
+
+### NOT duplicates — distinct restaurants or mislabels, DO NOT DELETE, human-review:
+- Arte Cafe — two DIFFERENT locations: 191 7th Ave (Chelsea) vs 106 W 73rd St (UWS). Both real. Maybe rename to distinguish (e.g. "Arte Cafe - Chelsea" / "Arte Cafe - UWS").
+- Tacombi - Financial District — 74 Broad St (real FiDi) vs 377 Amsterdam Ave (UWS!). Second is MISLABELED — it's a UWS location wearing the FiDi name. Fix the name + neighborhood on the Amsterdam Ave one.
+
+### ROOT CAUSE (the system bug to fix):
+- The sub-second Sarabeth's triple = approval action firing the insert multiple times (double-click, or insert running on re-render / not disabled during submit). This is a real bug in the admin approval flow (app/admin/page.tsx).
+- FIX NEXT SESSION: (1) disable the Approve button while submitting + guard against double-insert (check if a restaurant with same name+address already exists before inserting, or debounce/disable the button). (2) THEN clean the true duplicates above, checking first whether any duplicate row has reservations attached (don't orphan reservation data — keep the row that has reservations if they differ). (3) Human-review Arte Cafe + Tacombi.
+
+### REFERENCE: Olga's master sheet
+- Brian has a master tracking spreadsheet (NYC_Lunch_Restaurants_.xlsx): 281 approved rows, columns include Status, Uploaded By, Name, Address, Neighborhood, Cuisine, "Category (A or B)", deal, price, days, hours, phone, email, website, Instagram, 4 photo URLs, source URL, date verified, notes. This is the source-of-truth list to reconcile the DB against.
+- QUESTION TO RESOLVE: what is "Category (A or B)"? Possibly the partner-tier marker (A = partner / B = free?). If so it's directly relevant to the future partner feature — confirm with Brian and wire it to is_partner when building Tier 2.
+
 ## ✅ Shipped (May 21, 2026 — Tier 1 hand-off session)
 
 ### Honest non-partner reservation hand-off (DONE — on-screen + email)
@@ -219,6 +240,27 @@ Rule: every input/textarea/select on mobile must be ≥16px font (or Tailwind te
 ### Workflow lessons
 - Safari mobile caches aggressively. First mobile debug step: force-close the tab (swipe-up dismiss) and reopen — multiple "broken" reports this session were just cache.
 - Terminal heredoc gotcha: don't let stray text (like a pasted closing tag) land on the command line; it causes cascading syntax errors. Paste one clean block at a time.
+
+## 🐛 DUPLICATE LISTINGS — diagnosed May 21, NOT yet cleaned (DO CAREFULLY NEXT SESSION)
+
+280 active restaurants; 5 names appear more than once. Timestamp analysis shows TWO different causes — so do NOT bulk-delete (3 of the rows are legit/distinct):
+
+### TRUE duplicates (same name + SAME address) — safe to dedupe, keep OLDEST:
+- Fushimi — both 475 Driggs Ave, created 6 days apart (May 2 & May 8). Human re-submission. Keep 18b37fad (older), remove 9e9421e6.
+- Felice on Hudson — both 615 Hudson St, created 2 days apart (May 4 & May 6). Human re-submission. Keep dcb07076 (older), remove a127766d.
+- Sarabeth's Central Park South — THREE rows, same address (40 W 59th St), created within 0.8 SECONDS of each other (May 20 21:11:20.8 / 21.3 / 21.6). Keep one (e.g. 355ea3a9), remove the other two.
+
+### NOT duplicates — distinct restaurants or mislabels, DO NOT DELETE, human-review:
+- Arte Cafe — two DIFFERENT locations: 191 7th Ave (Chelsea) vs 106 W 73rd St (UWS). Both real. Maybe rename to distinguish (e.g. "Arte Cafe - Chelsea" / "Arte Cafe - UWS").
+- Tacombi - Financial District — 74 Broad St (real FiDi) vs 377 Amsterdam Ave (UWS!). Second is MISLABELED — it's a UWS location wearing the FiDi name. Fix the name + neighborhood on the Amsterdam Ave one.
+
+### ROOT CAUSE (the system bug to fix):
+- The sub-second Sarabeth's triple = approval action firing the insert multiple times (double-click, or insert running on re-render / not disabled during submit). This is a real bug in the admin approval flow (app/admin/page.tsx).
+- FIX NEXT SESSION: (1) disable the Approve button while submitting + guard against double-insert (check if a restaurant with same name+address already exists before inserting, or debounce/disable the button). (2) THEN clean the true duplicates above, checking first whether any duplicate row has reservations attached (don't orphan reservation data — keep the row that has reservations if they differ). (3) Human-review Arte Cafe + Tacombi.
+
+### REFERENCE: Olga's master sheet
+- Brian has a master tracking spreadsheet (NYC_Lunch_Restaurants_.xlsx): 281 approved rows, columns include Status, Uploaded By, Name, Address, Neighborhood, Cuisine, "Category (A or B)", deal, price, days, hours, phone, email, website, Instagram, 4 photo URLs, source URL, date verified, notes. This is the source-of-truth list to reconcile the DB against.
+- QUESTION TO RESOLVE: what is "Category (A or B)"? Possibly the partner-tier marker (A = partner / B = free?). If so it's directly relevant to the future partner feature — confirm with Brian and wire it to is_partner when building Tier 2.
 
 ## ✅ Shipped (May 21, 2026 — Tier 1 hand-off session)
 
