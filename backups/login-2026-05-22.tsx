@@ -58,7 +58,7 @@ export default function LoginPage() {
     setLoading(false);
   }
 
-  const inputClass = "w-full border border-gray-200 rounded-xl px-4 py-3.5 text-base text-gray-900 bg-white focus:outline-none focus:border-[#4A9FD5]";
+  const inputClass = "w-full border border-gray-200 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-[#4A9FD5]";
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#EEF6FC] to-white flex flex-col items-center justify-center px-4">

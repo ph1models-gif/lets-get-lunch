@@ -42,7 +42,7 @@ export default function SignupPage() {
     setLoading(false);
   }
 
-  const inputClass = "w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:border-[#4A9FD5]";
+  const inputClass = "w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#4A9FD5]";
 
   return (
     <main className="min-h-screen bg-[#EEF6FC] flex items-center justify-center px-4 py-12">
