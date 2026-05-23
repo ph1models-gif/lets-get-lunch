@@ -352,21 +352,6 @@ export default function AdminPage() {
   }
 
   async function approveVendor(vendor: Vendor) {
-    // GUARD: prevent duplicate restaurants from double-clicking Approve.
-    // Check if an active restaurant with the same name + address already exists.
-    const { data: existing } = await supabase
-      .from('restaurants')
-      .select('id')
-      .ilike('name', vendor.restaurant_name.trim())
-      .ilike('address', vendor.address.trim())
-      .limit(1)
-    if (existing && existing.length > 0) {
-      alert(`"${vendor.restaurant_name}" already exists as a listing — marking vendor approved without creating a duplicate.`)
-      await supabase.from('vendors').update({ status: 'approved' }).eq('id', vendor.id)
-      fetchVendors()
-      return
-    }
-
     let lat: number | null = null
     let lng: number | null = null
     try {
