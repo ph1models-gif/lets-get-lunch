@@ -578,3 +578,27 @@ Min 8 chars, 1 uppercase, 1 number, 1 symbol
 - PWA before native app
 - lib/neighborhoods.ts is the single source of truth — never define NEIGHBORHOODS locally again
 - New required fields use type="text" + JS validation (not type="url") so we can auto-prefix gracefully
+
+## ✅ Recently Fixed (May 22, 2026)
+- **Dark-mode white-on-white form bug** — Mac/Chrome users in dark mode saw white text on white background on signup/login forms. Root cause: default Next.js dark-mode block in globals.css flipped --foreground-rgb to white; inputs had no explicit color so they inherited it. Fix: removed the dark-mode block from globals.css + added text-gray-900 bg-white to signup/login inputClass. (commit 8def045)
+- **Duplicate-restaurant root cause fixed** — approveVendor had no guard; double/triple-clicking Approve inserted 2-3 restaurant rows. Added a pre-insert check: queries for existing active restaurant with same name+address (case-insensitive), skips insert + alerts if found. (commit e50aca9). NO MORE NEW DUPES.
+
+## 🐛 OPEN — Clean up 9 existing duplicate rows (Supabase, when ready)
+Root cause now fixed (commit e50aca9), but pre-existing dupes remain in DB. Brian prefers code over Supabase, so this is deferred until he has energy for SQL.
+
+TRUE dupes to delete (5 rows — VERIFY 0 reservations first):
+- 69c66e11-7bc9-4e95-84d1-1fe855f9cbce (Sarabeth's CPS dupe 2)
+- fe336910-897e-4c99-9e18-7e215b830c4c (Sarabeth's CPS dupe 3)
+- a127766d-acdd-4c5b-bbd1-7446ab6d0f27 (Felice on Hudson, newer)
+- 9e9421e6-faa4-41b8-b842-e7637f67bc9c (Fushimi, newer)
+- 505bfded-5fb8-48b2-8c6d-d7ee041c4aba (Hawksmoor NYC, is_active=false)
+
+NOT dupes (real 2nd locations — KEEP BOTH): Arte Cafe (Chelsea 191 7th Ave + UWS 106 W 73rd) — consider renaming to disambiguate.
+AMBIGUOUS (Brian's call): Piccola Cucina Enoteca (same address 196 Spring St but websites differ SoHo vs uptown), Tacombi Financial District (not yet inspected).
+
+CLEANUP SEQUENCE (next Supabase session):
+1. Run reservations+deals count on the 5 IDs above — confirm reservations=0 for each
+2. Screenshot rows as reversibility snapshot
+3. DELETE FROM deals WHERE restaurant_id IN (5 ids)
+4. DELETE FROM restaurants WHERE id IN (5 ids)
+5. Verify: SELECT name, COUNT(*) FROM restaurants GROUP BY name HAVING COUNT(*)>1
