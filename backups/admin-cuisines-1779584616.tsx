@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 
 import { NEIGHBORHOODS, NEIGHBORHOOD_GROUPS } from '../../lib/neighborhoods';
-import { CUISINES } from '../../lib/cuisines';
 const PASSWORD = 'lunch2026'
 
 type Vendor = {
@@ -55,7 +54,12 @@ type Deal = {
 
 
 
-
+const CUISINES = [
+  "American","Italian","Japanese/Sushi","French","Mexican/Latin",
+  "Chinese","Indian","Mediterranean","Greek","Thai","Korean",
+  "Vietnamese","Middle Eastern","Seafood","Steakhouse","BBQ",
+  "Vegan/Plant-Based","Bakery/Cafe","Other"
+];
 
 const HOURS_OPTIONS = [
   "10:30am–2pm","10:30am–2:30pm","10:30am–3pm","10:30am–3:30pm",
@@ -1174,6 +1178,7 @@ export default function AdminPage() {
                           <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={editForm.cuisine || ''} onChange={e => setEditForm(f => ({ ...f, cuisine: e.target.value }))}>
                             <option value="">Select cuisine...</option>
                             {CUISINES.map(c => <option key={c} value={c}>{c}</option>)}
+                            {CUISINES.map(c => <option key={c}>{c}</option>)}
                           </select>
                         </div>
                         <div>

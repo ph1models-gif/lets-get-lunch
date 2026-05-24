@@ -4,8 +4,12 @@ import Image from 'next/image';
 import { supabase } from '../../lib/supabase';
 
 import { NEIGHBORHOODS, NEIGHBORHOOD_GROUPS } from '../../lib/neighborhoods';
-import { CUISINES } from '../../lib/cuisines';
-
+const CUISINES = [
+  "American","Italian","Japanese/Sushi","French","Mexican/Latin",
+  "Chinese","Indian","Mediterranean","Greek","Thai","Korean",
+  "Vietnamese","Middle Eastern","Seafood","Steakhouse","BBQ",
+  "Vegan/Plant-Based","Bakery/Cafe","Other"
+];
 
 const HOURS_OPTIONS = [
   "10:30am–2pm","10:30am–2:30pm","10:30am–3pm","10:30am–3:30pm",
