@@ -610,3 +610,13 @@ CLEANUP SEQUENCE (next Supabase session):
 - Killed Bug E: admin had a DUPLICATE CUISINES.map() (old line 1181, the one missing value={c}) rendering the list twice in the Active Listings edit dropdown. Removed it.
 - No renames, no merges, zero data migration. Verified live across all 5 dropdowns via screenshots.
 - TODO (separate, deferred): homepage search pills (app/page.tsx ~line 75 `filters`) still use the OLD different vocabulary ('Asian','Latin/Mexican','Vegan-Friendly') and substring-match filter logic — NOT yet unified with lib/cuisines.ts. Decide later whether to expand homepage pills to match (careful change: homepage filter logic has special-case substring matching).
+
+## ✅ RESOLVED (May 24, 2026) — Duplicate listings cleaned up
+Root cause was already fixed (approveVendor guard, commit e50aca9). Brian then cleaned the pre-existing dupes manually in the admin/Supabase. Verified via script (dupcheck2) + screenshots:
+- True system dupes deleted, oldest kept: Sarabeth's Central Park South (355ea3a9 kept), Felice on Hudson (dcb07076 kept), Fushimi (18b37fad kept).
+- Mislabeled dupe removed: Tacombi - Financial District now only the real FiDi row (74 Broad St, 5693015a); the mislabeled 377 Amsterdam Ave row is gone.
+- Distinct-location name collision relabeled (NOT deleted): "Arte Cafe" = 191 7th Ave/Chelsea; "Arte Cafe UWS" = 106 W 73rd St/Upper West Side. Both kept, renamed to distinguish.
+- Mission Ceviche: one clean row per real location — "Mission Ceviche Union Square" (7 E 17th St) + "Mission Ceviche Upper East Side" (1400 2nd Ave).
+- Integrity check: 0 orphaned deals (of 333), 0 orphaned reservations (of 30) — no lead data lost. FK cascade appears to work.
+- Total listings: 334.
+- MINOR open: confirm Mission Ceviche bios read as Peruvian/ceviche (earlier had a wrong "Rustic Italian" bio from the duplication side effect) — quick admin glance, 30-sec edit each if still wrong.
