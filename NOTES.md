@@ -602,3 +602,11 @@ CLEANUP SEQUENCE (next Supabase session):
 3. DELETE FROM deals WHERE restaurant_id IN (5 ids)
 4. DELETE FROM restaurants WHERE id IN (5 ids)
 5. Verify: SELECT name, COUNT(*) FROM restaurants GROUP BY name HAVING COUNT(*)>1
+
+## ✅ Shipped (May 23, 2026) — Bug F + Bug E: single-source cuisines
+- Created lib/cuisines.ts as the single source of truth for cuisines (mirrors lib/neighborhoods.ts pattern). Alphabetical, "Other" pinned last.
+- Wired BOTH app/admin/page.tsx and app/list-your-restaurant/page.tsx (Olga's upload form) to import { CUISINES } from '../../lib/cuisines' — removed the two drifted local CUISINES consts. All dropdowns (vendor form, admin Add Listing, admin Pending Review&Edit, admin Active Listings edit) now read from one list.
+- Added 4 cuisines: Spanish (covers 6 existing Spanish restaurants that had no matching option), Turkish (matches existing Turka Restaurant), Asian Fusion, Brazilian.
+- Killed Bug E: admin had a DUPLICATE CUISINES.map() (old line 1181, the one missing value={c}) rendering the list twice in the Active Listings edit dropdown. Removed it.
+- No renames, no merges, zero data migration. Verified live across all 5 dropdowns via screenshots.
+- TODO (separate, deferred): homepage search pills (app/page.tsx ~line 75 `filters`) still use the OLD different vocabulary ('Asian','Latin/Mexican','Vegan-Friendly') and substring-match filter logic — NOT yet unified with lib/cuisines.ts. Decide later whether to expand homepage pills to match (careful change: homepage filter logic has special-case substring matching).
