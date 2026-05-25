@@ -42,15 +42,6 @@ export default function SignupPage() {
     setLoading(false);
   }
 
-  async function handleGoogle() {
-    setLoading(true); setError('');
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    });
-    if (error) { setError(error.message); setLoading(false); }
-  }
-
   const inputClass = "w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:border-[#4A9FD5]";
 
   return (
@@ -120,16 +111,6 @@ export default function SignupPage() {
                 </select>
               </div>
 
-              <button onClick={handleGoogle} disabled={loading}
-                className="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white text-gray-700 py-3.5 rounded-xl font-medium text-base hover:bg-gray-50 transition-colors disabled:opacity-50">
-                <img src="https://www.google.com/favicon.ico" width="18" height="18" alt="" />
-                Continue with Google
-              </button>
-              <div className="flex items-center gap-3 my-1">
-                <div className="flex-1 h-px bg-gray-200"></div>
-                <span className="text-xs text-gray-400">or</span>
-                <div className="flex-1 h-px bg-gray-200"></div>
-              </div>
               <button onClick={handleSignUp} disabled={loading}
                 className="w-full bg-[#4A9FD5] text-white py-3.5 rounded-xl font-semibold text-base hover:bg-[#3a8fc5] transition-colors disabled:opacity-50 mt-2">
                 {loading ? 'Creating account...' : 'Create free account'}

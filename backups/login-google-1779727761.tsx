@@ -30,15 +30,6 @@ export default function LoginPage() {
     window.location.href = '/';
   }
 
-  async function handleGoogle() {
-    setLoading(true); setError('');
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    });
-    if (error) { setError(error.message); setLoading(false); }
-  }
-
   async function handleSignUp() {
     setLoading(true); setError('');
     if (!signUpForm.firstName || !signUpForm.lastName || !signUpForm.email || !signUpForm.password) {
@@ -129,16 +120,6 @@ export default function LoginPage() {
                 {NEIGHBORHOODS.map(n => <option key={n}>{n}</option>)}
               </select>
             </div>
-            <button onClick={handleGoogle} disabled={loading}
-              className="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white text-gray-700 py-3.5 rounded-xl font-medium text-base hover:bg-gray-50 transition-colors disabled:opacity-50">
-              <img src="https://www.google.com/favicon.ico" width="18" height="18" alt="" />
-              Continue with Google
-            </button>
-            <div className="flex items-center gap-3 my-1">
-              <div className="flex-1 h-px bg-gray-200"></div>
-              <span className="text-xs text-gray-400">or</span>
-              <div className="flex-1 h-px bg-gray-200"></div>
-            </div>
             <button onClick={handleSignUp} disabled={loading}
               className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50 mt-2">
               {loading ? 'Creating account...' : 'Create free account'}
@@ -159,16 +140,6 @@ export default function LoginPage() {
             <p className="text-right">
               <a href="/reset-password" className="text-xs text-[#4A9FD5] hover:underline">Forgot password?</a>
             </p>
-            <button onClick={handleGoogle} disabled={loading}
-              className="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white text-gray-700 py-3.5 rounded-xl font-medium text-base hover:bg-gray-50 transition-colors disabled:opacity-50">
-              <img src="https://www.google.com/favicon.ico" width="18" height="18" alt="" />
-              Continue with Google
-            </button>
-            <div className="flex items-center gap-3 my-1">
-              <div className="flex-1 h-px bg-gray-200"></div>
-              <span className="text-xs text-gray-400">or</span>
-              <div className="flex-1 h-px bg-gray-200"></div>
-            </div>
             <button onClick={handleSignIn} disabled={loading}
               className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50">
               {loading ? 'Signing in...' : 'Sign in'}
