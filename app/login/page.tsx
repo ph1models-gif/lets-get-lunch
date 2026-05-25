@@ -91,6 +91,16 @@ export default function LoginPage() {
 
         {tab === 'signup' ? (
           <div className="space-y-4">
+            <button onClick={handleGoogle} disabled={loading}
+              className="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white text-gray-700 py-3.5 rounded-xl font-medium text-base hover:bg-gray-50 transition-colors disabled:opacity-50">
+              <img src="https://www.google.com/favicon.ico" width="18" height="18" alt="" />
+              Continue with Google
+            </button>
+            <div className="flex items-center gap-3 my-1">
+              <div className="flex-1 h-px bg-gray-200"></div>
+              <span className="text-xs text-gray-400">or</span>
+              <div className="flex-1 h-px bg-gray-200"></div>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">First name</label>
@@ -129,6 +139,13 @@ export default function LoginPage() {
                 {NEIGHBORHOODS.map(n => <option key={n}>{n}</option>)}
               </select>
             </div>
+            <button onClick={handleSignUp} disabled={loading}
+              className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50 mt-2">
+              {loading ? 'Creating account...' : 'Create free account'}
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
             <button onClick={handleGoogle} disabled={loading}
               className="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white text-gray-700 py-3.5 rounded-xl font-medium text-base hover:bg-gray-50 transition-colors disabled:opacity-50">
               <img src="https://www.google.com/favicon.ico" width="18" height="18" alt="" />
@@ -139,13 +156,6 @@ export default function LoginPage() {
               <span className="text-xs text-gray-400">or</span>
               <div className="flex-1 h-px bg-gray-200"></div>
             </div>
-            <button onClick={handleSignUp} disabled={loading}
-              className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50 mt-2">
-              {loading ? 'Creating account...' : 'Create free account'}
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
               <input type="email" value={signInForm.email} onChange={e => setSignInForm(f => ({...f, email: e.target.value}))}
@@ -159,16 +169,6 @@ export default function LoginPage() {
             <p className="text-right">
               <a href="/reset-password" className="text-xs text-[#4A9FD5] hover:underline">Forgot password?</a>
             </p>
-            <button onClick={handleGoogle} disabled={loading}
-              className="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white text-gray-700 py-3.5 rounded-xl font-medium text-base hover:bg-gray-50 transition-colors disabled:opacity-50">
-              <img src="https://www.google.com/favicon.ico" width="18" height="18" alt="" />
-              Continue with Google
-            </button>
-            <div className="flex items-center gap-3 my-1">
-              <div className="flex-1 h-px bg-gray-200"></div>
-              <span className="text-xs text-gray-400">or</span>
-              <div className="flex-1 h-px bg-gray-200"></div>
-            </div>
             <button onClick={handleSignIn} disabled={loading}
               className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50">
               {loading ? 'Signing in...' : 'Sign in'}
