@@ -620,3 +620,12 @@ Root cause was already fixed (approveVendor guard, commit e50aca9). Brian then c
 - Integrity check: 0 orphaned deals (of 333), 0 orphaned reservations (of 30) — no lead data lost. FK cascade appears to work.
 - Total listings: 334.
 - MINOR open: confirm Mission Ceviche bios read as Peruvian/ceviche (earlier had a wrong "Rustic Italian" bio from the duplication side effect) — quick admin glance, 30-sec edit each if still wrong.
+
+## ✅ Shipped (May 24, 2026) — Homepage cuisine pills reworked
+- Removed the "All" pill. Pills now toggle on/off (multi-select, OR logic). Nothing selected = show everything (replaces "All").
+- Replaced the fragile substring-matching filter logic (old lines 102-107: special cases for Asian/Vegan-Friendly/Seafood/Japanese/Latin + a split('/')[0] catch-all) with clean exact match: `selected.length > 0 && !selected.includes(r.cuisine)`.
+- State changed from `filter: string` ('All' default) to `selected: string[]` ([] default). Added togglePill helper.
+- 14 pills (the cuisines with real inventory + Vegan), each a {label,value} pair so "Vegan" displays but matches DB value "Vegan/Plant-Based": Italian, American, Japanese/Sushi, French, Mediterranean, Mexican/Latin, Steakhouse, Thai, Indian, Greek, Seafood, Korean, Spanish, Vegan.
+- Map + listings both read from the same `filtered` array, so they update automatically with pill selection. Tested live, working.
+- NOTE: pills are a hardcoded list in app/page.tsx (NOT pulled from lib/cuisines.ts) — intentional, since pills are a curated subset (14 of 23) for visual clarity, not the full taxonomy. If you add a high-volume cuisine later, add a pill here manually.
+- DEFERRED (phase 2 idea): make pills location-aware — show only cuisines available in the current map view (dynamic facets). Feasible but bigger (ties pills to map bounds, recalcs on pan/zoom). Build on top of this working version later if desired. Lower priority — users mostly zoom to their area to see what's available.
