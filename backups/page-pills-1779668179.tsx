@@ -29,7 +29,7 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [selected, setSelected] = useState<string[]>([]);
+  const [filter, setFilter] = useState('All');
   const [maxPrice, setMaxPrice] = useState(100);
   const [laptopOnly, setLaptopOnly] = useState(false);
   const [wifiOnly, setWifiOnly] = useState(false);
@@ -72,23 +72,7 @@ export default function Home() {
     };
   }, []);
 
-  const CUISINE_PILLS: { label: string; value: string }[] = [
-    { label: 'Italian', value: 'Italian' },
-    { label: 'American', value: 'American' },
-    { label: 'Japanese/Sushi', value: 'Japanese/Sushi' },
-    { label: 'French', value: 'French' },
-    { label: 'Mediterranean', value: 'Mediterranean' },
-    { label: 'Mexican/Latin', value: 'Mexican/Latin' },
-    { label: 'Steakhouse', value: 'Steakhouse' },
-    { label: 'Thai', value: 'Thai' },
-    { label: 'Indian', value: 'Indian' },
-    { label: 'Greek', value: 'Greek' },
-    { label: 'Seafood', value: 'Seafood' },
-    { label: 'Korean', value: 'Korean' },
-    { label: 'Spanish', value: 'Spanish' },
-    { label: 'Vegan', value: 'Vegan/Plant-Based' },
-  ];
-  const togglePill = (v: string) => setSelected(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
+  const filters = ['All','Italian','Japanese/Sushi','Asian','French','American','Seafood','Mediterranean','Latin/Mexican','Indian','Vegan-Friendly','Steakhouse','BBQ'];
 
   const filtered = restaurants.filter(r => {
     const deal = r.deals?.[0];
@@ -115,7 +99,12 @@ export default function Home() {
       const textMatch = r.name.toLowerCase().includes(s) || r.neighborhood.toLowerCase().includes(s) || r.cuisine.toLowerCase().includes(s) || deal.special.toLowerCase().includes(s);
       if (!keywordMatch && !textMatch) return false;
     }
-    if (selected.length > 0 && !selected.includes(r.cuisine)) return false;
+    if (filter === 'Vegan-Friendly' && !r.cuisine.toLowerCase().includes('vegan')) return false;
+    if (filter === 'Seafood' && !r.cuisine.toLowerCase().includes('seafood')) return false;
+    if (filter === 'Asian' && !r.cuisine.toLowerCase().includes('asian')) return false;
+    if (filter === 'Japanese/Sushi' && !r.cuisine.toLowerCase().includes('japanese') && !r.cuisine.toLowerCase().includes('sushi')) return false;
+    if (filter === 'Latin/Mexican' && !r.cuisine.toLowerCase().includes('latin') && !r.cuisine.toLowerCase().includes('mexican')) return false;
+    if (!['All','Vegan-Friendly','Seafood','Asian','Japanese/Sushi','Latin/Mexican'].includes(filter) && !r.cuisine.toLowerCase().includes(filter.toLowerCase().split('/')[0])) return false;
     if (deal.price > maxPrice) return false;
     if (laptopOnly && !r.work_friendly) return false;
     if (wifiOnly && !r.wifi) return false;
@@ -170,10 +159,10 @@ export default function Home() {
           />
         </div>
         <div className="flex gap-2 overflow-x-auto pb-2 justify-start md:justify-center">
-          {CUISINE_PILLS.map(p => (
-            <button key={p.value} onClick={() => togglePill(p.value)}
-              className={`whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${selected.includes(p.value) ? 'bg-[#4A9FD5] text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
-              {p.label}
+          {filters.map(f => (
+            <button key={f} onClick={() => setFilter(f)}
+              className={`whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${filter === f ? 'bg-[#4A9FD5] text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+              {f}
             </button>
           ))}
         </div>
