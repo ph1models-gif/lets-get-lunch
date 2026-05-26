@@ -298,6 +298,8 @@ export default function Home() {
         <div className="flex gap-6 text-sm text-gray-400">
           <a href="/list-your-restaurant" className="hover:text-gray-600">For Restaurants</a>
           <a href="mailto:hello@letsgetlunch.nyc" className="hover:text-gray-600">Contact Us</a>
+          <a href="/privacy" className="hover:text-gray-600">Privacy</a>
+          <a href="/terms" className="hover:text-gray-600">Terms</a>
           {userFirstName ? (
             <>
               <span className="text-gray-600">Hi, {userFirstName}</span>
