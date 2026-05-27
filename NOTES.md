@@ -636,3 +636,10 @@ Root cause was already fixed (approveVendor guard, commit e50aca9). Brian then c
 - Code: handleGoogle() -> supabase.auth.signInWithOAuth({provider:'google', redirectTo: origin+'/auth/callback'}). New app/auth/callback/page.tsx waits for session, creates profiles row on first login (name from Google user_metadata, email, neighborhood null), redirects home.
 - VERIFIED live on iPhone: signup, signout, signin all work; round trip confirmed; profiles row check = exactly 1 row, name "Brian Keith-Photography", neighborhood null (no dupes across multiple cycles).
 - KNOWN/DEFERRED: (1) Google consent screen shows raw supabase.co URL not "Let's Get Lunch" — cosmetic, needs Google verification (logo+privacy policy+domain verify) later. (2) Google users get neighborhood=null, no prompt yet. (3) Apple sign-in deferred ($99/yr Apple Developer fee; revisit with native app). (4) FEATURE IDEA: live weekday-midday geolocation ("where they lunch Tue/Wed/Thu ~11:55am") — high-value signal, separate build.
+
+## ✅ Shipped (May 26, 2026) — Google OAuth branding verified + legal pages
+- PROBLEM: Google consent screen showed raw "iqurlwenkozmxoyymnkg.supabase.co" instead of brand name — test user said it "looked sketchy," hurting signups.
+- FIX: Created Privacy Policy (app/privacy/page.tsx → /privacy) and Terms of Service (app/terms/page.tsx → /terms), styled to match site, honest boilerplate (NOT lawyer-reviewed — flagged in-file; review before scaling/payments). Added Privacy + Terms links to homepage footer.
+- Google Cloud Auth Platform: verified domain ownership (letsgetlunch.nyc via GoDaddy DNS TXT — DO NOT REMOVE that record or verification is lost), uploaded logo (LGL_LOGO.jpg, circular blue mark), fixed app name capitalization to "Let's Get Lunch", added privacy/terms URLs. App moved to Production.
+- KEY FINDING: full Google verification review NOT required because app uses only basic email+profile scopes (no sensitive/restricted scopes). Branding verified automatically + now shown to users. Consent screen now branded "Let's Get Lunch" w/ logo.
+- OAuth user cap: 100 users while basic-scope (not a near-term constraint).
