@@ -643,3 +643,12 @@ Root cause was already fixed (approveVendor guard, commit e50aca9). Brian then c
 - Google Cloud Auth Platform: verified domain ownership (letsgetlunch.nyc via GoDaddy DNS TXT — DO NOT REMOVE that record or verification is lost), uploaded logo (LGL_LOGO.jpg, circular blue mark), fixed app name capitalization to "Let's Get Lunch", added privacy/terms URLs. App moved to Production.
 - KEY FINDING: full Google verification review NOT required because app uses only basic email+profile scopes (no sensitive/restricted scopes). Branding verified automatically + now shown to users. Consent screen now branded "Let's Get Lunch" w/ logo.
 - OAuth user cap: 100 users while basic-scope (not a near-term constraint).
+
+## ✅ Shipped (May 29, 2026) — Vercel Web Analytics enabled (page views only)
+- WHY: profiles table only sees signed-up users; needed to track anonymous traffic too.
+- WHAT: Vercel Web Analytics on Hobby tier (50k events/mo, 30 day history, FREE). Installed @vercel/analytics, added <Analytics /> to app/layout.tsx after {children}. Enabled in Vercel dashboard.
+- GIVES: page views, unique visitors, top pages, referrers, country/device breakdown. Data appears ~10 min after visits in Vercel dashboard > Analytics tab.
+- DOES NOT include: custom events (Reserve tapped, signup completed, etc) — that's Pro tier ($20/mo). Deferred.
+- KNOWN GOTCHAS: ad/tracker blockers in Safari/iOS may block the script for some visitors; data will undercount slightly. Vercel batches data 5-10 min so it's not real-time.
+- TODO when ready: custom events (requires Pro tier) + Privacy Policy update to disclose analytics (currently the policy doesn't mention it - mild disclosure gap, not urgent at current scale).
+- KNOWN OPEN (logged, NOT addressed): npm install showed 9 vulnerabilities (2 mod / 6 high / 1 crit) in existing deps. DO NOT run npm audit fix --force - can break working build. Address in a dedicated session, individually.
