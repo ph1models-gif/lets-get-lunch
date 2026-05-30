@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Bebas_Neue } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import Script from "next/script";
 
@@ -28,7 +29,7 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
       </head>
-      <body className={`${inter.className} ${bebas.variable}`}>{children}</body>
+      <body className={`${inter.className} ${bebas.variable}`}>{children}<Analytics /></body>
     </html>
   );
 }
