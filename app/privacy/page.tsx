@@ -13,7 +13,7 @@ export default function PrivacyPage() {
             </div>
           </a>
           <h1 className="text-2xl font-bold text-gray-900">Privacy Policy</h1>
-          <p className="text-sm text-gray-500 mt-1">Last updated: May 26, 2026</p>
+          <p className="text-sm text-gray-500 mt-1">Last updated: May 31, 2026</p>
         </div>
         <div className="bg-white rounded-2xl p-8 shadow-sm text-gray-700 text-base leading-relaxed space-y-5">
           <p>Let&apos;s Get Lunch (&quot;we,&quot; &quot;us&quot;) operates letsgetlunch.nyc, a directory of New York City prix-fixe lunch deals where you can browse listings and make reservation requests. This policy explains what we collect and how we use it.</p>
@@ -28,6 +28,10 @@ export default function PrivacyPage() {
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Service providers</h2>
             <p>We rely on a small number of trusted providers to operate the service, and share data with them only for that purpose: Supabase (authentication and database), Resend (transactional email), Vercel (hosting), and Google (optional sign-in).</p>
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">Analytics</h2>
+            <p>We use Vercel Web Analytics, a privacy-friendly analytics service provided by our hosting partner, to understand how many people visit the site and which pages they view. This service does not use cookies, does not identify individual users, and does not track you across other websites. It collects aggregated data such as page views, referring sites, country, and device type.</p>
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Your choices</h2>
