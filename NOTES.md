@@ -652,3 +652,9 @@ Root cause was already fixed (approveVendor guard, commit e50aca9). Brian then c
 - KNOWN GOTCHAS: ad/tracker blockers in Safari/iOS may block the script for some visitors; data will undercount slightly. Vercel batches data 5-10 min so it's not real-time.
 - TODO when ready: custom events (requires Pro tier) + Privacy Policy update to disclose analytics (currently the policy doesn't mention it - mild disclosure gap, not urgent at current scale).
 - KNOWN OPEN (logged, NOT addressed): npm install showed 9 vulnerabilities (2 mod / 6 high / 1 crit) in existing deps. DO NOT run npm audit fix --force - can break working build. Address in a dedicated session, individually.
+
+## ✅ Shipped (May 31, 2026) — Privacy Policy: Vercel Analytics disclosure
+- Closed the disclosure gap from May 29 (analytics added without policy mention).
+- Added "Analytics" section between "Service providers" and "Your choices" disclosing Vercel Web Analytics: cookieless, no individual tracking, aggregated data only (page views, referrers, country, device).
+- Updated "Last updated" date to May 31, 2026.
+- Still NOT lawyer-reviewed — boilerplate caveat in-file remains. Get counsel review before scaling/payments.
