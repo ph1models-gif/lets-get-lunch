@@ -658,3 +658,14 @@ Root cause was already fixed (approveVendor guard, commit e50aca9). Brian then c
 - Added "Analytics" section between "Service providers" and "Your choices" disclosing Vercel Web Analytics: cookieless, no individual tracking, aggregated data only (page views, referrers, country, device).
 - Updated "Last updated" date to May 31, 2026.
 - Still NOT lawyer-reviewed — boilerplate caveat in-file remains. Get counsel review before scaling/payments.
+
+
+## ✅ Shipped (Jun 2-3, 2026) — Duplicate root cause ACTUALLY fixed (DB constraint)
+- CONTEXT: May notes claimed dupes were fixed by the approveVendor JS guard (commit e50aca9). That guard is INSUFFICIENT — it does check-then-insert, which loses a race when Approve fires twice ~0.1s apart (both SELECT find nothing, both INSERT). Confirmed via timestamps: Sophistian Pizzeria had twin rows 0.1s apart on Jun 1.
+- RULED OUT editing as a cause: saveEdit (app/admin/page.tsx ~445-528) is pure .update().eq('id'), no restaurant insert. Confirmed NO trigger on restaurants table (pg_trigger query returned nothing). Editing a listing CANNOT create a dupe — it only surfaces pre-existing ones when you search the name after fetchRestaurants() re-renders.
+- REAL FIX: added DB-level unique index:
+  create unique index uniq_restaurant_name_address on restaurants (lower(trim(name)), lower(trim(address)));
+  Postgres now refuses same-name+same-address inserts regardless of app code / race / double-click.
+- CLEANED 4 dupe groups first (all resv-checked, no lead data lost): Sophistian Pizzeria (kept Italian/active), Hawksmoor NYC (kept American/active w/ 1 resv), Le Crocodile (kept May-2 "80 Wythe Ave" correct pin, deleted May-25 "80 Ave Wythe Hotel" wrong-geocode row), Piccola already clean.
+- LIMITATION: constraint only catches EXACT name+address matches. Does NOT catch spelling variants ("80 Wythe Ave" vs "80 Ave Wythe Hotel", "John's" vs "Johns"). Fuzzy matching deferred.
+- KNOWN UX GAP: approveVendor doesn't yet catch the Postgres unique-violation error gracefully — a true-dup approve will now throw an ugly error instead of the friendly "already exists" alert. It will NOT create a dupe (that's the point), but the approve flow should be wrapped to catch error code 23505 in a follow-up. Editing listings (deals, is_partner, etc) is unaffected and safe.
