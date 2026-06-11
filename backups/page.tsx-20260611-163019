@@ -1127,7 +1127,6 @@ export default function AdminPage() {
                       {r.photo_url && <img src={r.photo_url} alt="" className="w-10 h-10 object-cover rounded-lg" />}
                       <h2 className="font-semibold text-gray-900">{r.name}</h2>
                       <span className="text-sm text-gray-400">{r.cuisine} · {r.neighborhood}</span>
-                      <a href={`https://www.letsgetlunch.nyc/restaurants/${r.id}`} target="_blank" rel="noopener noreferrer" className="text-xs text-[#4A9FD5] hover:underline break-all">letsgetlunch.nyc/restaurants/{r.id}</a>
                     </div>
                     <div className="flex items-center gap-2">
                       {!isEditing && (
