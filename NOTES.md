@@ -676,3 +676,22 @@ Root cause was already fixed (approveVendor guard, commit e50aca9). Brian then c
 - NEW PAGE /lookup (app/lookup/page.tsx): password-gated, READ-ONLY. For VA Olga to find a restaurant and copy its live page URL for outreach emails. Search by name/address + neighborhood + cuisine dropdowns (same filters as admin). Active listings only. Copy button puts full https://www.letsgetlunch.nyc/restaurants/{id} on clipboard. NO edit/insert/delete code exists on the page -- safe by omission.
 - Password: olga2026 (separate from admin lunch2026). Hand-off to Olga: URL letsgetlunch.nyc/lookup + password olga2026.
 - SECURITY TODO (weekend pass): /lookup AND /admin are both protected only by a CLIENT-SIDE hardcoded password -- not real auth. Anyone reading page source can find the password, and the hardcoded Supabase publishable key allows direct DB access regardless of page. Weekend hardening must cover: (1) RLS audit + lock down table write policies, (2) replace weak hardcoded admin password, (3) fold /lookup into whatever auth model replaces it, (4) the 9 deferred npm vulns. Listings are already publicly readable via the live map, so /lookup adds no NEW scrape exposure -- but the password is not a real barrier.
+
+
+## SECURITY HARDENING PLAN (started Jun 14, 2026 Sun eve) -- CRITICAL
+### THE HOLE (confirmed via pg_policies audit):
+- All write policies are {public} with qual/with_check = true = ANYONE with the publishable key (visible in page source) can INSERT/UPDATE/DELETE restaurants, deals, profiles, vendors and READ all reservations (customer names/emails/phones).
+- restaurants table: rowsecurity = FALSE (RLS off entirely).
+- Root cause: app writes everything with the anon/publishable key (admin, vendor form, reserve flow all use it). Can't just deny public writes or app breaks.
+
+### FIX ORDER (each step tested live before next; never rush a policy change):
+1. [FOUNDATION] Add service_role key to .env.local ONLY (gitignored, never client code). Create lib/supabaseAdmin.ts that uses it -- server-side only.
+2. Move admin writes (saveEdit, approveVendor, addListing, delete, toggleActive) into server-side API routes (app/api/admin/*) that use the service_role client AND check a server-side secret/password. Client calls these routes instead of writing directly.
+3. Keep reserve flow: move its insert to already-server-side route.ts using service_role (route.ts already exists, just swap key source).
+4. ONLY AFTER 1-3 work: tighten RLS policies -- public gets SELECT on restaurants/deals (is_active=true) only; revoke public INSERT/UPDATE/DELETE on restaurants/deals/profiles; revoke public SELECT on reservations (admin reads via service_role now); keep public INSERT on vendors (vendor form) + reservations.
+5. Enable RLS on restaurants table (currently off).
+6. Replace weak admin password lunch2026 + lookup olga2026 with env-based secrets.
+7. npm audit -- 9 vulns, individually, not --force.
+8. Remove backups/ from git (add to .gitignore) -- contains old keys (publishable, safe, but hygiene).
+
+### RULES: one change at a time. npm run build + test live site after each. Rollback = git revert. Do NOT change RLS before server-side writes exist or the app breaks.
