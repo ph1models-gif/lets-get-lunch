@@ -695,3 +695,17 @@ Root cause was already fixed (approveVendor guard, commit e50aca9). Brian then c
 8. Remove backups/ from git (add to .gitignore) -- contains old keys (publishable, safe, but hygiene).
 
 ### RULES: one change at a time. npm run build + test live site after each. Rollback = git revert. Do NOT change RLS before server-side writes exist or the app breaks.
+
+
+## Security hardening -- FOUNDATION DONE (Jun 14, 2026 Sun eve) [steps 1-3 of plan]
+- service_role (sb_secret_) key: stored in server .env.local AND Vercel env (SUPABASE_SERVICE_ROLE_KEY, Sensitive, Prod+Preview). NEVER in code. Old keys exposed during setup were ROLLED -- only the final rolled key is live.
+- Created lib/supabaseAdmin.ts: server-side-only client, LAZY init via Proxy (does NOT throw at module load / build time -- only checks key on first .from() call). Build was failing with eager top-level throw; lazy pattern fixed it. Do not revert to eager check or build breaks.
+- app/api/reserve/route.ts: swapped from inline publishable-key client to `import { supabaseAdmin as supabase }`. The `as supabase` alias keeps all existing supabase.from() calls unchanged.
+- VERIFIED LIVE: real reservation on letsgetlunch.nyc saved + confirmation email received. Full chain works: Vercel env -> route -> service_role -> DB insert -> Resend. (commit 0c2fed0)
+- NOTE: RESEND_API_KEY in Vercel shows "Needs Attention" (wants re-save as Sensitive) -- harmless, 1-min fix later.
+
+### STILL TODO (next session -- the RISKY part, needs a fresh head):
+- Step 2: move ADMIN writes (saveEdit, approveVendor, addListing, deleteRestaurant, toggleActive) into server-side API routes (app/api/admin/*) using supabaseAdmin + a server-side secret check. Admin page currently still writes directly with the PUBLISHABLE key.
+- Step 4-5: ONLY after admin writes are server-side -> tighten RLS (revoke public INSERT/UPDATE/DELETE on restaurants/deals/profiles; revoke public SELECT on reservations; enable RLS on restaurants table which is currently OFF). Test live site after EACH policy change.
+- Step 6-8: replace weak passwords (lunch2026/olga2026) w/ env secrets; npm audit (9 vulns, individually); remove backups/ from git.
+- CURRENT STATE: the DB is still wide open (public can write/delete) until step 2+4 are done. Foundation just makes that fix POSSIBLE without breaking the app.
