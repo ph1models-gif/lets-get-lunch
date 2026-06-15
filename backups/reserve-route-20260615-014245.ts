@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin as supabase } from '../../../lib/supabaseAdmin'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  'https://iqurlwenkozmxoyymnkg.supabase.co',
+  'sb_publishable_XV712EbMI7leXaWHaITV5Q_hKNNals4'
+)
 
 function generateCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
