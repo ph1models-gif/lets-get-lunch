@@ -709,3 +709,11 @@ Root cause was already fixed (approveVendor guard, commit e50aca9). Brian then c
 - Step 4-5: ONLY after admin writes are server-side -> tighten RLS (revoke public INSERT/UPDATE/DELETE on restaurants/deals/profiles; revoke public SELECT on reservations; enable RLS on restaurants table which is currently OFF). Test live site after EACH policy change.
 - Step 6-8: replace weak passwords (lunch2026/olga2026) w/ env secrets; npm audit (9 vulns, individually); remove backups/ from git.
 - CURRENT STATE: the DB is still wide open (public can write/delete) until step 2+4 are done. Foundation just makes that fix POSSIBLE without breaking the app.
+
+
+## Shipped (Jun 15, 2026) -- Staten Island neighborhoods added to dropdown
+- lib/neighborhoods.ts Staten Island group had only 2 entries (St. George, Stapleton). Olga blocked sourcing SI.
+- Added 16 from Olga's sheet column F: Annadale, Arrochar, Bulls Head, Charleston, Dongan Hills, Eltingville, Great Kills, Heartland Village, New Dorp, Port Richmond, Rosebank, Rossville, Tottenville, West Brighton, Westerleigh, Woodrow. Total SI now 18, alphabetized.
+- Deliberately did NOT add the full ~62 SI neighborhoods -- dropdown should match real sourcing, not aspirational coverage. Add more as Olga needs them.
+- Verified live (Bulls Head visible in dropdown). Standalone commit, separate from in-progress security work.
+- Also committed the .gitignore backups/ entry that was pending.
