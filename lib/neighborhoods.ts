@@ -44,7 +44,7 @@ export const NEIGHBORHOOD_GROUPS: { borough: string; names: string[] }[] = [
   },
   {
     borough: 'Staten Island',
-    names: ['St. George', 'Stapleton'],
+    names: ['Annadale', 'Arrochar', 'Bulls Head', 'Charleston', 'Dongan Hills', 'Eltingville', 'Great Kills', 'Heartland Village', 'New Dorp', 'Port Richmond', 'Rosebank', 'Rossville', 'St. George', 'Stapleton', 'Tottenville', 'West Brighton', 'Westerleigh', 'Woodrow'],
   },
 ];
 
