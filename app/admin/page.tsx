@@ -5,7 +5,6 @@ import { supabase } from '@/lib/supabase'
 
 import { NEIGHBORHOODS, NEIGHBORHOOD_GROUPS } from '../../lib/neighborhoods';
 import { CUISINES } from '../../lib/cuisines';
-const PASSWORD = 'lunch2026'
 
 type Vendor = {
   id: string
@@ -530,8 +529,14 @@ export default function AdminPage() {
   }
 
   async function toggleActive(r: Restaurant) {
-    await supabase.from('restaurants').update({ is_active: !r.is_active }).eq('id', r.id)
-    setRestaurants(prev => prev.map(x => x.id === r.id ? { ...x, is_active: !r.is_active } : x))
+    const newActive = !r.is_active
+    const res = await fetch('/api/admin/toggle-active', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw, id: r.id, is_active: newActive }),
+    })
+    if (!res.ok) { alert('Update failed - check your admin session.'); return }
+    setRestaurants(prev => prev.map(x => x.id === r.id ? { ...x, is_active: newActive } : x))
   }
 
   async function deleteRestaurant(id: string) {
@@ -545,6 +550,16 @@ export default function AdminPage() {
     setEditForm(f => ({ ...f, photo_urls: (f.photo_urls || []).filter(u => u !== url) }))
   }
 
+  async function doLogin() {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw }),
+    })
+    if (res.ok) setAuthed(true)
+    else alert('Wrong password')
+  }
+
   if (!authed) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -552,10 +567,10 @@ export default function AdminPage() {
           <h1 className="text-xl font-semibold text-gray-900 mb-6">Admin login</h1>
           <input type="password" placeholder="Password" value={pw}
             onChange={e => setPw(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && pw === PASSWORD && setAuthed(true)}
+            onKeyDown={e => { if (e.key === 'Enter') doLogin() }}
             className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
           />
-          <button onClick={() => pw === PASSWORD ? setAuthed(true) : alert('Wrong password')}
+          <button onClick={doLogin}
             className="w-full bg-orange-500 text-white rounded-lg py-2 text-sm font-medium hover:bg-orange-600">
             Sign in
           </button>
