@@ -717,3 +717,47 @@ Root cause was already fixed (approveVendor guard, commit e50aca9). Brian then c
 - Deliberately did NOT add the full ~62 SI neighborhoods -- dropdown should match real sourcing, not aspirational coverage. Add more as Olga needs them.
 - Verified live (Bulls Head visible in dropdown). Standalone commit, separate from in-progress security work.
 - Also committed the .gitignore backups/ entry that was pending.
+
+
+## QUEUED PROJECT A -- Email unsubscribe / opt-out (Resend) [NOT STARTED]
+TRIGGER: a real user replied "STOP" to a booking-confirmation email (treated it like SMS opt-out) -- email had no context/opt-out. UX problem + deliverability risk (spam marks undo the SPF/DKIM/DMARC work).
+BUILD:
+1. Add List-Unsubscribe + List-Unsubscribe-Post headers to every Resend send -> Gmail/Apple native Unsubscribe.
+2. Email footer: context line ("You're receiving this because you requested a lunch reservation at [Restaurant] through Let's Get Lunch") + plain-language opt-out + working unsubscribe link.
+3. Unsubscribe endpoint + suppression list (new table or flag); check it before EVERY send.
+4. Sane from/reply-to; never re-send to a suppressed address.
+DB IMPACT (to confirm when building): likely a new `suppressions` table (email, created_at, reason) OR a suppressed flag on profiles -- but reservers often aren't signed up, so a standalone email-keyed suppressions table is the right call. Suppression check lives in app/api/reserve/route.ts (and any future send path) BEFORE the Resend fetch -- skip send if email is suppressed. Note: route.ts now uses supabaseAdmin (service_role) so it can read/write the suppression table server-side regardless of RLS.
+
+## QUEUED PROJECT B -- SEO for restaurant listing pages [NOT STARTED]
+INSIGHT FROM REAL DATA: organic Google traffic is finding specific restaurants (Sushi Yasuda, COQODAQ, ilili NoMad, Wolfgang's), landing on /restaurants/[id], and booking -- all LUNCH slots (12:00/12:30/3:00pm). Listing pages ARE working as SEO landing pages for "[restaurant] + lunch" intent. Lean in. (Users transact without signing up.)
+BUILD:
+1. Per-page <title> + meta description targeting "[Restaurant] lunch / prix-fixe lunch / lunch reservation". Add schema.org Restaurant + Menu/OfferCatalog structured data for rich results.
+2. CRITICAL PREREQ: /restaurants/[id] is currently `f (Dynamic)` server-rendered-on-demand with CLIENT-SIDE data fetch -> Google may see empty shells. Must make pages render restaurant content server-side (Next 14 generateMetadata + server component data fetch, or generateStaticParams for SSG) so they're fully crawlable. This is the biggest lever and the most involved change.
+3. sitemap.xml listing all 463 listing pages; submit to Google Search Console (GSC not yet set up -- do that FIRST to see current index state).
+4. Consider slug URLs (/restaurants/sushi-yasuda-nomad) vs raw UUID -- better SEO/CTR. Advise migration cost; keep UUID redirects so old links/QR don't break.
+5. Make lunch value-prop + booking CTA more prominent (search visitors arrive ready to book).
+6. Analytics: which pages pull search traffic + which convert. (Vercel Web Analytics is page-views only; custom events = Pro tier $20/mo, deferred. GSC covers search side free.)
+START BY AUDITING: current titles/meta, sitemap presence, SSR-vs-client-render on /restaurants/[id] -- establish the gap before building.
+REALITY CHECK (already discussed): ranking for a restaurant's BARE name is hard (competes w/ their own site, Google panel, Yelp/Resy). Realistic wedge = "[restaurant] lunch special / prix-fixe lunch / lunch [neighborhood]" long-tail where we have unique content (the lunch deal).
+
+
+## QUEUED PROJECT A -- Email unsubscribe / opt-out (Resend) [NOT STARTED]
+TRIGGER: a real user replied "STOP" to a booking-confirmation email (treated it like SMS opt-out) -- email had no context/opt-out. UX problem + deliverability risk (spam marks undo the SPF/DKIM/DMARC work).
+BUILD:
+1. Add List-Unsubscribe + List-Unsubscribe-Post headers to every Resend send -> Gmail/Apple native Unsubscribe.
+2. Email footer: context line ("You're receiving this because you requested a lunch reservation at [Restaurant] through Let's Get Lunch") + plain-language opt-out + working unsubscribe link.
+3. Unsubscribe endpoint + suppression list (new table or flag); check it before EVERY send.
+4. Sane from/reply-to; never re-send to a suppressed address.
+DB IMPACT (to confirm when building): likely a new `suppressions` table (email, created_at, reason) OR a suppressed flag on profiles -- but reservers often aren't signed up, so a standalone email-keyed suppressions table is the right call. Suppression check lives in app/api/reserve/route.ts (and any future send path) BEFORE the Resend fetch -- skip send if email is suppressed. Note: route.ts now uses supabaseAdmin (service_role) so it can read/write the suppression table server-side regardless of RLS.
+
+## QUEUED PROJECT B -- SEO for restaurant listing pages [NOT STARTED]
+INSIGHT FROM REAL DATA: organic Google traffic is finding specific restaurants (Sushi Yasuda, COQODAQ, ilili NoMad, Wolfgang's), landing on /restaurants/[id], and booking -- all LUNCH slots (12:00/12:30/3:00pm). Listing pages ARE working as SEO landing pages for "[restaurant] + lunch" intent. Lean in. (Users transact without signing up.)
+BUILD:
+1. Per-page <title> + meta description targeting "[Restaurant] lunch / prix-fixe lunch / lunch reservation". Add schema.org Restaurant + Menu/OfferCatalog structured data for rich results.
+2. CRITICAL PREREQ: /restaurants/[id] is currently `f (Dynamic)` server-rendered-on-demand with CLIENT-SIDE data fetch -> Google may see empty shells. Must make pages render restaurant content server-side (Next 14 generateMetadata + server component data fetch, or generateStaticParams for SSG) so they're fully crawlable. This is the biggest lever and the most involved change.
+3. sitemap.xml listing all 463 listing pages; submit to Google Search Console (GSC not yet set up -- do that FIRST to see current index state).
+4. Consider slug URLs (/restaurants/sushi-yasuda-nomad) vs raw UUID -- better SEO/CTR. Advise migration cost; keep UUID redirects so old links/QR don't break.
+5. Make lunch value-prop + booking CTA more prominent (search visitors arrive ready to book).
+6. Analytics: which pages pull search traffic + which convert. (Vercel Web Analytics is page-views only; custom events = Pro tier $20/mo, deferred. GSC covers search side free.)
+START BY AUDITING: current titles/meta, sitemap presence, SSR-vs-client-render on /restaurants/[id] -- establish the gap before building.
+REALITY CHECK (already discussed): ranking for a restaurant's BARE name is hard (competes w/ their own site, Google panel, Yelp/Resy). Realistic wedge = "[restaurant] lunch special / prix-fixe lunch / lunch [neighborhood]" long-tail where we have unique content (the lunch deal).
