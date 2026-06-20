@@ -347,57 +347,16 @@ export default function AdminPage() {
   }
 
   async function approveVendor(vendor: Vendor) {
-    // GUARD: prevent duplicate restaurants from double-clicking Approve.
-    // Check if an active restaurant with the same name + address already exists.
-    const { data: existing } = await supabase
-      .from('restaurants')
-      .select('id')
-      .ilike('name', vendor.restaurant_name.trim())
-      .ilike('address', vendor.address.trim())
-      .limit(1)
-    if (existing && existing.length > 0) {
-      alert(`"${vendor.restaurant_name}" already exists as a listing — marking vendor approved without creating a duplicate.`)
-      await supabase.from('vendors').update({ status: 'approved' }).eq('id', vendor.id)
-      fetchVendors()
-      return
+    const res = await fetch('/api/admin/approve-vendor', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw, vendor }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) { alert('Approve failed - check your admin session.'); return }
+    if (data.duplicate) {
+      alert(`"${vendor.restaurant_name}" already exists as a listing - marked approved without creating a duplicate.`)
     }
-
-    let lat: number | null = null
-    let lng: number | null = null
-    try {
-      const geo = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(vendor.address + ', New York, NY')}&key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0`)
-      const geoData = await geo.json()
-      if (geoData.results?.[0]?.geometry?.location) {
-        lat = geoData.results[0].geometry.location.lat
-        lng = geoData.results[0].geometry.location.lng
-      }
-    } catch (e) { console.error('Geocoding failed:', e) }
-
-    const { data: rest } = await supabase.from('restaurants').insert({
-      name: vendor.restaurant_name,
-      cuisine: vendor.cuisine,
-      neighborhood: vendor.neighborhood,
-      address: vendor.address,
-      hours: vendor.hours,
-      photo_url: vendor.photo_url,
-      photo_urls: vendor.photo_urls,
-      bio: vendor.bio || null,
-      work_friendly: vendor.work_friendly === 'yes',
-      wifi: vendor.wifi === 'yes',
-      website: vendor.website || null,
-      is_active: true, lat, lng,
-    }).select().single()
-
-    if (rest) {
-      await supabase.from('deals').insert({
-        restaurant_id: rest.id,
-        special: vendor.special,
-        price: parseFloat(vendor.price.replace('$', '')) || 0,
-        days: vendor.days || ['Mon','Tue','Wed','Thu','Fri'],
-        is_active: true,
-      })
-    }
-    await supabase.from('vendors').update({ status: 'approved' }).eq('id', vendor.id)
     fetchVendors()
   }
 
