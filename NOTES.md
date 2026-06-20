@@ -761,3 +761,19 @@ BUILD:
 6. Analytics: which pages pull search traffic + which convert. (Vercel Web Analytics is page-views only; custom events = Pro tier $20/mo, deferred. GSC covers search side free.)
 START BY AUDITING: current titles/meta, sitemap presence, SSR-vs-client-render on /restaurants/[id] -- establish the gap before building.
 REALITY CHECK (already discussed): ranking for a restaurant's BARE name is hard (competes w/ their own site, Google panel, Yelp/Resy). Realistic wedge = "[restaurant] lunch special / prix-fixe lunch / lunch [neighborhood]" long-tail where we have unique content (the lunch deal).
+
+
+## Security Step 2 -- progress update (Jun 20, 2026, session 2)
+DONE + verified live (all use pattern: client POST w/ pw -> /api/admin/<action> -> re-check ADMIN_SECRET -> supabaseAdmin service_role write):
+- /api/admin/login (commit ae91253)
+- /api/admin/toggle-active (commit ae91253)
+- /api/admin/delete-restaurant (commit f7134df)
+- Hardcoded 'lunch2026' fully removed from client.
+
+STILL TODO (3 writes, same pattern, NOT yet moved -- admin still writes these with PUBLISHABLE key):
+- approveVendor -- 5 ops: dup-guard (ilike name+address), geocode fetch, restaurants insert, deals insert, vendors status update. Function ~line 349-403. The geocode + dup-guard must move server-side too. Medium-big.
+- addListing -- insert + geocode. Medium.
+- saveEdit -- THE BIG ONE: restaurant update + deal update-or-insert + photo uploads (Supabase Storage) + geocode. Photo upload is the tricky part (currently client-side via supabase.storage). ~line 445-528.
+
+THEN Step 4 (RLS lockdown) -- ONLY after all 3 above are server-side. Until then DB still publicly writable.
+Rollback: git tag pre-step2-secure.
