@@ -540,8 +540,12 @@ export default function AdminPage() {
   }
 
   async function deleteRestaurant(id: string) {
-    await supabase.from('deals').delete().eq('restaurant_id', id)
-    await supabase.from('restaurants').delete().eq('id', id)
+    const res = await fetch('/api/admin/delete-restaurant', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw, id }),
+    })
+    if (!res.ok) { alert('Delete failed - check your admin session.'); return }
     setRestaurants(prev => prev.filter(x => x.id !== id))
     setConfirmDelete(null)
   }
