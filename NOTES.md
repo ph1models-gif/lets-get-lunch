@@ -777,3 +777,15 @@ STILL TODO (3 writes, same pattern, NOT yet moved -- admin still writes these wi
 
 THEN Step 4 (RLS lockdown) -- ONLY after all 3 above are server-side. Until then DB still publicly writable.
 Rollback: git tag pre-step2-secure.
+
+
+## Security Step 2 -- progress (Jun 20, session 3)
+- /api/admin/approve-vendor DONE + tested live (restaurant + deal created). Replicates dup-guard + geocode + restaurant insert + deal insert + vendor status update server-side. ADDED: 23505 unique-violation backstop -> if DB index rejects a dup the guard missed, marks vendor approved cleanly instead of erroring.
+- 4 of 6 admin writes now server-side: login, toggle-active, delete-restaurant, approve-vendor.
+
+REMAINING (2):
+- addListing -- insert + geocode (inserts at admin/page.tsx lines ~297, 314). Medium. Same pattern as approve minus the dup-guard complexity. Has its own form-state to pass.
+- saveEdit -- THE BIG ONE: restaurant update + deal update-or-insert (line ~476) + PHOTO UPLOADS (Supabase Storage, currently client-side) + geocode. Photo upload is the hard part -- may keep upload client-side (it's a storage write, not a table write) and only move the table writes server-side. Decide approach when tackling.
+
+THEN Step 4 RLS lockdown -- only after addListing + saveEdit done. DB still publicly writable until then.
+Rollback: git tag pre-step2-secure.
