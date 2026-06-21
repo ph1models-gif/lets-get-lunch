@@ -327,14 +327,14 @@ export default function AdminPage() {
 
   async function restoreVendor(id: string) {
     if (!confirm('Restore this vendor to Pending Submissions for review?')) return
-    await supabase.from('vendors').update({ status: 'pending' }).eq('id', id)
+    await fetch('/api/admin/vendor-update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw, id, patch: { status: 'pending' } }) })
     fetchContacts()
     fetchVendors()
     alert('Restored — check the Pending Submissions tab')
   }
 
   async function rejectVendor(id: string) {
-    await supabase.from('vendors').update({ status: 'rejected' }).eq('id', id)
+    await fetch('/api/admin/vendor-update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw, id, patch: { status: 'rejected' } }) })
     fetchVendors()
   }
 
@@ -706,7 +706,7 @@ export default function AdminPage() {
                           photoUrls = newUrls;
                         }
                         const updatedVendor = {...vendorEditForm, photo_url: photoUrl, photo_urls: photoUrls};
-                        await supabase.from('vendors').update(updatedVendor).eq('id', v.id);
+                        await fetch('/api/admin/vendor-update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw, id: v.id, patch: updatedVendor }) });
                         approveVendor({...v, ...updatedVendor});
                         setEditingVendorId(null);
                         setVendorMainFile(null);
