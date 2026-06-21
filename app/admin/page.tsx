@@ -447,7 +447,6 @@ export default function AdminPage() {
       setSaving(false)
       return
     }
-    }
 
     setSaving(false)
     setEditingId(null)
