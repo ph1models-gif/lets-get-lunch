@@ -801,3 +801,27 @@ LAST ONE:
 THEN Step 4 RLS lockdown. DB still publicly writable until saveEdit done + RLS applied.
 Rollback: git tag pre-step2-secure.
 DEFERRED note: photo uploads still use publishable key against Storage bucket (separate from table RLS). Storage-policy hardening = separate later task, doesn't block table RLS.
+
+
+## SECURITY STEP 2 -- COMPLETE (Jun 20, 2026)
+ALL admin table writes now go through server routes (admin secret check + service_role). Zero direct supabase.from().insert/update/delete left in app/admin/page.tsx (verified by grep). Routes:
+- /api/admin/login (password check)
+- /api/admin/toggle-active
+- /api/admin/delete-restaurant
+- /api/admin/approve-vendor (+ 23505 dup backstop)
+- /api/admin/add-listing (+ 23505 backstop)
+- /api/admin/save-edit (restaurant update + deal upsert, + 23505 backstop)
+- /api/admin/vendor-update (restore/reject/review-edit -> patch)
+All tested live + Vercel green. Hardcoded admin password fully removed; auth via ADMIN_SECRET env (server + Vercel).
+Photos + geocoding stay CLIENT-side (Storage writes, separate from table RLS) -- intentional.
+
+### READY FOR STEP 4 (RLS lockdown) -- the high-risk step, do FRESH:
+Now safe to revoke public table writes because admin no longer needs them. Plan:
+- restaurants: keep public SELECT (is_active=true); REVOKE public INSERT/UPDATE/DELETE; ENABLE RLS (currently OFF on this table!).
+- deals: keep public SELECT (is_active=true); revoke public INSERT/UPDATE/DELETE.
+- vendors: KEEP public INSERT (the /list-your-restaurant form needs it); revoke public UPDATE/DELETE; consider restricting SELECT.
+- reservations: KEEP public INSERT (reserve flow -- though that's now server-side via service_role too, verify); REVOKE public SELECT (customer PII exposure!).
+- profiles: revoke public UPDATE/INSERT where possible (auth-tied).
+- TEST LIVE SITE AFTER EACH POLICY CHANGE. Homepage must still load listings (public SELECT). Reserve flow + admin must still work (service_role bypasses RLS).
+- Reservations insert: CHECK whether reserve route uses service_role (it does -> route.ts uses supabaseAdmin) so public INSERT on reservations can also be revoked. Verify before revoking.
+Rollback: git tag pre-step2-secure + Supabase daily backups + local JSON export.
