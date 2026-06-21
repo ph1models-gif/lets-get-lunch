@@ -293,55 +293,20 @@ export default function AdminPage() {
       }
     }
 
-    // Insert restaurant
-    const { data: rest } = await supabase.from('restaurants').insert({
-      name: addForm.name,
-      address: addForm.address,
-      neighborhood: addForm.neighborhood,
-      cuisine: addForm.cuisine,
-      hours: addForm.hours,
-      bio: addForm.bio || null,
-      work_friendly: addForm.work_friendly,
-      wifi: addForm.wifi,
-      photo_url: photoUrl,
-      photo_urls: photoUrls,
-      website: addForm.website || null,
-      is_active: true,
-      lat, lng,
-    }).select().single()
-
-    if (rest) {
-      await supabase.from('deals').insert({
-        restaurant_id: rest.id,
-        special: addForm.special,
-        price: parseFloat(addForm.price),
-        days: addForm.days,
-        is_active: true,
-      })
-      // Also save to vendors table for contact tracking
-      await supabase.from('vendors').insert({
-        restaurant_name: addForm.name,
-        contact_name: addForm.contact_name,
-        email: addForm.contact_email,
-        phone: addForm.contact_phone,
-        address: addForm.address,
-        neighborhood: addForm.neighborhood,
-        cuisine: addForm.cuisine,
-        hours: addForm.hours,
-        special: addForm.special,
-        price: addForm.price,
-        work_friendly: addForm.work_friendly ? 'yes' : 'no',
-        wifi: addForm.wifi ? 'yes' : 'no',
-        bio: addForm.bio || null,
-        days: addForm.days,
-        status: 'approved',
-      })
+    // Inserts moved server-side (service_role). Photos + geocode already done above.
+    const res = await fetch('/api/admin/add-listing', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw, form: addForm, photoUrl, photoUrls, lat, lng }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (res.ok && data.ok) {
       setAddSuccess(`✅ ${addForm.name} added and live on the site!`)
       setAddForm({ name: '', address: '', neighborhood: '', cuisine: '', hours: '', bio: '', special: '', price: '', work_friendly: false, wifi: false, days: ['Mon','Tue','Wed','Thu','Fri'], contact_name: '', contact_email: '', contact_phone: '', website: '' })
       setAddMainFile(null)
       setAddExtraFiles([])
     } else {
-      setAddError('Failed to save restaurant. Try again.')
+      setAddError(data.error || 'Failed to save restaurant. Try again.')
     }
     setAddSaving(false)
   }
