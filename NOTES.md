@@ -789,3 +789,15 @@ REMAINING (2):
 
 THEN Step 4 RLS lockdown -- only after addListing + saveEdit done. DB still publicly writable until then.
 Rollback: git tag pre-step2-secure.
+
+
+## Security Step 2 -- progress (Jun 20, session 3 cont.)
+- /api/admin/add-listing DONE + tested live. submitNewRestaurant: geocode + photo upload stay CLIENT-side, then restaurant+deal+vendor inserts go server-side via service_role. 23505 dup backstop -> 409. PATTERN for saveEdit confirmed: keep storage/geocode client, move table writes server.
+- 5 of 6 admin writes now server-side: login, toggle-active, delete-restaurant, approve-vendor, add-listing (submitNewRestaurant).
+
+LAST ONE:
+- saveEdit (~line 445-528, deal insert at ~476) -- restaurant UPDATE + deal update-or-insert + photo upload (Storage, keep client) + geocode (keep client). Same split: photos+geocode client, table writes -> new /api/admin/save-edit route. Slightly more complex than add (update-or-insert branch for deal). Last write before RLS.
+
+THEN Step 4 RLS lockdown. DB still publicly writable until saveEdit done + RLS applied.
+Rollback: git tag pre-step2-secure.
+DEFERRED note: photo uploads still use publishable key against Storage bucket (separate from table RLS). Storage-policy hardening = separate later task, doesn't block table RLS.
