@@ -414,7 +414,7 @@ export default function AdminPage() {
       } catch (e) { console.error('Geocoding failed on edit:', e) }
     }
 
-    await supabase.from('restaurants').update({
+    const fields = {
       name: editForm.name,
       cuisine: editForm.cuisine,
       neighborhood: editForm.neighborhood,
@@ -428,23 +428,25 @@ export default function AdminPage() {
       work_friendly: editForm.work_friendly || false,
       wifi: editForm.wifi || false,
       website: editForm.website || null,
-    }).eq('id', r.id)
-
-    const deal = deals.find(d => d.restaurant_id === r.id)
-    if (deal) {
-      await supabase.from('deals').update({
-        special: editForm.deal_special,
-        price: parseFloat(editForm.deal_price || '0'),
-        days: editForm.deal_days || ['Mon','Tue','Wed','Thu','Fri'],
-      }).eq('id', deal.id)
-    } else if (editForm.deal_special) {
-      await supabase.from('deals').insert({
-        restaurant_id: r.id,
-        special: editForm.deal_special,
-        price: parseFloat(editForm.deal_price || '0'),
-        days: editForm.deal_days || ['Mon','Tue','Wed','Thu','Fri'],
-        is_active: true,
-      })
+    }
+    const existingDeal = deals.find(d => d.restaurant_id === r.id)
+    const dealPayload = {
+      id: existingDeal ? existingDeal.id : null,
+      special: editForm.deal_special,
+      price: parseFloat(editForm.deal_price || '0'),
+      days: editForm.deal_days || ['Mon','Tue','Wed','Thu','Fri'],
+    }
+    const res = await fetch('/api/admin/save-edit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw, id: r.id, fields, deal: dealPayload }),
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      alert(data.error || 'Save failed - check your admin session.')
+      setSaving(false)
+      return
+    }
     }
 
     setSaving(false)
