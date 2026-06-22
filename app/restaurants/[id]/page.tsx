@@ -17,6 +17,7 @@ export async function generateMetadata(
   const fallback: Metadata = {
     title: "Lunch Deal — NYC Prix-Fixe | Let's Get Lunch",
     description: 'Find the best prix-fixe lunch deals across NYC. Real tables, real service, all under $35.',
+    robots: { index: false, follow: false },
   }
   try {
     const supabase = sb()
@@ -24,6 +25,7 @@ export async function generateMetadata(
       .from('restaurants')
       .select('name, neighborhood, cuisine, bio')
       .eq('id', params.id)
+      .eq('is_active', true)
       .single()
     if (!r || !r.name) return fallback
 

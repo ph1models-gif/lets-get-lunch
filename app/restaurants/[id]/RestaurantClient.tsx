@@ -66,6 +66,7 @@ export default function RestaurantClient() {
         .from('restaurants')
         .select('*, deals(*)')
         .eq('id', id)
+        .eq('is_active', true)
         .single();
       setR(data);
       setLoading(false);
@@ -243,8 +244,9 @@ export default function RestaurantClient() {
     <main className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="text-center">
         <div className="text-5xl mb-4">🍽️</div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Restaurant not found</h1>
-        <a href="/" className="text-[#4A9FD5] hover:underline">Back to home</a>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">This lunch isn&apos;t available right now</h1>
+        <p className="text-gray-500 mb-4">It may have been removed or is no longer listed.</p>
+        <a href="/" className="text-[#4A9FD5] hover:underline">Browse other lunches →</a>
       </div>
     </main>
   );
