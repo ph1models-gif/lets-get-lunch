@@ -50,7 +50,17 @@ export async function POST(req: NextRequest) {
     // Send email — wrapped so failure does NOT block the code returning
     try {
       const userEmail = contact.includes('@') ? contact : null
+      // Respect unsubscribes: never email someone who opted out
+      let isUnsubscribed = false
       if (userEmail) {
+        const { data: unsub } = await supabase
+          .from('unsubscribes')
+          .select('email')
+          .eq('email', userEmail.trim().toLowerCase())
+          .maybeSingle()
+        if (unsub) isUnsubscribed = true
+      }
+      if (userEmail && !isUnsubscribed) {
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
@@ -63,7 +73,7 @@ export async function POST(req: NextRequest) {
             subject: `Your lunch plan — ${restaurant_name}`,
             html: `
               <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
-                <h1 style="color:#4A9FD5;font-size:24px;margin-bottom:8px">You're all set! 🍽️</h1>
+                <h1 style="color:#4A9FD5;font-size:24px;margin-bottom:8px">Here's your lunch at ${restaurant_name} 🍽️</h1>
                 <p style="color:#444;font-size:16px">Hi ${name},</p>
                 <p style="color:#444;font-size:16px">We've noted your interest in the lunch special at <strong>${restaurant_name}</strong>.</p>
                 <div style="background:#EEF6FC;border-radius:12px;padding:20px;margin:24px 0">
@@ -72,7 +82,7 @@ export async function POST(req: NextRequest) {
                   ${restaurantWebsite ? `<p style="margin:8px 0;font-size:16px"><strong>🌐 Website:</strong> <a href="${restaurantWebsite}" style="color:#4A9FD5;text-decoration:none">${restaurantWebsite}</a></p>` : ''}
                 </div>
                 <div style="border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:24px">
-                  <p style="margin:0 0 8px;color:#666;font-size:13px">Reservation details</p>
+                  <p style="margin:0 0 8px;color:#666;font-size:13px">Lunch details</p>
                   <p style="margin:4px 0;font-size:15px"><strong>Restaurant:</strong> ${restaurant_name}</p>
                   ${restaurantAddress ? `<p style="margin:4px 0;font-size:15px"><strong>Address:</strong> ${restaurantAddress}</p>` : ''}
                   <p style="margin:4px 0;font-size:15px"><strong>Time:</strong> ${preferred_time}</p>
@@ -84,7 +94,8 @@ export async function POST(req: NextRequest) {
                 </p>
                 <p style="color:#bbb;font-size:11px;text-align:center;margin-top:12px">
                   Let's Get Lunch · New York, NY<br/>
-                  To unsubscribe, reply to this email with the word STOP.
+                  You're receiving this because you asked us to email you this lunch deal.<br/>
+                  <a href="https://www.letsgetlunch.nyc/unsubscribe?email=${encodeURIComponent(userEmail)}" style="color:#bbb;text-decoration:underline">Unsubscribe</a>
                 </p>
               </div>
             `,

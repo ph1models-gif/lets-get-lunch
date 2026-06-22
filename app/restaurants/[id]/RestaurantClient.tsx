@@ -362,9 +362,9 @@ export default function RestaurantClient() {
 
         <button onClick={openModal}
           className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors mb-3">
-          Reserve this lunch special
+          Get this lunch special
         </button>
-        <p className="text-center text-xs text-gray-400">Free to reserve · Instant confirmation code</p>
+        <p className="text-center text-xs text-gray-400">Free · We&apos;ll show you how to grab it</p>
 
         <button onClick={handleShare}
           className="w-full border border-gray-200 text-gray-600 py-3 rounded-xl font-medium text-sm hover:bg-gray-50 transition-colors mt-3 flex items-center justify-center gap-2">
@@ -388,7 +388,7 @@ export default function RestaurantClient() {
               {/* STEP: book */}
               {step === 'book' && (
                 <>
-                  <h2 className="text-xl font-bold text-gray-900 mb-1">Reserve your lunch</h2>
+                  <h2 className="text-xl font-bold text-gray-900 mb-1">Get this lunch</h2>
                   <p className="text-sm text-gray-500 mb-6">{r.name} · ${deal?.price} per person</p>
 
                   {authError && <p className="text-red-500 text-sm bg-red-50 px-4 py-3 rounded-xl mb-4">{authError}</p>}
@@ -409,7 +409,7 @@ export default function RestaurantClient() {
                           </div>
                         </div>
                         <div>
-                          <label className={labelClass}>Email</label>
+                          <label className={labelClass}>Email (we&apos;ll send you this lunch so you don&apos;t forget)</label>
                           <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                             placeholder="your@email.com" className={inputClass} />
                         </div>
@@ -518,8 +518,8 @@ export default function RestaurantClient() {
               {/* STEP: success */}
               {step === 'success' && (
                 <div className="text-center py-4">
-                  <div className="text-5xl mb-3">🎉</div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-1">You&apos;re all set!</h2>
+                  <div className="text-5xl mb-3">🍽️</div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-1">Got it — here&apos;s how to grab this lunch</h2>
                   <p className="text-gray-500 mb-4">We&apos;ve noted your interest in this lunch deal at {r.name}</p>
                   <div className="bg-[#EEF6FC] rounded-2xl py-5 px-6 mb-4 text-left">
                     <p className="text-sm text-gray-700 mb-3">{r.name} isn&apos;t a Let&apos;s Get Lunch partner yet, so we can&apos;t book your table directly. Call ahead or just walk in — and mention you saw the lunch special on Let&apos;s Get Lunch.</p>
@@ -540,7 +540,7 @@ export default function RestaurantClient() {
                     <p className="text-xs text-gray-400 mb-1">Restaurant address</p>
                     <p className="text-sm font-medium text-gray-900">{r.address}</p>
                   </div>
-                  <p className="text-sm text-gray-500 mb-4">Confirmation sent to {form.email}</p>
+                  <p className="text-sm text-gray-500 mb-4">We&apos;ve emailed this lunch to {form.email}</p>
                   <button onClick={() => setShowModal(false)}
                     className="w-full border border-gray-200 text-gray-700 py-4 rounded-xl font-medium text-lg hover:bg-gray-50">
                     Done
