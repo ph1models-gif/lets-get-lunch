@@ -825,3 +825,23 @@ Now safe to revoke public table writes because admin no longer needs them. Plan:
 - TEST LIVE SITE AFTER EACH POLICY CHANGE. Homepage must still load listings (public SELECT). Reserve flow + admin must still work (service_role bypasses RLS).
 - Reservations insert: CHECK whether reserve route uses service_role (it does -> route.ts uses supabaseAdmin) so public INSERT on reservations can also be revoked. Verify before revoking.
 Rollback: git tag pre-step2-secure + Supabase daily backups + local JSON export.
+
+
+## RLS LOCKDOWN -- progress (Jun 22, 2026, session end)
+DONE + tested live (4 of 5 tables):
+- reservations: dropped public SELECT (PII leak closed). Kept INSERT. Admin read moved to /api/admin/reservations (service_role). TESTED.
+- deals: dropped public delete/insert/update. Kept "Public can read deals" (is_active=true). Homepage + admin deal-edit TESTED.
+- vendors: dropped "Public can update vendors". Kept INSERT (form) + SELECT. Form + admin pending TESTED.
+- profiles: dropped old public insert/update (were with_check=true -- anyone could write any profile). REPLACED with constrained policies: "Users can insert their own profile" (with check auth.uid()=id) + "Users can update their own profile" (using+with check auth.uid()=id). Signup re-tested -> new profile saves (test test / Chelsea). MORE secure than before.
+  - GOTCHA fixed: profile INSERT is client-side in 4 spots (login, signup, RestaurantClient reserve, auth/callback) all set id=data.user.id, so auth.uid()=id policy is correct. SQL keyword is "with check" (two words), not "with_check".
+
+### LAST TABLE -- restaurants -- NOT DONE. Highest risk. Do FRESH:
+- restaurants currently has RLS *OFF* (rowsecurity=false) -- policies exist but unenforced, table fully open.
+- SEQUENCE when ready:
+  1. drop "public delete restaurants", "Public can insert restaurants", "public update restaurants" (harmless while RLS off -- just prep).
+  2. KEEP "Public can read restaurants" (is_active=true) -- homepage depends on it.
+  3. THEN: alter table public.restaurants enable row level security;  <-- moment of truth.
+  4. IMMEDIATELY refresh live homepage -- listings MUST still load (via the public SELECT policy). If dark, the SELECT policy is wrong -> disable RLS again to restore, then fix policy.
+- Have homepage open in a second tab, ready to refresh the instant RLS flips on.
+- Admin writes/reads to restaurants already go via service_role (toggle, delete, approve, add, save-edit) so they bypass RLS fine. Admin restaurants READ (Active Listings / fetchRestaurants) -- VERIFY it still works after RLS on (it reads is_active listings, public SELECT covers active; but check if it needs to see inactive ones -> if so that read needs a service_role route too, like reservations did).
+Rollback: git tag pre-step2-secure + Supabase daily backups. To instantly undo: alter table public.restaurants disable row level security;
