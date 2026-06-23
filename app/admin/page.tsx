@@ -241,11 +241,13 @@ export default function AdminPage() {
 
   async function fetchReservations() {
     setResLoading(true)
-    const { data } = await supabase
-      .from('reservations')
-      .select('*, restaurants(name)')
-      .order('created_at', { ascending: false })
-    setReservations(data || [])
+    const res = await fetch('/api/admin/reservations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw }),
+    })
+    const data = await res.json().catch(() => ({}))
+    setReservations(res.ok && data.ok ? (data.reservations || []) : [])
     setResLoading(false)
   }
 
