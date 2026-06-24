@@ -16,7 +16,7 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const fallback: Metadata = {
     title: "Lunch Deal — NYC Prix-Fixe | Let's Get Lunch",
-    description: 'Find the best prix-fixe lunch deals across NYC. Real tables, real service, all under $35.',
+    description: 'Discover great prix-fixe lunch deals at hundreds of NYC restaurants. Real sit-down tables, fast service, most under $35. Find your lunch today.',
     robots: { index: false, follow: false },
   }
   try {

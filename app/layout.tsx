@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     shortcut: '/favicon.svg',
   },
   title: "Let's Get Lunch — NYC Prix-Fixe Lunch Deals",
-  description: "Find the best prix-fixe lunch deals across NYC. Real tables, real service, all under $35.",
+  description: "Discover great prix-fixe lunch deals at hundreds of NYC restaurants. Real sit-down tables, fast service, most under $35. Find your lunch today.",
 };
 
 export default function RootLayout({
