@@ -845,3 +845,21 @@ DONE + tested live (4 of 5 tables):
 - Have homepage open in a second tab, ready to refresh the instant RLS flips on.
 - Admin writes/reads to restaurants already go via service_role (toggle, delete, approve, add, save-edit) so they bypass RLS fine. Admin restaurants READ (Active Listings / fetchRestaurants) -- VERIFY it still works after RLS on (it reads is_active listings, public SELECT covers active; but check if it needs to see inactive ones -> if so that read needs a service_role route too, like reservations did).
 Rollback: git tag pre-step2-secure + Supabase daily backups. To instantly undo: alter table public.restaurants disable row level security;
+
+
+## TODO (next session) -- two open items, both LOW urgency:
+
+### 1. Google Maps API key hardening (Maps worked again after a transient blip Jun 23)
+- Key "Maps Platform API Key" in Google Cloud (project-3cd62bd2-7a1f-4e7e-979) currently allows 32 APIs, NO app restriction. It's the hardcoded key AIzaSy...JheFm0 in client + server code.
+- DECISION PENDING (3 options):
+  - A (safe/quick): restrict by API only -> keep Maps JavaScript + Geocoding + Places, uncheck other 29. Leave Application restriction = None. Can't break anything.
+  - B: add website referrers https://www.letsgetlunch.nyc/* + https://letsgetlunch.nyc/* -> BUT this risks breaking SERVER-SIDE geocoding (Vercel server requests send no referrer header -> Google rejects geocode calls in add-listing/save-edit/reserve routes). If doing B, MUST test adding a listing right after + revert if no pin.
+  - C (correct architecture): TWO keys -- one browser key restricted to websites (map), one server key API/IP-restricted (geocoding). Requires adding 2nd key to env + code. The proper fix.
+- RECOMMENDATION: A tonight-equivalent, C eventually. NOT just-B (quietly breaks geocoding).
+- WHY transient: billing shows "Paid account" $0.00, healthy. Map recovered on its own -- likely a Google-side blip or momentary billing re-verify.
+
+### 2. RLS lockdown -- FINAL table still pending (restaurants)
+- 4 of 5 tables done+tested (reservations, deals, vendors, profiles). Only restaurants left.
+- restaurants has RLS OFF. Sequence: drop 3 public write policies (prep), keep "Public can read restaurants" (is_active=true), THEN enable RLS, THEN refresh homepage IMMEDIATELY (listings must load). Have homepage open in 2nd tab.
+- Check admin Active Listings still works after (may need inactive listings -> if so, that read goes server-side like reservations did).
+- Instant rollback: alter table public.restaurants disable row level security;
