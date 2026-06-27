@@ -889,3 +889,9 @@ ALL 5 tables locked down + tested live. The database is no longer publicly writa
 Rollback (if ever needed): alter table public.restaurants disable row level security; + git tag pre-step2-secure.
 
 ### SECURITY PROJECT (Steps 2 + 4) -- FULLY COMPLETE. The original open exposure (publicly writable DB) is CLOSED.
+
+
+## RLS LOCKDOWN -- VERIFIED COMPLETE (Jun 27, 2026, corrected)
+IMPORTANT CORRECTION: the first "enable RLS" on restaurants did NOT take (status query showed rowsecurity=false even though homepage worked -- because with RLS off, public SELECT works anyway so "homepage loads" was a false positive). Re-ran `alter table public.restaurants enable row level security;` and CONFIRMED via pg_tables that restaurants.rowsecurity=true. Homepage + admin re-tested working.
+LESSON: always confirm RLS state with `select rowsecurity from pg_tables where tablename=...` -- do NOT trust "the site still works" as proof RLS is on (it isn't proof; RLS-off also lets reads through).
+FINAL STATE: ALL public-schema tables now rowsecurity=true (deals, profiles, reservations, restaurants, unsubscribes, vendors). DB genuinely locked. Security project (Steps 2+4) truly complete.
