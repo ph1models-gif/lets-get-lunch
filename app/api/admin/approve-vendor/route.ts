@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '../../../../lib/supabaseAdmin'
 
-const MAPS_KEY = 'AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0'
 
 export async function POST(req: NextRequest) {
   try {
-    const { password, vendor } = await req.json()
+    const { password, vendor, lat, lng } = await req.json()
     if (password !== process.env.ADMIN_SECRET) {
       return NextResponse.json({ ok: false }, { status: 401 })
     }
@@ -25,17 +24,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, duplicate: true })
     }
 
-    // Geocode address (best-effort)
-    let lat: number | null = null
-    let lng: number | null = null
-    try {
-      const geo = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(vendor.address + ', New York, NY')}&key=${MAPS_KEY}`)
-      const geoData = await geo.json()
-      if (geoData.results?.[0]?.geometry?.location) {
-        lat = geoData.results[0].geometry.location.lat
-        lng = geoData.results[0].geometry.location.lng
-      }
-    } catch (e) { console.error('Geocoding failed:', e) }
+    // lat/lng are geocoded client-side (in admin) and passed in the request body.
 
     // Insert restaurant
     const { data: rest, error: insErr } = await supabaseAdmin.from('restaurants').insert({

@@ -314,10 +314,18 @@ export default function AdminPage() {
   }
 
   async function approveVendor(vendor: Vendor) {
+    let geoLat = null, geoLng = null
+    if (vendor.address) {
+      try {
+        const geo = await fetch('https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(vendor.address + ', New York, NY') + '&key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0')
+        const gd = await geo.json()
+        if (gd.results && gd.results[0]) { geoLat = gd.results[0].geometry.location.lat; geoLng = gd.results[0].geometry.location.lng }
+      } catch (e) { console.error(e) }
+    }
     const res = await fetch('/api/admin/approve-vendor', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pw, vendor }),
+      body: JSON.stringify({ password: pw, vendor, lat: geoLat, lng: geoLng }),
     })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) { alert('Approve failed - check your admin session.'); return }
