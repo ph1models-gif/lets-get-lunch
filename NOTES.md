@@ -863,3 +863,16 @@ Rollback: git tag pre-step2-secure + Supabase daily backups. To instantly undo: 
 - restaurants has RLS OFF. Sequence: drop 3 public write policies (prep), keep "Public can read restaurants" (is_active=true), THEN enable RLS, THEN refresh homepage IMMEDIATELY (listings must load). Have homepage open in 2nd tab.
 - Check admin Active Listings still works after (may need inactive listings -> if so, that read goes server-side like reservations did).
 - Instant rollback: alter table public.restaurants disable row level security;
+
+
+## RLS LOCKDOWN -- COMPLETE (Jun 27, 2026)
+ALL 5 tables locked down + tested live. The database is no longer publicly writable.
+- restaurants: dropped public delete/insert/update policies; KEPT "Public can read restaurants" (is_active=true); ENABLED RLS (was OFF). Homepage still loads listings ✓. Admin shows all listings incl. hidden + writes work ✓ (admin reads/writes via service_role, bypass RLS).
+- reservations: public SELECT dropped (PII closed), INSERT kept, admin read via /api/admin/reservations.
+- deals: public write dropped, public SELECT (is_active) kept.
+- vendors: public UPDATE dropped, INSERT (form) + SELECT kept.
+- profiles: public insert/update replaced with constrained "own profile" policies (auth.uid()=id).
+- Security posture now: public (publishable key) can only READ active listings/deals + INSERT vendor applications + reservations + own profile. All admin/privileged ops go through service_role server routes behind ADMIN_SECRET. service_role bypasses RLS so app fully works.
+Rollback (if ever needed): alter table public.restaurants disable row level security; + git tag pre-step2-secure.
+
+### SECURITY PROJECT (Steps 2 + 4) -- FULLY COMPLETE. The original open exposure (publicly writable DB) is CLOSED.
