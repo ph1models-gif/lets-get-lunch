@@ -265,11 +265,11 @@ export default function AdminPage() {
     // Geocode address
     let lat = null, lng = null
     try {
-      const geo = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(addForm.address + ', New York, NY')}&key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0`)
+      const geo = await fetch(`/api/geocode?address=${encodeURIComponent(addForm.address)}`)
       const geoData = await geo.json()
-      if (geoData.results?.[0]?.geometry?.location) {
-        lat = geoData.results[0].geometry.location.lat
-        lng = geoData.results[0].geometry.location.lng
+      if (geoData.lat != null && geoData.lng != null) {
+        lat = geoData.lat
+        lng = geoData.lng
       }
     } catch(e) {}
 
@@ -317,9 +317,9 @@ export default function AdminPage() {
     let geoLat = null, geoLng = null
     if (vendor.address) {
       try {
-        const geo = await fetch('https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(vendor.address + ', New York, NY') + '&key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0')
+        const geo = await fetch('/api/geocode?address=' + encodeURIComponent(vendor.address))
         const gd = await geo.json()
-        if (gd.results && gd.results[0]) { geoLat = gd.results[0].geometry.location.lat; geoLng = gd.results[0].geometry.location.lng }
+        if (gd.lat != null && gd.lng != null) { geoLat = gd.lat; geoLng = gd.lng }
       } catch (e) { console.error(e) }
     }
     const res = await fetch('/api/admin/approve-vendor', {
@@ -415,11 +415,11 @@ export default function AdminPage() {
     let geoLng: number | null = editForm.lng || null
     if (editForm.address) {
       try {
-        const geo = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(editForm.address + ', New York, NY')}&key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0`)
+        const geo = await fetch(`/api/geocode?address=${encodeURIComponent(editForm.address)}`)
         const geoData = await geo.json()
-        if (geoData.results?.[0]?.geometry?.location) {
-          geoLat = geoData.results[0].geometry.location.lat
-          geoLng = geoData.results[0].geometry.location.lng
+        if (geoData.lat != null && geoData.lng != null) {
+          geoLat = geoData.lat
+          geoLng = geoData.lng
         }
       } catch (e) { console.error('Geocoding failed on edit:', e) }
     }
