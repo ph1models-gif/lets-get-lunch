@@ -27,7 +27,9 @@ export default function AuthCallback() {
           neighborhood: null,
         });
       }
-      window.location.href = '/';
+      const raw = new URLSearchParams(window.location.search).get('next') || '';
+      const safe = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/';
+      window.location.href = safe;
     }
     finish();
   }, []);
