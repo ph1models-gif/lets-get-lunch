@@ -138,7 +138,7 @@ export default function SignupPage() {
 
               <p className="text-center text-sm text-gray-500">
                 Already have an account?{' '}
-                <a href="/login" className="text-[#4A9FD5] font-medium hover:underline">Sign in</a>
+                <a href={`/login${typeof window !== 'undefined' ? window.location.search : ''}`} className="text-[#4A9FD5] font-medium hover:underline">Sign in</a>
               </p>
             </div>
           )}

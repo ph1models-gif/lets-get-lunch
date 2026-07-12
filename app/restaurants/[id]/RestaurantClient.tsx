@@ -46,6 +46,11 @@ export default function RestaurantClient() {
   const [authError, setAuthError] = useState('');
   const [resCode, setResCode] = useState('');
   const [isNewUser, setIsNewUser] = useState(false);
+  const [showClaimModal, setShowClaimModal] = useState(false);
+  const [claimSize, setClaimSize] = useState(2);
+  const [claiming, setClaiming] = useState(false);
+  const [claimCode, setClaimCode] = useState('');
+  const [claimError, setClaimError] = useState('');
   const [userName, setUserName] = useState('');
   const [userFirstName, setUserFirstName] = useState('');
 
@@ -263,6 +268,43 @@ export default function RestaurantClient() {
   }
 
   const deal = r.deals?.[0];
+
+  async function handleClaimClick() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      window.location.href = `/signup?next=/restaurants/${r.id}`;
+      return;
+    }
+    setShowClaimModal(true);
+  }
+
+  async function submitClaim() {
+    setClaiming(true);
+    setClaimError('');
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { setClaimError('Please sign in again.'); setClaiming(false); return; }
+      const res = await fetch('/api/claim', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ deal_id: deal?.id, party_size: claimSize }),
+      });
+      const data = await res.json();
+      if (res.ok && data.code) {
+        setClaimCode(data.code);
+      } else if (data.error === 'already_claimed') {
+        setClaimError('You already claimed this lunch today.');
+      } else {
+        setClaimError('Something went wrong. Please try again.');
+      }
+    } catch (e) {
+      setClaimError('Something went wrong. Please try again.');
+    }
+    setClaiming(false);
+  }
   const inputClass = "w-full border border-gray-200 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-[#4A9FD5]";
   const labelClass = "block text-sm font-medium text-gray-700 mb-1.5";
 
@@ -361,17 +403,73 @@ export default function RestaurantClient() {
           </div>
         </div>
 
-        <button onClick={openModal}
-          className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors mb-3">
-          Get this lunch special
-        </button>
-        <p className="text-center text-xs text-gray-400">Free · We&apos;ll show you how to grab it</p>
+        {deal?.is_exclusive ? (
+          <>
+            <button onClick={handleClaimClick}
+              className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors mb-3">
+              Claim this exclusive lunch
+            </button>
+            <p className="text-center text-xs text-gray-400">Free account required · No reservation needed</p>
+          </>
+        ) : (
+          <>
+            <button onClick={openModal}
+              className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors mb-3">
+              Get this lunch special
+            </button>
+            <p className="text-center text-xs text-gray-400">Free · We&apos;ll show you how to grab it</p>
+          </>
+        )}
 
         <button onClick={handleShare}
           className="w-full border border-gray-200 text-gray-600 py-3 rounded-xl font-medium text-sm hover:bg-gray-50 transition-colors mt-3 flex items-center justify-center gap-2">
           📤 Share this deal with a friend
         </button>
       </div>
+
+      {/* Claim Modal */}
+      {showClaimModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+          onClick={() => { setShowClaimModal(false); setClaimCode(''); setClaimError(''); }}>
+          <div className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md p-6"
+            onClick={(e) => e.stopPropagation()}>
+            {!claimCode ? (
+              <>
+                <h2 className="text-xl font-bold text-gray-900 mb-1">Claim this exclusive lunch</h2>
+                <p className="text-sm text-gray-500 mb-5">{r.name}</p>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">How many people?</label>
+                <select value={claimSize} onChange={(e) => setClaimSize(Number(e.target.value))}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-base mb-5">
+                  {[1,2,3,4,5,6].map(n => (
+                    <option key={n} value={n}>{n} {n === 1 ? 'person' : 'people'}</option>
+                  ))}
+                </select>
+                {claimError && <p className="text-sm text-red-600 mb-3">{claimError}</p>}
+                <button onClick={submitClaim} disabled={claiming}
+                  className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] disabled:opacity-50">
+                  {claiming ? 'Claiming...' : 'Get my code'}
+                </button>
+              </>
+            ) : (
+              <>
+                <h2 className="text-xl font-bold text-gray-900 mb-1">Your lunch code</h2>
+                <p className="text-sm text-gray-500 mb-4">{r.name}</p>
+                <div className="bg-[#EEF6FC] rounded-2xl p-6 text-center mb-4">
+                  <p className="text-3xl font-bold text-[#4A9FD5] tracking-wider">{claimCode}</p>
+                </div>
+                <p className="text-sm text-gray-700 mb-2"><strong>No reservation needed</strong> — just walk in during lunch hours and show this code to your server or at the host stand.</p>
+                <p className="text-sm text-gray-600 mb-1">{deal?.special}</p>
+                <p className="text-sm text-gray-600 mb-1">🕐 {r.hours}</p>
+                <p className="text-sm text-gray-600 mb-5">📍 {r.address}</p>
+                <button onClick={() => { setShowClaimModal(false); setClaimCode(''); }}
+                  className="w-full border border-gray-200 text-gray-700 py-3 rounded-xl font-medium">
+                  Done
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Modal */}
       {showModal && (
