@@ -263,11 +263,6 @@ export default function RestaurantClient() {
   }
 
   const deal = r.deals?.[0];
-  const specialsLeft = (() => {
-    const n = r.id.replace(/-/g, '').split('').reduce((a: number, c: string) => a + c.charCodeAt(0), 0);
-    return (n % 7) + 4;
-  })();
-
   const inputClass = "w-full border border-gray-200 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-[#4A9FD5]";
   const labelClass = "block text-sm font-medium text-gray-700 mb-1.5";
 
@@ -335,7 +330,6 @@ export default function RestaurantClient() {
           <p className="text-gray-700 text-base leading-relaxed mb-4">{deal?.special}</p>
           <div className="flex gap-4 text-sm text-gray-600">
             <span>🕐 {r.hours}</span>
-            <span>🔥 {specialsLeft} specials left</span>
             {deal?.days && deal.days.length < 7 && (
               <span>📅 {deal.days.length === 5 && !deal.days.includes('Sat') && !deal.days.includes('Sun') ? 'Mon–Fri' : deal.days.join(', ')}</span>
             )}
