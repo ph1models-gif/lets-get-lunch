@@ -19,7 +19,7 @@ interface Restaurant {
   bio: string | null;
   photo_url: string | null;
   photo_urls: string[] | null;
-  deals: { special: string; price: number; courses: number; days: string[] }[];
+  deals: { id: string; special: string; price: number; courses: number; days: string[]; is_exclusive?: boolean }[];
 }
 
 
@@ -327,6 +327,11 @@ export default function RestaurantClient() {
 
         <div className="bg-[#EEF6FC] rounded-2xl p-6 mb-6">
           <h2 className="font-semibold text-gray-900 mb-3 text-lg">Today&apos;s lunch deal</h2>
+          {deal?.is_exclusive && (
+            <span className="inline-block mb-3 text-xs font-semibold bg-[#4A9FD5] text-white px-3 py-1 rounded-full">
+              ✦ Exclusive to Let&apos;s Get Lunch members
+            </span>
+          )}
           <p className="text-gray-700 text-base leading-relaxed mb-4">{deal?.special}</p>
           <div className="flex gap-4 text-sm text-gray-600">
             <span>🕐 {r.hours}</span>
