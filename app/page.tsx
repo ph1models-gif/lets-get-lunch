@@ -288,6 +288,12 @@ export default function Home() {
           <span className="text-xl">🍽️</span>
           <span className="font-semibold text-gray-700">Let&apos;s Get Lunch</span>
           <span className="text-gray-400 text-sm">· NYC · 2026</span>
+          <a href="https://instagram.com/letsgetlunch.nyc" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="ml-2 text-gray-300 hover:text-[#4A9FD5] transition-colors">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85C2.38 3.92 3.9 2.38 7.15 2.23 8.42 2.18 8.8 2.16 12 2.16zm0 5.68a4.16 4.16 0 100 8.32 4.16 4.16 0 000-8.32zm0 6.86a2.7 2.7 0 110-5.4 2.7 2.7 0 010 5.4zm4.34-6.98a.97.97 0 100-1.94.97.97 0 000 1.94z"/></svg>
+          </a>
+          <a href="https://tiktok.com/@lets.get.lunch" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="text-gray-300 hover:text-[#4A9FD5] transition-colors">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M16.6 5.82A4.28 4.28 0 0115.54 3h-3.09v12.4a2.59 2.59 0 01-2.59 2.5 2.59 2.59 0 01-2.59-2.59 2.59 2.59 0 013.39-2.47V9.7a5.68 5.68 0 00-.8-.06A5.68 5.68 0 004.2 15.3 5.68 5.68 0 009.86 21a5.68 5.68 0 005.66-5.7V8.85a7.35 7.35 0 004.3 1.38V7.14a4.28 4.28 0 01-3.22-1.32z"/></svg>
+          </a>
         </div>
         <div className="flex gap-6 text-sm text-gray-400">
           <a href="/list-your-restaurant" className="hover:text-gray-600">For Restaurants</a>
