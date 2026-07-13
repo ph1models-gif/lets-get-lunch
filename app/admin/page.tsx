@@ -153,7 +153,7 @@ export default function AdminPage() {
   const [deals, setDeals] = useState<Deal[]>([])
   const [restLoading, setRestLoading] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [editForm, setEditForm] = useState<Partial<Restaurant & { deal_special: string; deal_price: string }>>({})
+  const [editForm, setEditForm] = useState<Partial<Restaurant & { deal_special: string; deal_price: string; deal_is_exclusive: boolean }>>({})
   const [editMainFile, setEditMainFile] = useState<File | null>(null)
   const [editMainPreview, setEditMainPreview] = useState<string | null>(null)
   const [editExtraFiles, setEditExtraFiles] = useState<File[]>([])
@@ -368,6 +368,7 @@ export default function AdminPage() {
       lng: r.lng,
       deal_special: deal?.special || '',
       deal_price: deal?.price?.toString() || '',
+      deal_is_exclusive: deal?.is_exclusive || false,
       deal_days: deal?.days || ['Mon','Tue','Wed','Thu','Fri'],
       work_friendly: r.work_friendly || false,
       wifi: r.wifi || false,
@@ -444,6 +445,7 @@ export default function AdminPage() {
       id: existingDeal ? existingDeal.id : null,
       special: editForm.deal_special,
       price: parseFloat(editForm.deal_price || '0'),
+      is_exclusive: editForm.deal_is_exclusive || false,
       days: editForm.deal_days || ['Mon','Tue','Wed','Thu','Fri'],
     }
     const res = await fetch('/api/admin/save-edit', {
@@ -1185,6 +1187,12 @@ export default function AdminPage() {
                           <div>
                             <label className="block text-xs text-gray-500 mb-1">Price ($)</label>
                             <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={editForm.deal_price || ''} onChange={e => setEditForm(f => ({ ...f, deal_price: e.target.value }))} placeholder="e.g. 29" />
+                          </div>
+                          <div className="col-span-2">
+                            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer">
+                              <input type="checkbox" checked={editForm.deal_is_exclusive || false} onChange={e => setEditForm(f => ({ ...f, deal_is_exclusive: e.target.checked }))} className="w-4 h-4" />
+                              Exclusive to Let&apos;s Get Lunch members (requires signup to claim)
+                            </label>
                             <div className="mt-3">
                               <p className="text-xs text-gray-500 mb-2">Days available</p>
                               <div className="flex gap-2 flex-wrap">
