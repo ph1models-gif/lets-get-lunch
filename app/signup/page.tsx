@@ -37,7 +37,9 @@ export default function SignupPage() {
         neighborhood: form.neighborhood || null,
       });
       setSuccess(true);
-      setTimeout(() => { window.location.href = '/'; }, 2000);
+      const raw = new URLSearchParams(window.location.search).get('next') || '';
+      const safe = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/';
+      setTimeout(() => { window.location.href = safe; }, 2000);
     }
     setLoading(false);
   }
