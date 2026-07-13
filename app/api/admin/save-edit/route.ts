@@ -28,9 +28,11 @@ export async function POST(req: NextRequest) {
         special: deal.special,
         price: deal.price,
         days: deal.days,
+        is_exclusive: deal.is_exclusive || false,
       }).eq('id', deal.id)
     } else if (deal && deal.special) {
       await supabaseAdmin.from('deals').insert({
+        is_exclusive: deal.is_exclusive || false,
         restaurant_id: id,
         special: deal.special,
         price: deal.price,

@@ -1295,7 +1295,7 @@ export default function AdminPage() {
                     <div className="px-6 py-4 grid grid-cols-3 gap-4 text-sm text-gray-600">
                       <div><span className="text-gray-400">Address</span><br />{r.address || '—'}</div>
                       <div><span className="text-gray-400">Hours</span><br />{r.hours || '—'}</div>
-                      <div><span className="text-gray-400">Deal</span><br />{deal?.special || '—'}</div>
+                      <div><span className="text-gray-400">Deal</span><br />{deal?.is_exclusive && <span className="inline-block mr-2 text-xs font-semibold bg-[#4A9FD5] text-white px-2 py-0.5 rounded-full">✦ EXCLUSIVE</span>}{deal?.special || '—'}</div>
                       <div><span className="text-gray-400">Days</span><br />{
                         deal?.days && deal.days.length > 0
                           ? deal.days.length === 7 ? 'Daily'
