@@ -895,3 +895,60 @@ Rollback (if ever needed): alter table public.restaurants disable row level secu
 IMPORTANT CORRECTION: the first "enable RLS" on restaurants did NOT take (status query showed rowsecurity=false even though homepage worked -- because with RLS off, public SELECT works anyway so "homepage loads" was a false positive). Re-ran `alter table public.restaurants enable row level security;` and CONFIRMED via pg_tables that restaurants.rowsecurity=true. Homepage + admin re-tested working.
 LESSON: always confirm RLS state with `select rowsecurity from pg_tables where tablename=...` -- do NOT trust "the site still works" as proof RLS is on (it isn't proof; RLS-off also lets reads through).
 FINAL STATE: ALL public-schema tables now rowsecurity=true (deals, profiles, reservations, restaurants, unsubscribes, vendors). DB genuinely locked. Security project (Steps 2+4) truly complete.
+
+## 2026-06-28 — Geocoding fixed (server-side two-key)
+- ROOT CAUSE: single Maps key was referrer-locked ("Websites"); Google Geocoding web service rejects referrer-locked keys. Approved listings got no coords/pin.
+- FIX: created 2nd Google key — App restrictions=None, API restrictions=Geocoding API only, 500/day quota cap.
+- Key stored server-side ONLY as GOOGLE_GEOCODING_KEY in .env.local + Vercel (all 3 envs). NEVER in browser, gitignored.
+- New route: app/api/geocode/route.ts (reads key server-side, returns {lat,lng}).
+- Patched all 3 admin call sites (add ~268, approveVendor ~320, edit ~418) to fetch /api/geocode instead of hitting Google directly. Removed hardcoded AIzaSy key from admin entirely.
+- Map in layout.tsx UNCHANGED — still uses old website-locked key (correct).
+- VERIFIED LIVE: endpoint returns correct coords; approved "The Hop Shoppe" (372 Van Duzer St, SI) → saved 40.6292,-74.0797 → pin renders.
+- NOTE: pin only appeared after setting days to include Sat/Sun — day-of-week FILTER quirk, not geocoding. Worth checking weekday filter logic later.
+- APPROVAL GATE LIFTED: new listings can be approved again.
+
+## TODO (next session)
+- Delete/find test listings: testhampton2, sparks, testhampton. Admin "Active listings" search shows 0 even with Show Hidden ON — check if already deleted, name mismatch, or in vendors table not restaurants. Use direct DB query.
+- Remove leftover backups: .env.local.bak, app/admin/page.tsx.bak (confirm gitignored/untracked first).
+- Verify Hop Shoppe days are set to REALITY (Mon-Fri if that's the real deal), confirm pin still shows on weekday view.
+
+## 2026-07-12/13 — Exclusive claims system (LGX) SHIPPED
+Core pilot mechanic: exclusive deals visible to all, but CLAIMING requires a free account. Claim code proves attribution to restaurant.
+
+**Also this session:** removed fake "specials left" counter (was a deterministic hash of the UUID, mod 7 + 4 — never a real count). Integrity fix. Commit addfa36.
+
+### DB (Supabase)
+- `deals.is_exclusive` boolean, default false
+- `claims` table: id, deal_id, restaurant_id, user_id, code, party_size (1-6), status (claimed/redeemed/expired), claim_date, created_at
+- UNIQUE index `claims_one_per_user_per_deal_per_day` on (user_id, deal_id, claim_date) — DB-enforced, not app logic
+- `claim_date` defaults to NY calendar date, NOT UTC. Critical: a 9pm ET claim is already "tomorrow" in UTC and would break one-per-day.
+- RLS ON. Policy: users SELECT own claims only. No INSERT policy — writes go through server (service_role).
+
+### Code prefix decision
+- Reservations = `LGL-XXXX` (existing, unchanged)
+- Claims = `LGX-XXXX` (new). Differ in the FIRST char after the stem so they're distinguishable at a glance / over a noisy phone. Rejected LGLR/LGLC — distinguishing letter buried mid-prefix = misread risk at a busy host stand.
+- Charset excludes 0/O/1/I.
+
+### Files
+- `app/api/claim/route.ts` — NEW. Verifies user from Bearer token server-side (never trusts client user_id), verifies deal is_exclusive from DB, derives restaurant_id from deal row. Returns 409 `already_claimed` on Postgres 23505. Emails code via Resend (failure never blocks the code).
+- `app/restaurants/[id]/RestaurantClient.tsx` — badge, gated button, claim modal.
+- `app/auth/callback/page.tsx`, `login`, `signup` — `?next=` return-path. Phishing guard: only accepts paths starting with single `/`.
+- `app/admin/page.tsx` — exclusive checkbox in edit form + EXCLUSIVE badge on listing card.
+- `app/api/admin/save-edit/route.ts` — BUG FIXED: route wrote only special/price/days, silently dropped is_exclusive. Unchecking never saved.
+
+### Language rules held
+Claim modal + email say "No reservation needed — just walk in and show this code." NO "you're all set", no time picker, no booking implication.
+
+### GOTCHA — Vercel silently skipped a deploy
+Commit 0946045 pushed to GitHub, Vercel never built it. Claims ran old code; email looked broken for ~30min. ALWAYS confirm the commit hash appears in Vercel > Deployments after a push. An empty commit (`git commit --allow-empty`) wakes the webhook.
+
+### Deliberately NOT built
+- Claims admin dashboard — Brian will judge pilot by signups, not code-by-code audit. Revisit if a partner wants counts.
+- `daily_limit` / real specials counter — no partner has agreed to cap covers.
+
+### TODO
+- Smyth Tavern was used as the test listing — is_exclusive now OFF (correct; they haven't agreed to anything).
+- Signup while ALREADY logged in hangs on "Creating account..." — Supabase signUp with an active session. Handle it (log out first, or detect session).
+- Signup page subtitle still says "Reserve NYC's best prix-fixe lunch deals" — the word "Reserve" contradicts the walk-in model. Fix.
+- Search Console: "Duplicate without user-selected canonical". Not urgent. Likely www/non-www + client-rendered listing pages.
+- Clean up .bak files (many).
