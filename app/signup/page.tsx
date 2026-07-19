@@ -57,16 +57,16 @@ export default function SignupPage() {
 
   return (
     <main className="min-h-screen bg-[#EEF6FC] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md relative">
+        <a href="/" aria-label="Close" className="absolute -top-2 right-0 sm:-right-2 w-9 h-9 flex items-center justify-center rounded-full bg-white shadow-sm text-gray-400 hover:text-gray-700 text-xl">×</a>
         <div className="text-center mb-8">
           <a href="/">
             <div className="inline-flex items-center gap-2 mb-4">
-              <span className="text-3xl">🍽️</span>
-              <span className="text-2xl font-bold text-gray-900">Let&apos;s Get Lunch</span>
+              <img src="/logo.jpg" alt="Let's Get Lunch" className="h-16 w-auto" />
             </div>
           </a>
           <h1 className="text-xl font-semibold text-gray-800">Create your free account</h1>
-          <p className="text-sm text-gray-500 mt-1">Reserve NYC&apos;s best prix-fixe lunch deals in seconds</p>
+          <p className="text-sm text-gray-500 mt-1">Claim exclusive NYC lunch deals — free to join</p>
         </div>
 
         <div className="bg-white rounded-2xl p-8 shadow-sm">
