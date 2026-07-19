@@ -56,9 +56,9 @@ export default function SignupPage() {
   const inputClass = "w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:border-[#4A9FD5]";
 
   return (
-    <main className="min-h-screen bg-[#EEF6FC] flex items-center justify-center px-4 py-12">
+    <main className="min-h-screen bg-[#EEF6FC] flex items-start justify-center px-4 pt-6 pb-12">
       <div className="w-full max-w-md relative">
-        <a href="/" aria-label="Close" className="absolute -top-2 right-0 sm:-right-2 w-9 h-9 flex items-center justify-center rounded-full bg-white shadow-sm text-gray-400 hover:text-gray-700 text-xl">×</a>
+        <a href="/" aria-label="Close" className="absolute top-6 right-0 sm:-right-2 w-9 h-9 flex items-center justify-center rounded-full bg-white shadow-sm text-gray-400 hover:text-gray-700 text-xl z-10">×</a>
         <div className="text-center mb-8">
           <a href="/">
             <div className="inline-flex items-center gap-2 mb-4">
