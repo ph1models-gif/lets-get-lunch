@@ -9,8 +9,8 @@ const bebas = Bebas_Neue({ subsets: ["latin"], weight: "400", variable: "--font-
 
 export const metadata: Metadata = {
   icons: {
-    icon: '/favicon.svg',
-    shortcut: '/favicon.svg',
+    icon: '/favicon.jpg',
+    shortcut: '/favicon.jpg',
   },
   title: "Let's Get Lunch — NYC Prix-Fixe Lunch Deals",
   description: "Discover great prix-fixe lunch deals at hundreds of NYC restaurants. Real sit-down tables, fast service, most under $35. Find your lunch today.",
