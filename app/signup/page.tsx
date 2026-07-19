@@ -62,7 +62,7 @@ export default function SignupPage() {
         <div className="text-center mb-8">
           <a href="/">
             <div className="inline-flex items-center gap-2 mb-4">
-              <img src="/logo.jpg" alt="Let's Get Lunch" className="h-28 w-auto rounded-2xl" />
+              <img src="/logo.jpg" alt="Let's Get Lunch" className="h-36 w-auto rounded-2xl" />
             </div>
           </a>
           <h1 className="text-xl font-semibold text-gray-800">Create your free account</h1>
