@@ -952,3 +952,35 @@ Commit 0946045 pushed to GitHub, Vercel never built it. Claims ran old code; ema
 - Signup page subtitle still says "Reserve NYC's best prix-fixe lunch deals" — the word "Reserve" contradicts the walk-in model. Fix.
 - Search Console: "Duplicate without user-selected canonical". Not urgent. Likely www/non-www + client-rendered listing pages.
 - Clean up .bak files (many).
+
+## 2026-07-19 — Signup polish + /claim plan (pre-build checkpoint)
+
+### Shipped tonight (all live, pushed through 618d906)
+- Signup page: real LGL logo (public/logo.jpg, h-36, rounded-2xl white tile — JPG has white bg, framed intentionally), X escape top-right, logo also links home. Reduced top blue space (items-start, pt-6).
+- Signup subtitle: "Claim exclusive NYC lunch deals — free to join" (was "Reserve NYC's best..." — killed "Reserve", contradicts walk-in model).
+- Footer: IG @letsgetlunch.nyc + TikTok @lets.get.lunch icons (grey, hover blue).
+- Favicon: real LGL badge (public/favicon.jpg). Old one was 0 bytes. Confirmed serving at /favicon.jpg. Browser cache shows old "L" for existing visitors only — new visitors get it clean.
+- Cleaned up all .bak files.
+
+### NEXT: /claim landing page (card QR target) — SPEC
+Build /claim as a variant of the existing homepage/map. ONLY difference from normal page:
+- Auth CTA reads "Claim exclusive deals" (NOT "Log in", NOT "Sign up for our website") — prominent, top-right, colored button.
+- CTA routes to existing /signup flow. DO NOT modify /signup (its URL is on Brian's printed business-card QR — must not change).
+- NO login wall. Map + deals visible to everyone logged out. Tease publicly, gate the claim.
+- Mobile-first (every scan is a phone on a sidewalk).
+- Do NOT build: exclusive-deals map filter, members-only view, homepage overlay. Not needed — exclusive deals reach users by EMAIL, not a special view.
+
+### KEY REFRAME (the actual lever, not code)
+The signup friction was never the form — it was the PITCH. Asking "sign up for my website" = a business ask (uncomfortable). Selling "exclusive lunch deals, sign up to get them" = a gift. Same signup, opposite psychology. Card/convo/CTA all lead with DEAL, never "sign up." Signup is the mechanism, never the headline.
+
+### ALSO TODO
+- /login page still has OLD logo (emoji + wordmark). Update to match /signup (same logo swap). Users bounce between the two via "Sign in" link — inconsistency is visible.
+- Build user-facing opt-out toggle for exclusive-deal emails (extend existing unsubscribe system, don't rebuild).
+
+### OPEN QUESTION (decide before printing cards)
+What is the FIRST email a new signup receives, and WHEN? Card promises "exclusive deals" — if someone signs up in the park Wed and hears nothing for a week, the card lied. Mamazul is live (first exclusive partner); sister restaurant in works. Define the first-email cadence so the pitch is true.
+
+### PARTNERS
+- Mamazul: signed, first exclusive partner.
+- Sister restaurant of Mamazul: deal in works.
+- Smyth Tavern: was the TEST listing — is_exclusive OFF (correct, they never agreed).
