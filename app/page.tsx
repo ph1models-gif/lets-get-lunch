@@ -38,6 +38,12 @@ export default function Home() {
   const mapPanRef = useRef<((lat: number, lng: number) => void) | null>(null);
   const [mapBounds, setMapBounds] = useState<{north: number, south: number, east: number, west: number} | null>(null);
   const [userFirstName, setUserFirstName] = useState('');
+  const [claimMode, setClaimMode] = useState(false);
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/claim')) {
+      setClaimMode(true);
+    }
+  }, []);
 
   async function load() {
     const { data, error } = await supabase
@@ -142,7 +148,11 @@ export default function Home() {
                 className="text-sm text-gray-400 hover:text-gray-600">Sign out</button>
             </div>
           ) : (
-            <a href="/login" className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full font-medium hover:bg-[#3a8fc5]">Sign in</a>
+            claimMode ? (
+              <a href="/signup" className="text-sm bg-[#4A9FD5] text-white px-4 py-2 rounded-full font-semibold hover:bg-[#3a8fc5] shadow-sm">Claim exclusive deals</a>
+            ) : (
+              <a href="/login" className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full font-medium hover:bg-[#3a8fc5]">Sign in</a>
+            )
           )}
         </div>
       </nav>
