@@ -149,7 +149,7 @@ export default function Home() {
             </div>
           ) : (
             claimMode ? (
-              <a href="/signup" className="text-sm bg-gray-900 text-white px-5 py-2 rounded-full font-semibold hover:bg-black shadow-sm text-center leading-tight max-w-[140px] sm:max-w-none">Claim exclusive deals</a>
+              <a href="/signup" className="text-sm bg-gray-900 text-white px-5 py-2 rounded-full font-semibold hover:bg-black shadow-sm text-center leading-tight max-w-[140px] sm:max-w-none">Claim <span className="text-[#4A9FD5]">exclusive</span> deals</a>
             ) : (
               <a href="/login" className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full font-medium hover:bg-[#3a8fc5]">Sign in</a>
             )
