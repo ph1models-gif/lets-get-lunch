@@ -61,7 +61,7 @@ export default function EmailPreferences() {
     <main className="min-h-screen bg-[#EEF6FC] flex items-start justify-center px-4 pt-10 pb-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
-          <img src="/logo.jpg" alt="Let's Get Lunch" className="h-24 w-auto rounded-2xl inline-block" />
+          <a href="/"><img src="/logo.jpg" alt="Let's Get Lunch" className="h-24 w-auto rounded-2xl inline-block" /></a>
           <h1 className="text-xl font-semibold text-gray-800 mt-4">Email preferences</h1>
           <p className="text-sm text-gray-500 mt-1">How often should we send you lunch?</p>
         </div>
@@ -84,13 +84,16 @@ export default function EmailPreferences() {
                 {unsubbed ? (
                   <span className="text-xs text-gray-500">You&apos;ve been unsubscribed. You can still browse and claim deals anytime.</span>
                 ) : (
-                  <button onClick={unsubscribeAll} disabled={saving} className="text-xs text-gray-400 hover:underline">Unsubscribe from all emails</button>
+                  <button onClick={unsubscribeAll} disabled={saving} className="text-xs text-gray-500 hover:underline">Unsubscribe from all emails</button>
                 )}
               </p>
             </>
           )}
         </div>
       </div>
+      <p className="text-center mt-5">
+        <a href="/" className="text-sm text-[#4A9FD5] hover:underline">← Back to lunch deals</a>
+      </p>
     </main>
   );
 }
