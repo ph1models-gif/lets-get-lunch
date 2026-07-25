@@ -113,7 +113,7 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange }: Prop
         map,
         title: r.name,
         label: {text: deal ? `$${deal.price}` : '', color:'white', fontSize:'10px', fontWeight:'bold'},
-        icon: {path:g.SymbolPath.CIRCLE, scale: deal?.is_exclusive ? 19.8 : 18, fillColor:'#4A9FD5', fillOpacity:1, strokeColor:'white', strokeWeight:2},
+        icon: {path:g.SymbolPath.CIRCLE, scale: deal?.is_exclusive ? 21.6 : 18, fillColor:'#4A9FD5', fillOpacity:1, strokeColor:'white', strokeWeight:2},
         cursor: 'pointer',
       });
       // Apply initial visibility based on current activeIds (avoids race with useEffect)
