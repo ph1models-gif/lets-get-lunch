@@ -14,6 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: BASE, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },
+    { url: `${BASE}/newsletter`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
     { url: `${BASE}/list-your-restaurant`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE}/privacy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
     { url: `${BASE}/terms`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
@@ -38,5 +39,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // so the sitemap is never empty/broken.
   }
 
-  return [...staticPages, ...restaurantPages]
+  let postPages: MetadataRoute.Sitemap = []
+  try {
+    const { data } = await supabase
+      .from('posts')
+      .select('slug, published_at, created_at')
+      .eq('published', true)
+    if (data) {
+      postPages = data.map((p) => ({
+        url: `${BASE}/newsletter/${p.slug}`,
+        lastModified: p.published_at ? new Date(p.published_at) : new Date(p.created_at),
+        changeFrequency: 'monthly' as const,
+        priority: 0.5,
+      }))
+    }
+  } catch (e) {
+    // If the DB is unreachable at build time, still return the other pages
+    // so the sitemap is never empty/broken.
+  }
+
+  return [...staticPages, ...restaurantPages, ...postPages]
 }
