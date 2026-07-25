@@ -1,11 +1,22 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { marked } from 'marked';
-import { supabase } from '../../../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 
 const BASE = 'https://www.letsgetlunch.nyc';
 
 export const dynamic = 'force-dynamic';
+
+// A page-local client whose fetch always opts out of Next's Data Cache, so a
+// deleted/edited post is reflected immediately instead of on the next
+// automatic revalidation.
+function getSupabase() {
+  return createClient(
+    'https://iqurlwenkozmxoyymnkg.supabase.co',
+    'sb_publishable_XV712EbMI7leXaWHaITV5Q_hKNNals4',
+    { global: { fetch: (input, init) => fetch(input, { ...init, cache: 'no-store' }) } }
+  );
+}
 
 interface Post {
   title: string;
@@ -17,7 +28,7 @@ interface Post {
 }
 
 async function getPost(slug: string): Promise<Post | null> {
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from('posts')
     .select('title, excerpt, body, cover_image_url, published_at, created_at')
     .eq('slug', slug)

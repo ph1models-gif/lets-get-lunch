@@ -1,7 +1,18 @@
 import type { Metadata } from 'next';
-import { supabase } from '../../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
+
+// A page-local client whose fetch always opts out of Next's Data Cache, so a
+// deleted/edited post is reflected immediately instead of on the next
+// automatic revalidation.
+function getSupabase() {
+  return createClient(
+    'https://iqurlwenkozmxoyymnkg.supabase.co',
+    'sb_publishable_XV712EbMI7leXaWHaITV5Q_hKNNals4',
+    { global: { fetch: (input, init) => fetch(input, { ...init, cache: 'no-store' }) } }
+  );
+}
 
 export const metadata: Metadata = {
   title: "Newsletter — Let's Get Lunch",
@@ -26,7 +37,7 @@ function formatDate(value: string) {
 }
 
 export default async function NewsletterArchive() {
-  const { data: posts } = await supabase
+  const { data: posts } = await getSupabase()
     .from('posts')
     .select('slug, title, excerpt, cover_image_url, published_at, created_at')
     .eq('published', true)
