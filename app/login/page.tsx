@@ -27,7 +27,9 @@ export default function LoginPage() {
       email: signInForm.email, password: signInForm.password,
     });
     if (error) { setError(error.message); setLoading(false); return; }
-    window.location.href = '/';
+    const raw = new URLSearchParams(window.location.search).get('next') || '';
+    const safe = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/';
+    window.location.href = safe;
   }
 
   async function handleGoogle() {
@@ -63,7 +65,9 @@ export default function LoginPage() {
       });
     }
     setSuccess("You're in! You can now make reservations.");
-    setTimeout(() => { window.location.href = '/'; }, 1500);
+    const raw = new URLSearchParams(window.location.search).get('next') || '';
+    const safe = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/';
+    setTimeout(() => { window.location.href = safe; }, 1500);
     setLoading(false);
   }
 
