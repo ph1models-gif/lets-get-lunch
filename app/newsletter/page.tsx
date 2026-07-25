@@ -37,7 +37,7 @@ export default async function NewsletterArchive() {
       <div className="w-full max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <a href="/"><img src="/logo.jpg" alt="Let's Get Lunch" className="h-24 w-auto rounded-2xl inline-block" /></a>
-          <h1 className="text-xl font-semibold text-gray-800 mt-4">Newsletter</h1>
+          <h1 className="font-[family-name:var(--font-bebas)] tracking-wide text-3xl text-gray-800 mt-4">Newsletter</h1>
           <p className="text-sm text-gray-500 mt-1">NYC lunch news, new deals, and neighborhood picks.</p>
         </div>
 
@@ -62,7 +62,7 @@ export default async function NewsletterArchive() {
                   <p className="text-xs text-gray-400 mb-1">
                     {formatDate(post.published_at || post.created_at)}
                   </p>
-                  <h2 className="text-lg font-semibold text-gray-900">{post.title}</h2>
+                  <h2 className="font-[family-name:var(--font-bebas)] tracking-wide text-2xl text-gray-900">{post.title}</h2>
                   {post.excerpt && (
                     <p className="text-sm text-gray-500 mt-2">{post.excerpt}</p>
                   )}

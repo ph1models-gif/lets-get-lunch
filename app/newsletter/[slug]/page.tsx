@@ -88,9 +88,9 @@ export default async function NewsletterPost(
             <p className="text-xs text-gray-400 mb-1">
               {formatDate(post.published_at || post.created_at)}
             </p>
-            <h1 className="text-2xl font-semibold text-gray-900">{post.title}</h1>
+            <h1 className="font-[family-name:var(--font-bebas)] tracking-wide text-3xl text-gray-900">{post.title}</h1>
             <div
-              className="prose prose-sm sm:prose-base max-w-none mt-6 prose-headings:text-gray-900 prose-a:text-[#4A9FD5]"
+              className="prose prose-sm sm:prose-base max-w-none mt-6 prose-headings:font-[family-name:var(--font-bebas)] prose-headings:tracking-wide prose-headings:text-gray-900 prose-a:text-[#4A9FD5]"
               dangerouslySetInnerHTML={{ __html: html }}
             />
           </div>
