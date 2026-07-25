@@ -53,6 +53,13 @@ export default function RestaurantClient() {
   const [claimError, setClaimError] = useState('');
   const [userName, setUserName] = useState('');
   const [userFirstName, setUserFirstName] = useState('');
+  const [loginHref, setLoginHref] = useState('/login');
+
+  useEffect(() => {
+    const path = window.location.pathname;
+    const safe = path.startsWith('/') && !path.startsWith('//') ? path : '/';
+    setLoginHref(`/login?next=${safe}`);
+  }, []);
 
   // Book form
   const [form, setForm] = useState({
@@ -319,7 +326,7 @@ export default function RestaurantClient() {
               className="text-sm text-gray-400 hover:text-gray-600">Sign out</button>
           </div>
         ) : (
-          <a href="/login" className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full font-medium hover:bg-[#3a8fc5]">Sign in</a>
+          <a href={loginHref} className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full font-medium hover:bg-[#3a8fc5]">Sign in</a>
         )}
       </nav>
 

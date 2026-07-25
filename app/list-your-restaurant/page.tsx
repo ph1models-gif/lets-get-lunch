@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { supabase } from '../../lib/supabase';
 
@@ -18,6 +18,13 @@ export default function ListYourRestaurant() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [loginHref, setLoginHref] = useState('/login');
+
+  useEffect(() => {
+    const path = window.location.pathname;
+    const safe = path.startsWith('/') && !path.startsWith('//') ? path : '/';
+    setLoginHref(`/login?next=${safe}`);
+  }, []);
 
   const [mainPhoto, setMainPhoto] = useState<File | null>(null);
   const [mainPreview, setMainPreview] = useState<string | null>(null);
@@ -150,7 +157,7 @@ export default function ListYourRestaurant() {
           <span className="text-xl">🍽️</span>
           <span className="font-semibold text-gray-900">Let&apos;s Get Lunch</span>
         </a>
-        <a href="/login" className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full">Sign in</a>
+        <a href={loginHref} className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full">Sign in</a>
       </nav>
 
       <div className="max-w-2xl mx-auto px-4 py-12">
