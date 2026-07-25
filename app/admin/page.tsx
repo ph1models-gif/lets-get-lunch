@@ -616,7 +616,7 @@ export default function AdminPage() {
                     </div>
                     <div>
                       <label className="block text-xs text-gray-500 mb-1">Bio</label>
-                      <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={vendorEditForm.bio || ''} onChange={e => setVendorEditForm((f: any) => ({...f, bio: e.target.value}))} maxLength={120} />
+                      <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={vendorEditForm.bio || ''} onChange={e => setVendorEditForm((f: any) => ({...f, bio: e.target.value}))} maxLength={300} />
                     </div>
                     <div>
                       <label className="block text-xs text-gray-500 mb-1">Contact name</label>
@@ -785,7 +785,7 @@ export default function AdminPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">One-line bio</label>
-                <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={addForm.bio} onChange={e => setAddForm(f => ({...f, bio: e.target.value}))} placeholder="e.g. Upscale Italian in the heart of Midtown" maxLength={120} />
+                <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={addForm.bio} onChange={e => setAddForm(f => ({...f, bio: e.target.value}))} placeholder="e.g. Upscale Italian in the heart of Midtown" maxLength={300} />
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
                   <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={addForm.website} onChange={e => setAddForm(f => ({...f, website: e.target.value}))} placeholder="https://example.com" />
@@ -1163,7 +1163,7 @@ export default function AdminPage() {
                       {/* Bio */}
                       <div>
                         <label className="block text-xs font-medium text-gray-600 mb-1">One-line bio</label>
-                        <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={editForm.bio || ''} onChange={e => setEditForm(f => ({ ...f, bio: e.target.value }))} placeholder="e.g. Hip, airy eatery with Asian-inspired vegan dishes" maxLength={120} />
+                        <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={editForm.bio || ''} onChange={e => setEditForm(f => ({ ...f, bio: e.target.value }))} placeholder="e.g. Hip, airy eatery with Asian-inspired vegan dishes" maxLength={300} />
                         <div className="flex gap-4 mt-3">
                           <label className="flex items-center gap-2 text-sm cursor-pointer">
                             <input type="checkbox" checked={!!editForm.work_friendly} onChange={e => setEditForm(f => ({ ...f, work_friendly: e.target.checked }))} />
