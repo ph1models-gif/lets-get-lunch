@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { supabase } from '../../lib/supabase';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: "Newsletter — Let's Get Lunch",

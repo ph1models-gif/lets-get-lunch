@@ -5,6 +5,8 @@ import { supabase } from '../../../lib/supabase';
 
 const BASE = 'https://www.letsgetlunch.nyc';
 
+export const dynamic = 'force-dynamic';
+
 interface Post {
   title: string;
   excerpt: string | null;
