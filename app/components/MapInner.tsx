@@ -135,10 +135,17 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange }: Prop
         ? `<div style="width:100%;height:110px;background:#EEF6FC;background-image:url('${photoUrl}');background-size:cover;background-position:center"></div>`
         : `<div style="width:100%;height:60px;background:#EEF6FC;display:flex;align-items:center;justify-content:center;font-size:24px">🍽️</div>`;
 
+      const exclusiveBadge = deal?.is_exclusive
+        ? `<span style="flex-shrink:0;background:#4A9FD5;color:white;font-size:9px;font-weight:600;padding:2px 6px;border-radius:9999px;white-space:nowrap">✦ Exclusive</span>`
+        : '';
+
       content.innerHTML = `
         ${photoBlock}
         <div style="padding:10px 12px 12px">
-          <div style="font-weight:600;font-size:14px;color:#111;margin-bottom:2px">${r.name}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:2px">
+            <div style="font-weight:600;font-size:14px;color:#111">${r.name}</div>
+            ${exclusiveBadge}
+          </div>
           <div style="font-size:11px;color:#888;margin-bottom:4px">${r.cuisine || ''}</div>
           ${dealHtml}
           <div style="font-size:15px;font-weight:700;color:#4A9FD5">${deal ? '$' + deal.price : ''}</div>
