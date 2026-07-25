@@ -21,7 +21,7 @@ interface Restaurant {
   hours: string;
   photo_url: string | null;
   photo_urls: string[] | null;
-  deals: { special: string; price: number; courses: number }[];
+  deals: { special: string; price: number; courses: number; is_exclusive?: boolean }[];
 }
 
 export default function Home() {
@@ -216,9 +216,10 @@ export default function Home() {
         ) : (
           filtered.map(r => {
             const deal = r.deals?.[0];
+            const isExclusive = !!deal?.is_exclusive;
             return (
               <a key={r.id} href={`/restaurants/${r.id}`}
-                className="block bg-white rounded-2xl border border-gray-200 hover:border-[#4A9FD5] hover:shadow-md transition-all no-underline">
+                className={`block bg-white rounded-2xl border hover:shadow-md transition-all no-underline ${isExclusive ? 'border-2 border-[#4A9FD5]' : 'border-gray-200 hover:border-[#4A9FD5]'}`}>
                 <div className="h-44 rounded-t-2xl overflow-hidden bg-gray-50">
                   {r.photo_url
                     ? <img src={r.photo_url} alt={r.name} className="w-full h-full object-cover" />
@@ -226,6 +227,11 @@ export default function Home() {
                   }
                 </div>
                 <div className="p-4">
+                  {isExclusive && (
+                    <span className="inline-block mb-2 text-xs font-semibold bg-[#4A9FD5] text-white px-3 py-1 rounded-full">
+                      ✦ Exclusive
+                    </span>
+                  )}
                   <div className="flex justify-between items-start mb-1">
                     <h3 className="font-semibold text-gray-900">{r.name}</h3>
                     <span className="font-bold text-[#4A9FD5] text-lg">${deal?.price}</span>
@@ -243,7 +249,7 @@ export default function Home() {
                     {r.wifi && <span className="text-xs bg-blue-50 text-[#4A9FD5] px-2 py-1 rounded-full font-medium">📶 WiFi</span>}
                   </div>
                   <div className="w-full py-2.5 bg-[#4A9FD5] text-white rounded-xl text-sm font-medium text-center">
-                    View deal
+                    {isExclusive ? 'View exclusive deal' : 'View deal'}
                   </div>
                 </div>
               </a>
