@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 
 import { NEIGHBORHOODS, NEIGHBORHOOD_GROUPS } from '../../lib/neighborhoods';
@@ -16,6 +16,11 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [loginHref, setLoginHref] = useState('/login');
+
+  useEffect(() => {
+    setLoginHref(`/login${window.location.search}`);
+  }, []);
 
   async function handleSignUp() {
     setLoading(true); setError('');
@@ -140,7 +145,7 @@ export default function SignupPage() {
 
               <p className="text-center text-sm text-gray-500">
                 Already have an account?{' '}
-                <a href={`/login${typeof window !== 'undefined' ? window.location.search : ''}`} className="text-[#4A9FD5] font-medium hover:underline">Sign in</a>
+                <a href={loginHref} className="text-[#4A9FD5] font-medium hover:underline">Sign in</a>
               </p>
             </div>
           )}
