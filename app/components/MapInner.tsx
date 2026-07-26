@@ -232,14 +232,21 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange, restau
   return (
     <div style={{position:'relative', width:'100%', height:'50vh', maxHeight:'420px', minHeight:'280px'}}>
       <style>{`
-        @keyframes shimmer {
-          0% { background-position: -800px 0; }
-          100% { background-position: 800px 0; }
+        @keyframes shimmer-sweep {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
         }
         .map-skeleton {
-          background: linear-gradient(90deg, #e8eaed 25%, #f0f2f5 50%, #e8eaed 75%);
-          background-size: 800px 100%;
-          animation: shimmer 1.5s infinite;
+          overflow: hidden;
+          background: #e8eaed;
+        }
+        .map-skeleton::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(90deg, transparent, #f0f2f5, transparent);
+          animation: shimmer-sweep 1.5s infinite;
+          will-change: transform;
         }
       `}</style>
       <div className="map-skeleton" style={{position:'absolute', inset:0, zIndex:0}} />

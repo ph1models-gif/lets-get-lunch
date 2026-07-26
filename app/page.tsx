@@ -21,5 +21,11 @@ export default async function Home() {
     .select(HOMEPAGE_RESTAURANT_SELECT)
     .eq('is_active', true);
 
-  return <HomeClient initialRestaurants={(data as unknown as Restaurant[]) ?? []} />;
+  return (
+    <>
+      {/* Warms the connection for the deferred Maps script (Wave 1) before it's requested */}
+      <link rel="preconnect" href="https://maps.googleapis.com" />
+      <HomeClient initialRestaurants={(data as unknown as Restaurant[]) ?? []} />
+    </>
+  );
 }
