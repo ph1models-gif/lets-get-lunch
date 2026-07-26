@@ -4,6 +4,7 @@ const nextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'iqurlwenkozmxoyymnkg.supabase.co' },
     ],
+    formats: ['image/avif', 'image/webp'],
   },
 };
 
