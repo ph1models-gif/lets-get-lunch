@@ -984,3 +984,31 @@ What is the FIRST email a new signup receives, and WHEN? Card promises "exclusiv
 - Mamazul: signed, first exclusive partner.
 - Sister restaurant of Mamazul: deal in works.
 - Smyth Tavern: was the TEST listing — is_exclusive OFF (correct, they never agreed).
+
+## 2026-07-25 — Newsletter (built with Claude Code) + bio limit
+### Newsletter — SHIPPED, live on main at /newsletter
+- Chose to BUILD IN-HOUSE at letsgetlunch.nyc/newsletter (subdirectory) instead of Beehiiv ($96/mo for branding removal) / Buttondown / Substack. Reason: SEO — subdirectory on main domain beats any subdomain/3rd-party for ranking, which matters (restaurants, PR, investors find pages via search). $0/mo, full control, own branding.
+- Built with CLAUDE CODE (first use) — ran on the server, way faster than SSH paste-back. Installed via npm i -g @anthropic-ai/claude-code. Work done on `newsletter` branch, merged to main.
+- posts table in Supabase: id, title, slug (unique), excerpt, body (markdown), cover_image_url, published (bool), published_at, created_at. RLS on, public SELECT only where published=true.
+- Public pages: /newsletter (archive) + /newsletter/[slug] (post, SEO metadata, markdown via `marked`). Both force-dynamic + cache:'no-store' on the Supabase fetch (needed BOTH — force-dynamic alone left deleted/stale posts showing because shared client cached).
+- Admin: /newsletter/admin — password-gated (reuses ADMIN_SECRET, same as main admin). Create/edit/delete posts, cover image upload (reuses restaurant-photos bucket, newsletter/ prefix). All writes via service-role API routes (posts-list/create/update/delete/upload), password verified server-side.
+- Post titles/headings use Bebas Neue (--font-bebas, matches logo). Body stays Inter.
+
+## 2026-07-26 — Mobile homepage perf (Core Web Vitals): Wave 1 + Wave 2
+### Baseline (PageSpeed mobile, production): Performance 46, LCP 9.8s, TBT 580ms, CLS 0.166. SEO 100 — this is purely a speed problem.
+
+### Wave 1 — SHIPPED, merged to main (branch `perf-lcp`, commit 32af998, merge 9f7cfab)
+- Google Maps `<Script>` moved out of root layout (was `strategy="beforeInteractive"`, blocking hydration on every route incl. pages with no map) into the homepage's `Map.tsx`, now `lazyOnload` and gated behind an `IntersectionObserver` so the Maps bundle + marker construction don't load until the map nears the viewport.
+- Restaurant card photos switched to `next/image` (fill + sizes), `priority` on first 2 above-the-fold cards. Added Supabase storage host to `next.config.js`/`.mjs` `images.remotePatterns` (two config files exist in this repo — kept both in sync since it wasn't obvious which one Next actually loads).
+- Loading-skeleton cards restructured to mirror the real card's DOM (same padding/line placeholders) with a shared `min-h-[384px]` on both skeleton and real cards, so the data swap doesn't reflow the grid.
+- Result: TBT 580ms → 80ms (green). LCP and CLS untouched (9.8s→9.6s, 0.166→0.166) — expected, since Wave 1 didn't touch the client-side data-fetch waterfall or the root CLS cause.
+- CAUTION: the PageSpeed run reported as "Wave 1 results" was against a `perf-lcp` Vercel *preview* URL, not production — don't conflate the two. The Google Maps key is referrer-locked to `letsgetlunch.nyc`, so it silently fails on `*.vercel.app` previews. The real Wave 1 TBT win is only verifiable on production; preview PageSpeed is directional only (and will underreport Maps-related cost since Maps never loads there at all).
+
+### Wave 2 — branch `perf-wave2`, not yet merged
+Root cause of the stuck LCP: homepage (`app/page.tsx`) was 100% `'use client'` — the LCP element (first restaurant card photo) couldn't paint until hydrate → `useEffect` → Supabase fetch → re-render. That whole chain was the 9.6s.
+- Split the homepage into a Server Component (`app/page.tsx`, fetches restaurants) + `app/HomeClient.tsx` (all the existing interactive/filter/map state, now seeded via an `initialRestaurants` prop instead of fetching on mount). First cards + photos are now in the server-rendered HTML.
+- `force-dynamic` + a `cache: 'no-store'` fetch override on the page-local Supabase client — same pattern as `/newsletter` (see above); without both, restaurant edits/deactivations would either bake into a static build or hit a cached fetch.
+- De-duped the Supabase query: `MapInner.tsx` previously ran its own independent `restaurants` fetch just for markers. It now receives `restaurants` as a prop from the same single fetch instead.
+- Trimmed `select('*')` down to only the columns the homepage cards/map actually render (`app/types.ts` → `HOMEPAGE_RESTAURANT_SELECT`, one shared constant used by both the server fetch and the client's focus-triggered refresh, so they can't drift). Dropped: `address`, `rating`, `seats`, `photo_urls`, `deals.courses` — none of those are read on the homepage (still selected in full on `/restaurants/[id]`, untouched).
+- The old loading-skeleton branch in the restaurant grid is gone — with data present at first paint there's no swap left to guard against, so Wave 1's skeleton-matching fix became dead code and was removed along with the `loading` state.
+- Still client-side, unchanged: the focus-triggered restaurant refetch (picks up admin/`/claim` edits without a reload) and the auth/profile check — neither blocks the initial paint.
