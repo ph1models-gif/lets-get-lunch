@@ -3,6 +3,9 @@ import MapComponent from './components/Map';
 import NeighborhoodSearch from './components/NeighborhoodSearch';
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import Image from 'next/image';
+
+const CARD_MIN_HEIGHT = 'min-h-[384px]';
 
 interface Restaurant {
   id: string;
@@ -218,18 +221,41 @@ export default function Home() {
       <section className="px-4 pb-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {loading ? (
           [1,2,3].map(i => (
-            <div key={i} className="bg-gray-50 rounded-2xl border border-gray-100 h-64 animate-pulse" />
+            <div key={i} className={`bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse ${CARD_MIN_HEIGHT}`}>
+              <div className="h-44 bg-gray-100" />
+              <div className="p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="h-4 bg-gray-100 rounded w-2/3" />
+                  <div className="h-4 bg-gray-100 rounded w-10" />
+                </div>
+                <div className="h-3 bg-gray-100 rounded w-1/2 mb-3" />
+                <div className="h-3 bg-gray-100 rounded w-full mb-1" />
+                <div className="h-3 bg-gray-100 rounded w-4/5 mb-4" />
+                <div className="flex gap-2 mb-4">
+                  <div className="h-5 bg-gray-100 rounded-full w-16" />
+                  <div className="h-5 bg-gray-100 rounded-full w-20" />
+                </div>
+                <div className="h-10 bg-gray-100 rounded-xl" />
+              </div>
+            </div>
           ))
         ) : (
-          filtered.map(r => {
+          filtered.map((r, idx) => {
             const deal = r.deals?.[0];
             const isExclusive = !!deal?.is_exclusive;
             return (
               <a key={r.id} href={`/restaurants/${r.id}`}
-                className={`block bg-white rounded-2xl border hover:shadow-md transition-all no-underline ${isExclusive ? 'border-2 border-[#4A9FD5]' : 'border-gray-200 hover:border-[#4A9FD5]'}`}>
-                <div className="h-44 rounded-t-2xl overflow-hidden bg-gray-50">
+                className={`block bg-white rounded-2xl border hover:shadow-md transition-all no-underline ${CARD_MIN_HEIGHT} ${isExclusive ? 'border-2 border-[#4A9FD5]' : 'border-gray-200 hover:border-[#4A9FD5]'}`}>
+                <div className="h-44 rounded-t-2xl overflow-hidden bg-gray-50 relative">
                   {r.photo_url
-                    ? <img src={r.photo_url} alt={r.name} className="w-full h-full object-cover" />
+                    ? <Image
+                        src={r.photo_url}
+                        alt={r.name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover"
+                        priority={idx < 2}
+                      />
                     : <div className="w-full h-full flex items-center justify-center text-6xl">{r.emoji}</div>
                   }
                 </div>
@@ -244,7 +270,7 @@ export default function Home() {
                     <span className="font-bold text-[#4A9FD5] text-lg">${deal?.price}</span>
                   </div>
                   <p className="text-xs text-gray-500 mb-2">{r.neighborhood} · {r.cuisine} · {r.hours}</p>
-                  <p className="text-sm text-gray-700 mb-3 leading-relaxed">{deal?.special}</p>
+                  <p className="text-sm text-gray-700 mb-3 leading-relaxed line-clamp-2">{deal?.special}</p>
                   <div className="flex gap-2 flex-wrap mb-3">
                     {(() => {
                       const days = deal?.days || ['Mon','Tue','Wed','Thu','Fri'];

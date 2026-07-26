@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter, Bebas_Neue } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
-import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 const bebas = Bebas_Neue({ subsets: ["latin"], weight: "400", variable: "--font-bebas" });
@@ -24,12 +23,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <Script
-          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0"
-          strategy="beforeInteractive"
-        />
-      </head>
       <body className={`${inter.className} ${bebas.variable}`}>{children}<Analytics /></body>
     </html>
   );
