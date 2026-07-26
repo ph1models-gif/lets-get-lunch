@@ -50,7 +50,7 @@ export default function Map({ onPanReady, activeIds, onBoundsChange, restaurants
       {shouldMount ? (
         <>
           <Script
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0"
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0&v=weekly&loading=async"
             strategy="lazyOnload"
           />
           <MapInner onPanReady={onPanReady} activeIds={activeIds} onBoundsChange={onBoundsChange} restaurants={restaurants} />
