@@ -1,14 +1,15 @@
 'use client';
 import React, { useEffect, useRef } from 'react';
-import { supabase } from '../../lib/supabase';
+import { Restaurant } from '../types';
 
 interface Props {
   onPanReady?: (fn: (lat: number, lng: number) => void) => void;
   onBoundsChange?: (bounds: {north: number, south: number, east: number, west: number}) => void;
   activeIds?: string[];
+  restaurants: Restaurant[];
 }
 
-export default function MapInner({ onPanReady, activeIds, onBoundsChange }: Props) {
+export default function MapInner({ onPanReady, activeIds, onBoundsChange, restaurants }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const markersRef = useRef<Map<string, any>>(new Map());
   const activeIdsRef = useRef<string[] | undefined>(activeIds);
@@ -39,7 +40,7 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange }: Prop
     return () => clearInterval(interval);
   }, []);
 
-  async function initMap() {
+  function initMap() {
     if (!ref.current) return;
     const g = (window as any).google.maps;
 
@@ -79,13 +80,6 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange }: Prop
       });
     }
 
-    const { data: restaurants } = await supabase
-      .from('restaurants')
-      .select('id, name, lat, lng, cuisine, photo_url, deals(price, special, is_exclusive)')
-      .eq('is_active', true);
-
-    if (!restaurants) return;
-
     // Inject CSS to hide Google Maps close button and arrow
     const style = document.createElement('style');
     style.textContent = `
@@ -104,7 +98,7 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange }: Prop
       if (openPopup) { openPopup.close(); openPopup = null; }
     });
 
-    restaurants.forEach((r: any) => {
+    restaurants.forEach((r) => {
       const deal = r.deals?.[0];
       if (!r.lat || !r.lng) return;
 
