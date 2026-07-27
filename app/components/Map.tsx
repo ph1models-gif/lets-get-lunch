@@ -16,36 +16,8 @@ const MapInner = dynamic(() => import('./MapInner'), {
   loading: () => <MapPlaceholder />
 }) as React.ComponentType<MapProps>;
 
-// Same default center/zoom MapInner.tsx passes to google.maps.Map, so the
-// static-to-interactive swap is visually seamless (no pan/zoom jump).
-// No scale=2: this is a ~1s placeholder, not worth doubling the payload for
-// retina sharpness (133KB vs 57KB measured).
-const STATIC_MAP_URL =
-  'https://maps.googleapis.com/maps/api/staticmap' +
-  '?center=40.7425,-73.9879&zoom=16&size=640x420&maptype=roadmap' +
-  '&key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0';
-
 function MapPlaceholder() {
-  // Container dimensions must match MapInner's returned wrapper exactly
-  // (same width/height/maxHeight/minHeight) so swapping this out for the
-  // interactive map never shifts layout (CLS).
-  // fetchPriority="high" re-added on the now-57KB (non-retina) image as an
-  // isolated test: dropping payload alone (46-baseline ->33 ->44 without
-  // priority) didn't recover the ~58 pre-facade score, so next single
-  // variable is priority back on at the smaller size. If this doesn't
-  // recover it either, see NOTES.md 2026-07-27 entry for the revert plan.
-  return (
-    <div style={{position:'relative', width:'100%', height:'50vh', maxHeight:'420px', minHeight:'280px'}}>
-      <img
-        src={STATIC_MAP_URL}
-        alt=""
-        fetchPriority="high"
-        loading="eager"
-        decoding="async"
-        style={{position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover'}}
-      />
-    </div>
-  );
+  return <div style={{width:'100%',height:'50vh',maxHeight:'420px',minHeight:'280px',background:'#EEF2F7',display:'flex',alignItems:'center',justifyContent:'center'}}><p style={{color:'#888'}}>Loading map...</p></div>;
 }
 
 export default function Map({ onPanReady, activeIds, onBoundsChange, restaurants }: MapProps) {
