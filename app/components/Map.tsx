@@ -18,21 +18,28 @@ const MapInner = dynamic(() => import('./MapInner'), {
 
 // Same default center/zoom MapInner.tsx passes to google.maps.Map, so the
 // static-to-interactive swap is visually seamless (no pan/zoom jump).
+// No scale=2: this is a ~1s placeholder, not worth doubling the payload for
+// retina sharpness (133KB vs 57KB measured).
 const STATIC_MAP_URL =
   'https://maps.googleapis.com/maps/api/staticmap' +
-  '?center=40.7425,-73.9879&zoom=16&size=640x420&scale=2&maptype=roadmap' +
+  '?center=40.7425,-73.9879&zoom=16&size=640x420&maptype=roadmap' +
   '&key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0';
 
 function MapPlaceholder() {
   // Container dimensions must match MapInner's returned wrapper exactly
   // (same width/height/maxHeight/minHeight) so swapping this out for the
   // interactive map never shifts layout (CLS).
+  // No fetchPriority="high" here (yet): shipping this alongside the
+  // scale=2 removal made mobile Performance score worse (46-baseline ->33),
+  // likely 3 fetchPriority="high" images (this + the 2 priority restaurant
+  // cards from Wave 1) fighting over the browser's limited high-priority
+  // slot. Isolating this change to measure before re-adding it — see
+  // NOTES.md 2026-07-27 entry.
   return (
     <div style={{position:'relative', width:'100%', height:'50vh', maxHeight:'420px', minHeight:'280px'}}>
       <img
         src={STATIC_MAP_URL}
         alt=""
-        fetchPriority="high"
         loading="eager"
         decoding="async"
         style={{position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover'}}
