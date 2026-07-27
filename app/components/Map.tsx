@@ -16,8 +16,29 @@ const MapInner = dynamic(() => import('./MapInner'), {
   loading: () => <MapPlaceholder />
 }) as React.ComponentType<MapProps>;
 
+// Same default center/zoom MapInner.tsx passes to google.maps.Map, so the
+// static-to-interactive swap is visually seamless (no pan/zoom jump).
+const STATIC_MAP_URL =
+  'https://maps.googleapis.com/maps/api/staticmap' +
+  '?center=40.7425,-73.9879&zoom=16&size=640x420&scale=2&maptype=roadmap' +
+  '&key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0';
+
 function MapPlaceholder() {
-  return <div style={{width:'100%',height:'50vh',maxHeight:'420px',minHeight:'280px',background:'#EEF2F7',display:'flex',alignItems:'center',justifyContent:'center'}}><p style={{color:'#888'}}>Loading map...</p></div>;
+  // Container dimensions must match MapInner's returned wrapper exactly
+  // (same width/height/maxHeight/minHeight) so swapping this out for the
+  // interactive map never shifts layout (CLS).
+  return (
+    <div style={{position:'relative', width:'100%', height:'50vh', maxHeight:'420px', minHeight:'280px'}}>
+      <img
+        src={STATIC_MAP_URL}
+        alt=""
+        fetchPriority="high"
+        loading="eager"
+        decoding="async"
+        style={{position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover'}}
+      />
+    </div>
+  );
 }
 
 export default function Map({ onPanReady, activeIds, onBoundsChange, restaurants }: MapProps) {
