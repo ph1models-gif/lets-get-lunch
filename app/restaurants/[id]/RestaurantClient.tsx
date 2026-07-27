@@ -300,8 +300,8 @@ export default function RestaurantClient() {
         body: JSON.stringify({ deal_id: deal?.id, party_size: claimSize }),
       });
       const data = await res.json();
-      if (res.ok && data.code) {
-        setClaimCode(data.code);
+      if (res.ok && data.display_code) {
+        setClaimCode(data.display_code);
       } else if (data.error === 'already_claimed') {
         setClaimError('You already claimed this lunch today.');
       } else {
@@ -447,7 +447,7 @@ export default function RestaurantClient() {
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">How many people?</label>
                 <select value={claimSize} onChange={(e) => setClaimSize(Number(e.target.value))}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-base mb-5">
-                  {[1,2,3,4,5,6].map(n => (
+                  {[1,2,3,4,5,6,7,8].map(n => (
                     <option key={n} value={n}>{n} {n === 1 ? 'person' : 'people'}</option>
                   ))}
                 </select>

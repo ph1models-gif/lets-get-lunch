@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     const { deal_id, party_size } = await req.json()
     if (!deal_id) return NextResponse.json({ error: 'Missing deal' }, { status: 400 })
 
-    const size = Math.min(Math.max(parseInt(party_size) || 1, 1), 6)
+    const size = Math.min(Math.max(parseInt(party_size) || 1, 1), 8)
 
     const token = req.headers.get('authorization')?.replace('Bearer ', '')
     if (!token) return NextResponse.json({ error: 'Sign in to claim' }, { status: 401 })
@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
     }
 
     const code = generateCode()
+    const displayCode = `${code}-${size}`
 
     const { error: dbError } = await supabase.from('claims').insert({
       deal_id: deal.id,
@@ -80,7 +81,7 @@ export async function POST(req: NextRequest) {
             from: "Let's Get Lunch <hello@letsgetlunch.nyc>",
             to: userEmail,
             subject: `Your exclusive lunch code - ${rest.name}`,
-            html: claimEmail(code, size, rest, deal, userEmail),
+            html: claimEmail(displayCode, size, rest, deal, userEmail),
           }),
         })
       }
@@ -88,7 +89,7 @@ export async function POST(req: NextRequest) {
       console.error('Claim email error:', e)
     }
 
-    return NextResponse.json({ success: true, code, party_size: size })
+    return NextResponse.json({ success: true, code, display_code: displayCode, party_size: size })
 
   } catch (err) {
     console.error('Claim error:', err)
@@ -96,14 +97,14 @@ export async function POST(req: NextRequest) {
   }
 }
 
-function claimEmail(code: string, size: number, rest: any, deal: any, email: string): string {
+function claimEmail(displayCode: string, size: number, rest: any, deal: any, email: string): string {
   const people = size === 1 ? 'person' : 'people'
   return `
     <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
       <h1 style="color:#4A9FD5;font-size:24px;margin-bottom:8px">Your exclusive lunch code</h1>
       <p style="color:#444;font-size:16px">Here's your code for <strong>${rest.name}</strong>.</p>
       <div style="background:#EEF6FC;border-radius:12px;padding:24px;margin:24px 0;text-align:center">
-        <p style="margin:0;font-size:32px;font-weight:bold;color:#4A9FD5;letter-spacing:2px">${code}</p>
+        <p style="margin:0;font-size:32px;font-weight:bold;color:#4A9FD5;letter-spacing:2px">${displayCode}</p>
       </div>
       <p style="color:#444;font-size:16px"><strong>No reservation needed</strong> - just walk in during lunch hours and show this code to your server or at the host stand.</p>
       <div style="border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin:24px 0">

@@ -919,7 +919,8 @@ Core pilot mechanic: exclusive deals visible to all, but CLAIMING requires a fre
 
 ### DB (Supabase)
 - `deals.is_exclusive` boolean, default false
-- `claims` table: id, deal_id, restaurant_id, user_id, code, party_size (1-6), status (claimed/redeemed/expired), claim_date, created_at
+- `claims` table: id, deal_id, restaurant_id, user_id, code, party_size (1-8), status (claimed/redeemed/expired), claim_date, created_at
+- Displayed claim code is `{code}-{party_size}` (e.g. `LGX-4F7K-4`) — the base `code` column stays the bare lookup key; the party size suffix is display-only, computed once in `app/api/claim/route.ts` and returned as `display_code` so the on-screen confirmation and email always match.
 - UNIQUE index `claims_one_per_user_per_deal_per_day` on (user_id, deal_id, claim_date) — DB-enforced, not app logic
 - `claim_date` defaults to NY calendar date, NOT UTC. Critical: a 9pm ET claim is already "tomorrow" in UTC and would break one-per-day.
 - RLS ON. Policy: users SELECT own claims only. No INSERT policy — writes go through server (service_role).
