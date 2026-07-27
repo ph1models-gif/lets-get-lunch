@@ -29,17 +29,17 @@ function MapPlaceholder() {
   // Container dimensions must match MapInner's returned wrapper exactly
   // (same width/height/maxHeight/minHeight) so swapping this out for the
   // interactive map never shifts layout (CLS).
-  // No fetchPriority="high" here (yet): shipping this alongside the
-  // scale=2 removal made mobile Performance score worse (46-baseline ->33),
-  // likely 3 fetchPriority="high" images (this + the 2 priority restaurant
-  // cards from Wave 1) fighting over the browser's limited high-priority
-  // slot. Isolating this change to measure before re-adding it — see
-  // NOTES.md 2026-07-27 entry.
+  // fetchPriority="high" re-added on the now-57KB (non-retina) image as an
+  // isolated test: dropping payload alone (46-baseline ->33 ->44 without
+  // priority) didn't recover the ~58 pre-facade score, so next single
+  // variable is priority back on at the smaller size. If this doesn't
+  // recover it either, see NOTES.md 2026-07-27 entry for the revert plan.
   return (
     <div style={{position:'relative', width:'100%', height:'50vh', maxHeight:'420px', minHeight:'280px'}}>
       <img
         src={STATIC_MAP_URL}
         alt=""
+        fetchPriority="high"
         loading="eager"
         decoding="async"
         style={{position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover'}}
