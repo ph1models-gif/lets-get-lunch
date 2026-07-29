@@ -1060,3 +1060,13 @@ Wave 1 (commit `32af998`, Jul 26) switched restaurant card photos from a plain `
 - Hobby included: 5,000 image transformations/month, 300K cache reads/month, 100K cache writes/month.
 - Past the limit: **new images fail to optimize and return a 402**, which fires `next/image`'s `onError` and falls back to showing the `alt` text (broken-looking image, not a full outage) — **it does NOT silently serve unoptimized full-size originals**. Already-cached/previously-optimized images keep working fine, no error. No overage charge on Hobby (Image Optimization billing only applies on Pro+); this is a hard functional degradation, not a surprise bill.
 - If this recurs: check the Vercel dashboard's Image Optimization usage graph against deploy timestamps first — it's almost certainly another testing-cadence spike, not real traffic, until proven otherwise.
+
+### Current PageSpeed baseline, confirmed 2026-07-29 against real production — supersedes the old 46/LCP-9.8s number above
+Re-ran PSI mobile after the Image Optimization quota fixes shipped. First attempt looked alarming — Performance 46, LCP 9.8s, TBT 580ms, CLS 0.166 — but that report turned out to be **stale or against the wrong domain**, an exact match to the pre-Wave-1 baseline from before any perf work shipped (TBT 580ms in particular can't recur; Wave 1's Maps-script-deferral fix has been live in production since Jul 26 and nothing since has touched it). Re-run explicitly against production confirmed the URL:
+- `https://www.letsgetlunch.nyc/` (mobile): **85**
+- `https://letsgetlunch.nyc/` (mobile): **86**
+- Desktop: **88**
+
+So mobile is actually on par with desktop now, not the 46 the stale report showed. **Don't trust a PSI report that shows TBT anywhere near 580ms or a Performance score near 46 without first confirming it's a fresh run against `www.letsgetlunch.nyc` or `letsgetlunch.nyc`** — Google Maps' JS is referrer-locked to those two domains and silently no-ops elsewhere (e.g. `*.vercel.app` previews), which alone is enough to reproduce numbers this far off from real production.
+
+**Consequence for future sessions**: with mobile already at 85-86, there is no live LCP/perf problem to chase right now. A proposal came up this session to add an LGL-logo background placeholder behind the map (mobile-only) to improve LCP — correctly shelved once the real 85-86 numbers came in, since it'd be solving a problem that no longer exists. Don't resurrect it unless a *freshly confirmed* production PSI run against the right domain shows a real regression first.
