@@ -2,16 +2,21 @@ import { createClient } from '@supabase/supabase-js';
 import HomeClient from './HomeClient';
 import { HOMEPAGE_RESTAURANT_SELECT, Restaurant } from './types';
 
-export const dynamic = 'force-dynamic';
+// Restaurant list is revalidated every 60s instead of on every request.
+// Admin edits/deactivations/exclusive-flag toggles can take up to 60s to
+// show here (see NOTES.md) - acceptable for a lunch directory, and the
+// existing focus-triggered client refetch in HomeClient already shows
+// changes sooner for anyone with the tab open.
+export const revalidate = 60;
 
-// A page-local client whose fetch always opts out of Next's Data Cache, so a
-// restaurant/deal edited or deactivated in Supabase shows up immediately
-// instead of on the next deploy (same pattern as /newsletter).
+// A page-local client whose fetch is tagged into Next's Data Cache with the
+// same 60s revalidate window as the page, so a restaurant/deal edited in
+// Supabase shows up within a minute instead of only on the next deploy.
 function getSupabase() {
   return createClient(
     'https://iqurlwenkozmxoyymnkg.supabase.co',
     'sb_publishable_XV712EbMI7leXaWHaITV5Q_hKNNals4',
-    { global: { fetch: (input, init) => fetch(input, { ...init, cache: 'no-store' }) } }
+    { global: { fetch: (input, init) => fetch(input, { ...init, next: { revalidate: 60 } }) } }
   );
 }
 
