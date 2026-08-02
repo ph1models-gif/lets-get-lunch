@@ -39,6 +39,16 @@ function slugify(text: string) {
     .replace(/(^-|-$)/g, '')
 }
 
+// Appends a numeric suffix if `base` collides with another post's slug.
+function uniqueSlug(base: string, posts: Post[], excludeId: string | null): string {
+  if (!base) return base
+  const taken = new Set(posts.filter(p => p.id !== excludeId).map(p => p.slug))
+  if (!taken.has(base)) return base
+  let n = 2
+  while (taken.has(`${base}-${n}`)) n++
+  return `${base}-${n}`
+}
+
 export default function NewsletterAdminPage() {
   const [authed, setAuthed] = useState(false)
   const [pw, setPw] = useState('')
@@ -48,6 +58,10 @@ export default function NewsletterAdminPage() {
 
   const [form, setForm] = useState({ ...EMPTY_FORM })
   const [slugTouched, setSlugTouched] = useState(false)
+  // published_at of the post currently loaded into the form, if it's ever been
+  // published — set once and kept forever by posts-update, so this survives
+  // toggling the "Published" checkbox back off within the same edit.
+  const [editingPublishedAt, setEditingPublishedAt] = useState<string | null>(null)
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [coverPreview, setCoverPreview] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -84,6 +98,7 @@ export default function NewsletterAdminPage() {
   function resetForm() {
     setForm({ ...EMPTY_FORM })
     setSlugTouched(false)
+    setEditingPublishedAt(null)
     setCoverFile(null)
     setCoverPreview(null)
     setFormError('')
@@ -99,15 +114,33 @@ export default function NewsletterAdminPage() {
       cover_image_url: post.cover_image_url,
       published: post.published,
     })
-    setSlugTouched(true)
+    setEditingPublishedAt(post.published_at)
+    // If the stored slug doesn't match a fresh auto-generation from the current
+    // title, it's been manually customized — leave it alone on further title
+    // edits. Otherwise keep tracking the title (draft posts only; published
+    // posts are locked outright regardless of this, see slugLocked below).
+    setSlugTouched(post.slug !== slugify(post.title))
     setCoverFile(null)
     setCoverPreview(post.cover_image_url)
     setFormError('')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  // Once a post has ever been published (published_at persists even if later
+  // unpublished) or is about to be published in this save, its slug is the
+  // live/indexed/emailed URL — lock it so a title edit can't silently change it.
+  const slugLocked = !!editingPublishedAt || form.published
+
   function handleTitleChange(value: string) {
-    setForm(f => ({ ...f, title: value, slug: slugTouched ? f.slug : slugify(value) }))
+    if (slugLocked) {
+      setForm(f => ({ ...f, title: value }))
+      return
+    }
+    setForm(f => ({
+      ...f,
+      title: value,
+      slug: slugTouched ? f.slug : uniqueSlug(slugify(value), posts, f.id),
+    }))
   }
 
   function handleCoverFile(file: File | null) {
@@ -254,10 +287,13 @@ export default function NewsletterAdminPage() {
 
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Slug</label>
-              <input type="text" value={form.slug}
+              <input type="text" value={form.slug} disabled={slugLocked}
                 onChange={e => { setSlugTouched(true); setForm(f => ({ ...f, slug: e.target.value })) }}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-orange-400" />
-              <p className="text-xs text-gray-400 mt-1">/newsletter/{form.slug || 'your-slug'}</p>
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-orange-400 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed" />
+              <p className="text-xs text-gray-400 mt-1">
+                /newsletter/{form.slug || 'your-slug'}
+                {slugLocked && <span className="text-amber-600"> · Locked — this post has been published</span>}
+              </p>
             </div>
 
             <div>
