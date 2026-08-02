@@ -1116,3 +1116,23 @@ Measured directly against production rather than guessing: sampled 8 restaurant 
 
 ### Bottom line for "can I drop back to the free Hobby tier?"
 Yes. 1,359/mo steady-state (27% of quota) comfortably covers current scale and several months of the observed growth rate, the config is verified live on production (srcset confirmed as `640w/828w/1280w`, images confirmed not upscaled), and the actual root cause (60s default TTL colliding with rapid perf-test redeploys) is fixed regardless of bucket count. The one operational habit to keep: don't let a future perf-testing spree touch `next.config.js`'s image settings repeatedly in a short window without checking the math first — that's the only way this recurs.
+
+## 2026-08-02 — Newsletter: "Send as announcement" (built with Claude Code)
+
+### Shipped, merged to main (branch `newsletter-announcement`, commit `66040db`)
+Admin can now send a published newsletter post as a one-off email announcement from `/newsletter/admin`, without turning posts into a stateful "announcement" type — sending is an explicit action, not a flag on the post.
+
+- **Schema**: added two nullable columns to `posts` — `announcement_sent_at timestamptz`, `announcement_recipient_count integer`. Run by hand against Supabase (this repo has no migration tool — same convention as every prior schema change here). `NULL` sent_at = never sent; a resend just overwrites both columns, no separate send-history table (wasn't asked for).
+- **Recipient logic** (`lib/announcementRecipients.ts`, `getAnnouncementRecipients()`): single shared query used by both new routes, so the confirmation count and the actual send can never disagree. Combines the two suppression mechanisms that already existed independently in this codebase and had never been combined before: `profiles.email_frequency != 'off'` and the `unsubscribes` table (matching the exact `.trim().toLowerCase()` comparison already used in `/api/reserve` and `/api/claim`).
+- **Routes**: `POST /api/admin/posts-announcement-preview` (read-only, returns recipient count for the confirm step) and `POST /api/admin/posts-send-announcement` (re-verifies password, re-resolves recipients server-side — never trusts a client-supplied count, rejects unpublished posts since the email links to `/newsletter/[slug]` which 404s until published, sends via the existing raw-fetch Resend pattern in batches of 5, records `sent_at`/count). Both password-gated the same way as every other `app/api/admin/*` route.
+- **Email**: links back to the live `/newsletter/[slug]` page instead of duplicating the post body. Footer includes both the existing `/unsubscribe?email=` link (same pattern as `claimEmail()` in `/api/claim`) and the token-based `/email-preferences?token=` link — the latter wasn't in any prior email template but is exactly the mechanism this feature depends on, so added it.
+- **Admin UI**: two-step confirm (mirrors the existing Delete button's confirm/cancel pattern) showing live recipient count before sending. Once sent, button becomes "Sent on [date] · N recipients" with a separate explicit "Resend" action — can't be fired accidentally twice.
+
+### Verified against production before merging
+Ran the actual `getAnnouncementRecipients()` query directly (service-role key, read-only) rather than trusting the code by inspection alone: 46 profiles eligible at baseline. Toggled one real profile's `email_frequency` to `off` via the live `/email-preferences` page (production, pre-existing feature) — count dropped to 45, that profile's email correctly absent from the list. Toggled back to `weekly` — count returned to 46. Confirmed via GitHub commit-status/Vercel dashboard (no working `vercel` CLI auth in this session) that the branch's preview deployment reached Ready before merging.
+
+### Note for the next person touching this area
+Sending doesn't touch `posts.published` or any other existing column — a post can be edited after being announced (title/body typos etc.) without re-triggering a send or losing the `sent_at` record, since announce state is fully decoupled from post content by design.
+
+## QUEUED — Restaurant slugs (planned, not started)
+Next up: human-readable `/restaurants/[slug]` URLs replacing the current `/restaurants/[uuid]`, with a backfill for all ~458 existing listings and a redirect from old UUID links. Paused per your explicit call not to run two schema-changing features at once — full plan already written, will resume once this ships cleanly on production.
