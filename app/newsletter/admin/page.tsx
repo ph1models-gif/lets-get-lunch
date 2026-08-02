@@ -12,6 +12,13 @@ type Post = {
   published: boolean
   published_at: string | null
   created_at: string
+  announcement_sent_at: string | null
+  announcement_recipient_count: number | null
+}
+
+type AnnounceState = {
+  status: 'idle' | 'confirming' | 'sending'
+  count?: number
 }
 
 const EMPTY_FORM = {
@@ -46,6 +53,7 @@ export default function NewsletterAdminPage() {
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState('')
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [announceState, setAnnounceState] = useState<Record<string, AnnounceState>>({})
 
   useEffect(() => {
     if (authed) fetchPosts()
@@ -167,6 +175,41 @@ export default function NewsletterAdminPage() {
     fetchPosts()
   }
 
+  async function startAnnounce(id: string) {
+    const res = await fetch('/api/admin/posts-announcement-preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw, id }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok || !data.ok) {
+      alert(data.error || 'Could not load recipient count.')
+      return
+    }
+    setAnnounceState(s => ({ ...s, [id]: { status: 'confirming', count: data.count } }))
+  }
+
+  function cancelAnnounce(id: string) {
+    setAnnounceState(s => ({ ...s, [id]: { status: 'idle' } }))
+  }
+
+  async function sendAnnounce(id: string) {
+    setAnnounceState(s => ({ ...s, [id]: { ...s[id], status: 'sending' } }))
+    const res = await fetch('/api/admin/posts-send-announcement', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw, id }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok || !data.ok) {
+      alert(data.error || 'Could not send announcement.')
+      setAnnounceState(s => ({ ...s, [id]: { status: 'idle' } }))
+      return
+    }
+    setAnnounceState(s => ({ ...s, [id]: { status: 'idle' } }))
+    fetchPosts()
+  }
+
   if (!authed) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -271,39 +314,80 @@ export default function NewsletterAdminPage() {
             <p className="text-sm text-gray-400">No posts yet.</p>
           ) : (
             <div className="space-y-2">
-              {posts.map(post => (
-                <div key={post.id} className="flex items-center justify-between border border-gray-200 rounded-lg px-4 py-3">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{post.title}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      <span className={post.published ? 'text-green-600' : 'text-gray-400'}>
-                        {post.published ? 'Published' : 'Draft'}
-                      </span>
-                      {' · '}
-                      {new Date(post.published_at || post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <button onClick={() => startEdit(post)} className="text-sm text-orange-500 hover:underline">
-                      Edit
-                    </button>
-                    {confirmDeleteId === post.id ? (
-                      <>
-                        <button onClick={() => deletePost(post.id)} className="text-sm text-red-600 hover:underline">
-                          Confirm delete
+              {posts.map(post => {
+                const announce = announceState[post.id] || { status: 'idle' as const }
+                return (
+                <div key={post.id} className="border border-gray-200 rounded-lg px-4 py-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{post.title}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        <span className={post.published ? 'text-green-600' : 'text-gray-400'}>
+                          {post.published ? 'Published' : 'Draft'}
+                        </span>
+                        {' · '}
+                        {new Date(post.published_at || post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <button onClick={() => startEdit(post)} className="text-sm text-orange-500 hover:underline">
+                        Edit
+                      </button>
+                      {confirmDeleteId === post.id ? (
+                        <>
+                          <button onClick={() => deletePost(post.id)} className="text-sm text-red-600 hover:underline">
+                            Confirm delete
+                          </button>
+                          <button onClick={() => setConfirmDeleteId(null)} className="text-sm text-gray-500 hover:underline">
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <button onClick={() => setConfirmDeleteId(post.id)} className="text-sm text-red-600 hover:underline">
+                          Delete
                         </button>
-                        <button onClick={() => setConfirmDeleteId(null)} className="text-sm text-gray-500 hover:underline">
-                          Cancel
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
+                    {announce.status === 'confirming' ? (
+                      <>
+                        <p className="text-sm text-gray-700">Send to {announce.count} recipient{announce.count === 1 ? '' : 's'}?</p>
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <button onClick={() => sendAnnounce(post.id)} className="text-sm text-blue-600 hover:underline font-medium">
+                            Confirm
+                          </button>
+                          <button onClick={() => cancelAnnounce(post.id)} className="text-sm text-gray-500 hover:underline">
+                            Cancel
+                          </button>
+                        </div>
+                      </>
+                    ) : post.announcement_sent_at ? (
+                      <>
+                        <p className="text-xs text-gray-400">
+                          Sent on {new Date(post.announcement_sent_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          {typeof post.announcement_recipient_count === 'number' ? ` · ${post.announcement_recipient_count} recipients` : ''}
+                        </p>
+                        <button onClick={() => startAnnounce(post.id)} disabled={announce.status === 'sending'}
+                          className="text-sm text-orange-500 hover:underline disabled:opacity-50">
+                          {announce.status === 'sending' ? 'Sending...' : 'Resend'}
                         </button>
                       </>
                     ) : (
-                      <button onClick={() => setConfirmDeleteId(post.id)} className="text-sm text-red-600 hover:underline">
-                        Delete
-                      </button>
+                      <>
+                        <span />
+                        <button onClick={() => startAnnounce(post.id)} disabled={!post.published || announce.status === 'sending'}
+                          title={!post.published ? 'Publish the post first' : undefined}
+                          className="text-sm text-orange-500 hover:underline disabled:opacity-50 disabled:no-underline disabled:cursor-not-allowed">
+                          {announce.status === 'sending' ? 'Sending...' : 'Send as announcement'}
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
