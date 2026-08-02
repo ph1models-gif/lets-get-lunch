@@ -5,6 +5,7 @@ import { supabase } from '../../../lib/supabase';
 
 interface Restaurant {
   id: string;
+  slug: string;
   name: string;
   neighborhood: string;
   address: string;
@@ -34,7 +35,7 @@ function validatePassword(pw: string): string | null {
 type ModalStep = 'book' | 'password' | 'signin' | 'success';
 
 export default function RestaurantClient() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const [activePhoto, setActivePhoto] = useState<string | null>(null);
   const [r, setR] = useState<Restaurant | null>(null);
   const [loading, setLoading] = useState(true);
@@ -77,7 +78,7 @@ export default function RestaurantClient() {
       const { data } = await supabase
         .from('restaurants')
         .select('*, deals(*)')
-        .eq('id', id)
+        .eq('slug', slug)
         .eq('is_active', true)
         .single();
       setR(data);
@@ -121,7 +122,7 @@ export default function RestaurantClient() {
       // Note: cleanup happens via useEffect return below
     }
     load();
-  }, [id]);
+  }, [slug]);
 
   async function openModal() {
     setAuthError('');
@@ -279,7 +280,7 @@ export default function RestaurantClient() {
   async function handleClaimClick() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      window.location.href = `/signup?next=/restaurants/${r.id}`;
+      window.location.href = `/signup?next=/restaurants/${r.slug}`;
       return;
     }
     setShowClaimModal(true);

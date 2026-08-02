@@ -7,6 +7,7 @@ export interface Deal {
 
 export interface Restaurant {
   id: string;
+  slug: string;
   name: string;
   neighborhood: string;
   lat: number;
@@ -25,4 +26,4 @@ export interface Restaurant {
 // server-side fetch and the client-side focus-refresh, so the two never drift.
 // Only includes columns the homepage cards and map actually render.
 export const HOMEPAGE_RESTAURANT_SELECT =
-  'id, name, neighborhood, lat, lng, cuisine, emoji, work_friendly, walk_in, wifi, hours, photo_url, deals(price, special, is_exclusive, days)';
+  'id, slug, name, neighborhood, lat, lng, cuisine, emoji, work_friendly, walk_in, wifi, hours, photo_url, deals(price, special, is_exclusive, days)';

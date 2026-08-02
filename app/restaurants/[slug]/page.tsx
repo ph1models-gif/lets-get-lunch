@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { createClient } from '@supabase/supabase-js'
+import { cache } from 'react'
+import { permanentRedirect } from 'next/navigation'
 import RestaurantClient from './RestaurantClient'
 
 const BASE = 'https://www.letsgetlunch.nyc'
@@ -11,8 +13,31 @@ function sb() {
   )
 }
 
+// Resolves either a current slug or a legacy UUID to the same row. Shared
+// (via React's cache()) between generateMetadata and the page component so
+// a single request only ever does one DB round trip for the happy path.
+const getRestaurant = cache(async (slugOrId: string) => {
+  const supabase = sb()
+  const { data: bySlug } = await supabase
+    .from('restaurants')
+    .select('id, slug, name, neighborhood, cuisine, bio')
+    .eq('slug', slugOrId)
+    .eq('is_active', true)
+    .maybeSingle()
+  if (bySlug) return bySlug
+
+  // Legacy /restaurants/[uuid] link — resolve it so the page component can 308 redirect.
+  const { data: byId } = await supabase
+    .from('restaurants')
+    .select('id, slug, name, neighborhood, cuisine, bio')
+    .eq('id', slugOrId)
+    .eq('is_active', true)
+    .maybeSingle()
+  return byId
+})
+
 export async function generateMetadata(
-  { params }: { params: { id: string } }
+  { params }: { params: { slug: string } }
 ): Promise<Metadata> {
   const fallback: Metadata = {
     title: "Lunch Deal — NYC Prix-Fixe | Let's Get Lunch",
@@ -20,22 +45,17 @@ export async function generateMetadata(
     robots: { index: false, follow: false },
   }
   try {
-    const supabase = sb()
-    const { data: r } = await supabase
-      .from('restaurants')
-      .select('name, neighborhood, cuisine, bio')
-      .eq('id', params.id)
-      .eq('is_active', true)
-      .single()
+    const r = await getRestaurant(params.slug)
     if (!r || !r.name) return fallback
 
+    const supabase = sb()
     const { data: d } = await supabase
       .from('deals')
       .select('special, price, days')
-      .eq('restaurant_id', params.id)
+      .eq('restaurant_id', r.id)
       .single()
 
-    const canonical = `${BASE}/restaurants/${params.id}`
+    const canonical = `${BASE}/restaurants/${r.slug}`
     const loc = r.neighborhood ? ` in ${r.neighborhood}` : ''
     const priceStr = d && (d.price || d.price === 0) ? `$${d.price}` : ''
 
@@ -74,6 +94,10 @@ export async function generateMetadata(
   }
 }
 
-export default function Page() {
+export default async function Page({ params }: { params: { slug: string } }) {
+  const r = await getRestaurant(params.slug)
+  if (r && r.slug && r.slug !== params.slug) {
+    permanentRedirect(`/restaurants/${r.slug}`)
+  }
   return <RestaurantClient />
 }
