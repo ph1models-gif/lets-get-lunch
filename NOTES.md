@@ -1171,3 +1171,14 @@ Reverses the original announcement-email design on purpose, per explicit request
 
 ### Verified before merging
 No browser tooling available this session (flagged rather than skipped) — verified instead by: (1) hitting the live production image optimizer directly via `curl` for a real post's cover image and confirming the 484KB->47KB reduction and JPEG content-type; (2) rendering the actual `lib/announcementEmail.ts` template function against real post data (copy-paste verbatim, not reimplemented) and inspecting the output HTML directly; (3) publishing that rendered output as a visual before/after preview artifact for the user to review ahead of the real in-inbox test send.
+
+## 2026-08-02 — Announcement email: reduce-frequency nudge + first-person sign-off (built with Claude Code)
+
+### Shipped, merged to main (branch `newsletter-email-frequency-nudge`)
+Footer previously showed "Unsubscribe · Email preferences" as two equal-weight links — no reason not to just hit unsubscribe. Now: a prominent boxed CTA ("Getting these too often? Switch to weekly or monthly." + a **Change email frequency** button) up top, and a small plain-text **Unsubscribe completely** link underneath. Neither link's *destination* changed — `/email-preferences?token=...` and `/unsubscribe?email=...` are exactly what they were, only the visual/copy emphasis moved. Also: sign-off changed from "- The Let's Get Lunch team" to "- Brian" (solo founder, first person) — **scoped to this email only**, by explicit confirmation; the same "team" sign-off still appears in `/api/claim` and `/api/reserve`'s emails and was deliberately left alone.
+
+### Verified against production before merging (not assumed from reading the API routes)
+- Read the actual source of `app/email-preferences/page.tsx` and `app/unsubscribe/page.tsx` directly — confirmed neither has any login/session check, both are pure token/email flows. Preferences page presents all four options (Daily/Weekly/Monthly/Off) as one-click buttons.
+- Pulled a **real** subscriber's actual `email_pref_token` from `profiles` (not the `'test'` placeholder `posts-send-test` uses) and round-tripped it against the live `/api/email-preferences` API: read `weekly` → changed to `monthly` → confirmed persisted → restored to `weekly`.
+- Hit the live `/api/unsubscribe` endpoint with a disposable throwaway address (`claude-verification-test-<timestamp>@example.com`, not a real subscriber) to confirm the write path works, then deleted that row — no real subscriber was touched by this verification.
+- Note for later: `/unsubscribe` fires automatically on page load, no confirm click (correct — matches Gmail/Yahoo's one-click-unsubscribe requirement) — anyone testing this flow again should verify via direct API call with a disposable address, same as above, not by loading the page URL for a real subscriber.
