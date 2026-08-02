@@ -290,10 +290,10 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
           {/* Newsletter */}
           <div className="text-center md:px-8">
             <p className="text-xs uppercase tracking-wider text-gray-400 mb-2">The newsletter</p>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">Want the best deals in your inbox?</h2>
-            <p className="text-gray-500 max-w-md mx-auto mb-6">Read the latest lunch finds and exclusive deals from Let&apos;s Get Lunch.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">The best curated lunch specials in NYC.</h2>
+            <p className="text-gray-500 max-w-md mx-auto mb-6">See what&apos;s new.</p>
             <a href="/newsletter" className="inline-block bg-white border border-[#4A9FD5] text-[#4A9FD5] px-8 py-3 rounded-xl font-medium hover:bg-blue-50 transition-colors">
-              Read the newsletter
+              Read the newsletter →
             </a>
           </div>
 
