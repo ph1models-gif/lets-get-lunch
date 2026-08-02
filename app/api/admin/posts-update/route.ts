@@ -13,14 +13,19 @@ export async function POST(req: NextRequest) {
 
     const { data: existing } = await supabaseAdmin
       .from('posts')
-      .select('published_at')
+      .select('published_at, slug')
       .eq('id', id)
       .single()
 
     const published = !!post.published
+    // A post that's ever been published (published_at persists even if later
+    // unpublished) or is being published in this save has a live/indexed/
+    // emailed URL — never let a client-supplied slug override it here,
+    // regardless of what the UI sent.
+    const slugLocked = !!existing?.published_at || published
     const fields: Record<string, any> = {
       title: post.title,
-      slug: post.slug,
+      slug: slugLocked && existing?.slug ? existing.slug : post.slug,
       excerpt: post.excerpt || null,
       body: post.body || '',
       cover_image_url: post.cover_image_url || null,
