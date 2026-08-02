@@ -247,7 +247,7 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
       </section>
 
       <section className="bg-[#EEF6FC] px-4 py-12">
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-0 md:divide-x md:divide-gray-200">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-0 md:divide-x md:divide-gray-200">
 
           {/* For diners */}
           <div className="text-center md:px-8">
@@ -281,6 +281,19 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
             <p className="text-gray-500 max-w-md mx-auto mb-6">List it on Let&apos;s Get Lunch — free, takes 5 minutes.</p>
             <a href="/list-your-restaurant" className="inline-block bg-[#4A9FD5] text-white px-8 py-3 rounded-xl font-medium hover:bg-[#3a8fc5] transition-colors">
               List your lunch special
+            </a>
+          </div>
+
+          {/* Mobile-only divider */}
+          <div className="md:hidden border-t border-gray-200 my-2"></div>
+
+          {/* Newsletter */}
+          <div className="text-center md:px-8">
+            <p className="text-xs uppercase tracking-wider text-gray-400 mb-2">The newsletter</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Want the best deals in your inbox?</h2>
+            <p className="text-gray-500 max-w-md mx-auto mb-6">Read the latest lunch finds and exclusive deals from Let&apos;s Get Lunch.</p>
+            <a href="/newsletter" className="inline-block bg-white border border-[#4A9FD5] text-[#4A9FD5] px-8 py-3 rounded-xl font-medium hover:bg-blue-50 transition-colors">
+              Read the newsletter
             </a>
           </div>
 
