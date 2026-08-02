@@ -74,7 +74,7 @@ export function announcementEmailHtml(post: AnnouncementPost, recipient: Announc
       <div style="text-align:center;margin:0 0 20px">
         <a href="${postUrl}" style="color:#000;text-decoration:underline;font-weight:bold;font-size:14px">View in browser</a>
       </div>
-      <p style="color:#888;font-size:13px">- Brian</p>
+      <p style="font-family:sans-serif;color:#444;font-size:16px">- Brian</p>
 
       <p style="color:#999;font-size:11px;text-align:center;margin-top:20px;line-height:1.5">
         Getting these too often? Switch to weekly or monthly.
