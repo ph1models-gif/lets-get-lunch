@@ -29,9 +29,30 @@ function optimizedCoverImageUrl(coverImageUrl: string): string {
   return `${BASE}/_next/image?url=${encodeURIComponent(coverImageUrl)}&w=640&q=70`
 }
 
+// Posts are authored with a plain /restaurants/{slug} link in the body
+// pointing at the deal being written about (existing authoring convention —
+// e.g. the Mamazul post body ends with exactly this). Pull the restaurant
+// slug from that link and strip the raw URL out of the body text, so the
+// email can render it as a styled "Claim this exclusive lunch" button
+// instead — derived from the post's own content each send, not hardcoded.
+// Posts with no such link (not tied to a specific deal) just get no button.
+const RESTAURANT_LINK_RE = /https?:\/\/(?:www\.)?letsgetlunch\.nyc\/restaurants\/([a-z0-9]+(?:-[a-z0-9]+)*)\/?/i
+
+function extractRestaurantSlug(body: string): { cleanBody: string; restaurantSlug: string | null } {
+  const match = body.match(RESTAURANT_LINK_RE)
+  if (!match) return { cleanBody: body, restaurantSlug: null }
+  const cleanBody = body
+    .replace(match[0], '')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+  return { cleanBody, restaurantSlug: match[1] }
+}
+
 export function announcementEmailHtml(post: AnnouncementPost, recipient: AnnouncementEmailRecipient): string {
   const postUrl = `${BASE}/newsletter/${post.slug}`
-  const bodyHtml = marked.parse(post.body || '', { async: false }) as string
+  const { cleanBody, restaurantSlug } = extractRestaurantSlug(post.body || '')
+  const bodyHtml = marked.parse(cleanBody, { async: false }) as string
   const coverImg = post.cover_image_url ? optimizedCoverImageUrl(post.cover_image_url) : null
 
   return `
@@ -47,17 +68,20 @@ export function announcementEmailHtml(post: AnnouncementPost, recipient: Announc
       <h1 style="color:#4A9FD5;font-size:26px;margin-bottom:16px">${post.title}</h1>
       ${coverImg ? `<img src="${coverImg}" alt="" width="600" style="width:100%;max-width:600px;height:auto;border-radius:12px;margin-bottom:20px;display:block" />` : ''}
       <div class="post-body">${bodyHtml}</div>
+      ${restaurantSlug ? `<div style="text-align:center;margin:8px 0 16px">
+        <a href="${BASE}/restaurants/${restaurantSlug}" style="display:inline-block;background:#4A9FD5;color:#fff;text-decoration:none;font-size:16px;font-weight:bold;border-radius:10px;padding:14px 28px">Claim this exclusive lunch</a>
+      </div>` : ''}
       <div style="text-align:center;margin:32px 0 24px">
         <a href="${postUrl}" style="display:inline-block;background:#4A9FD5;color:#fff;text-decoration:none;font-size:14px;font-weight:bold;border-radius:8px;padding:10px 20px">View this post online</a>
       </div>
       <p style="color:#888;font-size:13px">- Brian</p>
 
-      <div style="background:#EEF6FC;border-radius:12px;padding:20px;margin-top:24px;text-align:center">
-        <p style="margin:0 0 14px;color:#333;font-size:15px;font-weight:600;line-height:1.4">Getting these too often? Switch to weekly or monthly.</p>
-        <a href="${BASE}/email-preferences?token=${recipient.email_pref_token}" style="display:inline-block;background:#4A9FD5;color:#fff;text-decoration:none;font-size:14px;font-weight:bold;border-radius:8px;padding:10px 20px">Change email frequency</a>
-      </div>
+      <p style="color:#999;font-size:11px;text-align:center;margin-top:20px;line-height:1.5">
+        Getting these too often? Switch to weekly or monthly.
+        <a href="${BASE}/email-preferences?token=${recipient.email_pref_token}" style="color:#999;text-decoration:underline">Change email frequency</a>
+      </p>
 
-      <p style="color:#bbb;font-size:11px;text-align:center;margin-top:16px">
+      <p style="color:#bbb;font-size:11px;text-align:center;margin-top:8px">
         Let's Get Lunch - New York, NY<br/>
         <a href="${BASE}/unsubscribe?email=${encodeURIComponent(recipient.email)}" style="color:#bbb;text-decoration:underline">Unsubscribe completely</a>
       </p>
