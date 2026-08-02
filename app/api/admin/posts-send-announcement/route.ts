@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '../../../../lib/supabaseAdmin'
 import { getAnnouncementRecipients, AnnouncementRecipient } from '../../../../lib/announcementRecipients'
+import { announcementEmailHtml, announcementEmailSubject, AnnouncementPost } from '../../../../lib/announcementEmail'
 
 export const maxDuration = 60
 
-const BASE = 'https://www.letsgetlunch.nyc'
 const BATCH_SIZE = 5
 
 export async function POST(req: NextRequest) {
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     const { data: post, error } = await supabaseAdmin
       .from('posts')
-      .select('id, title, slug, excerpt, published')
+      .select('id, title, slug, body, cover_image_url, published')
       .eq('id', id)
       .single()
     if (error || !post) {
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function sendAnnouncementEmail(post: { title: string; slug: string; excerpt: string | null }, recipient: AnnouncementRecipient) {
+async function sendAnnouncementEmail(post: AnnouncementPost, recipient: AnnouncementRecipient) {
   try {
     await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -63,31 +63,11 @@ async function sendAnnouncementEmail(post: { title: string; slug: string; excerp
       body: JSON.stringify({
         from: "Let's Get Lunch <hello@letsgetlunch.nyc>",
         to: recipient.email,
-        subject: `New from Let's Get Lunch: ${post.title}`,
-        html: announcementEmail(post, recipient),
+        subject: announcementEmailSubject(post),
+        html: announcementEmailHtml(post, recipient),
       }),
     })
   } catch (e) {
     console.error('Announcement email error:', e)
   }
-}
-
-function announcementEmail(post: { title: string; slug: string; excerpt: string | null }, recipient: AnnouncementRecipient): string {
-  const postUrl = `${BASE}/newsletter/${post.slug}`
-  return `
-    <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
-      <h1 style="color:#4A9FD5;font-size:24px;margin-bottom:8px">${post.title}</h1>
-      ${post.excerpt ? `<p style="color:#444;font-size:16px">${post.excerpt}</p>` : ''}
-      <div style="text-align:center;margin:24px 0">
-        <a href="${postUrl}" style="display:inline-block;background:#4A9FD5;color:#fff;text-decoration:none;font-size:15px;font-weight:bold;border-radius:8px;padding:12px 24px">Read it on Let's Get Lunch</a>
-      </div>
-      <p style="color:#888;font-size:13px">- The Let's Get Lunch team</p>
-      <p style="color:#bbb;font-size:11px;text-align:center;margin-top:12px">
-        Let's Get Lunch - New York, NY<br/>
-        <a href="${BASE}/unsubscribe?email=${encodeURIComponent(recipient.email)}" style="color:#bbb;text-decoration:underline">Unsubscribe</a>
-        &nbsp;&middot;&nbsp;
-        <a href="${BASE}/email-preferences?token=${recipient.email_pref_token}" style="color:#bbb;text-decoration:underline">Email preferences</a>
-      </p>
-    </div>
-  `
 }

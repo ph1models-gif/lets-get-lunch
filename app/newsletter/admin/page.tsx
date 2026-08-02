@@ -68,6 +68,7 @@ export default function NewsletterAdminPage() {
   const [formError, setFormError] = useState('')
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [announceState, setAnnounceState] = useState<Record<string, AnnounceState>>({})
+  const [testState, setTestState] = useState<Record<string, 'idle' | 'sending' | 'sent'>>({})
 
   useEffect(() => {
     if (authed) fetchPosts()
@@ -206,6 +207,23 @@ export default function NewsletterAdminPage() {
     setConfirmDeleteId(null)
     if (form.id === id) resetForm()
     fetchPosts()
+  }
+
+  async function sendTest(id: string) {
+    setTestState(s => ({ ...s, [id]: 'sending' }))
+    const res = await fetch('/api/admin/posts-send-test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw, id }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok || !data.ok) {
+      alert(data.error || 'Could not send test.')
+      setTestState(s => ({ ...s, [id]: 'idle' }))
+      return
+    }
+    setTestState(s => ({ ...s, [id]: 'sent' }))
+    setTimeout(() => setTestState(s => ({ ...s, [id]: 'idle' })), 3000)
   }
 
   async function startAnnounce(id: string) {
@@ -384,6 +402,13 @@ export default function NewsletterAdminPage() {
                         </button>
                       )}
                     </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
+                    <button onClick={() => sendTest(post.id)} disabled={testState[post.id] === 'sending'}
+                      className="text-sm text-gray-500 hover:underline disabled:opacity-50">
+                      {testState[post.id] === 'sending' ? 'Sending test...' : testState[post.id] === 'sent' ? 'Test sent' : 'Send test to me'}
+                    </button>
                   </div>
 
                   <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
