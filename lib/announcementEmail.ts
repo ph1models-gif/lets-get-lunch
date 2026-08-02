@@ -69,10 +69,10 @@ export function announcementEmailHtml(post: AnnouncementPost, recipient: Announc
       ${coverImg ? `<img src="${coverImg}" alt="" width="600" style="width:100%;max-width:600px;height:auto;border-radius:12px;margin-bottom:20px;display:block" />` : ''}
       <div class="post-body">${bodyHtml}</div>
       ${restaurantSlug ? `<div style="text-align:center;margin:8px 0 16px">
-        <a href="${BASE}/restaurants/${restaurantSlug}" style="display:inline-block;background:#4A9FD5;color:#fff;text-decoration:none;font-size:16px;font-weight:bold;border-radius:10px;padding:14px 28px">Claim this exclusive lunch</a>
+        <a href="${BASE}/restaurants/${restaurantSlug}" style="display:inline-block;background:#4A9FD5;color:#fff;text-decoration:none;font-size:14px;font-weight:bold;border-radius:9px;padding:12px 24px">Claim this exclusive lunch</a>
       </div>` : ''}
-      <div style="text-align:center;margin:32px 0 24px">
-        <a href="${postUrl}" style="display:inline-block;background:#4A9FD5;color:#fff;text-decoration:none;font-size:14px;font-weight:bold;border-radius:8px;padding:10px 20px">View this post online</a>
+      <div style="text-align:center;margin:0 0 20px">
+        <a href="${postUrl}" style="color:#000;text-decoration:underline;font-weight:bold;font-size:14px">View in browser</a>
       </div>
       <p style="color:#888;font-size:13px">- Brian</p>
 
