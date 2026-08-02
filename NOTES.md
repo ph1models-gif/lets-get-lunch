@@ -1205,3 +1205,8 @@ Fourth pass on the same email template in one day — visual hierarchy pass so e
 
 ### Process note
 Preview artifact was built and published this round (this request did ask to see it), but the user then said mid-task not to bother with previews going forward for newsletter changes — merged straight to `main` on their explicit "just merge and I will test" instruction. Verified via a full local render (copy-paste of the real function against the real Mamazul post) that the DOM order is correct — body → Claim → View in browser → sign-off → frequency → unsubscribe — before merging, same rigor as every other change, just without the extra artifact-publishing step this time.
+
+## 2026-08-02 — Announcement email: sign-off color fix (built with Claude Code)
+
+### Shipped, merged to main (branch `newsletter-email-signoff-color`, no preview per standing instruction)
+"- Brian" was styled `#888`/13px (a muted footer-gray, left over from when it sat among the other footer text). Now matches `.post-body p` exactly — `font-family:sans-serif; color:#444; font-size:16px` — so it reads as the close of the message itself, not muted footer chrome. Fifth pass on this template today; every change stayed inside `lib/announcementEmail.ts`.
