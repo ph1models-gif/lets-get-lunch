@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
+import NewsletterSignup from './NewsletterSignup';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,6 +52,8 @@ export default async function NewsletterArchive() {
           <h1 className="font-[family-name:var(--font-bebas)] tracking-wide text-3xl text-gray-800 mt-4">Newsletter</h1>
           <p className="text-sm text-gray-500 mt-1">NYC lunch news, new deals, and neighborhood picks.</p>
         </div>
+
+        <NewsletterSignup />
 
         {!posts || posts.length === 0 ? (
           <p className="text-center text-gray-400 text-sm py-8">No posts yet — check back soon.</p>
