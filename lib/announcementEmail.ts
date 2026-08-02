@@ -50,7 +50,7 @@ export function announcementEmailHtml(post: AnnouncementPost, recipient: Announc
       <div style="text-align:center;margin:32px 0 24px">
         <a href="${postUrl}" style="display:inline-block;background:#4A9FD5;color:#fff;text-decoration:none;font-size:14px;font-weight:bold;border-radius:8px;padding:10px 20px">View this post online</a>
       </div>
-      <p style="color:#888;font-size:13px">- The Let's Get Lunch team</p>
+      <p style="color:#888;font-size:13px">- Brian</p>
 
       <div style="background:#EEF6FC;border-radius:12px;padding:20px;margin-top:24px;text-align:center">
         <p style="margin:0 0 14px;color:#333;font-size:15px;font-weight:600;line-height:1.4">Getting these too often? Switch to weekly or monthly.</p>
