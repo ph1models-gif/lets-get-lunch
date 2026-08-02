@@ -1193,3 +1193,15 @@ Two changes to `lib/announcementEmail.ts`:
 
 ### Verified before merging (no visual preview this round — explicit instruction mid-task to skip it)
 Ran the actual `extractRestaurantSlug()` logic (copy-paste verbatim) against the real Mamazul post body: confirmed it extracts `mamazul`, confirmed the raw URL no longer appears in the cleaned body, and confirmed `mamazul` resolves to a real `is_active: true` row in `restaurants`. Build verified clean before merging; skipped the Vercel-Ready check-in and the artifact preview this round per explicit "just merge to site" instruction — everything else (branch, build, merge, NOTES) followed the same process as every other change this session.
+
+## 2026-08-02 — Announcement email: single clear CTA (built with Claude Code)
+
+### Shipped, merged to main (branch `newsletter-email-hierarchy-pass`)
+Fourth pass on the same email template in one day — visual hierarchy pass so exactly one element reads as a real button. In `lib/announcementEmail.ts`:
+- **Claim this exclusive lunch** shrunk ~15-18% per dimension (padding `14px/28px` → `12px/24px`, font-size `16px` → `14px`, radius `10px` → `9px`) — still the only colored/filled button on the page.
+- **"View this post online"** — was a second full blue button — converted to plain bold black underlined text, relabeled **"View in browser"**. Same destination (`/newsletter/{slug}`), zero color, clearly secondary next to Claim.
+- **"- Brian" sign-off** moved from sitting between the CTA row and the frequency nudge to directly after "View in browser" — now closes the message body before the footer block (frequency line, unsubscribe) begins, rather than sitting mid-footer.
+- Frequency nudge and unsubscribe link untouched from the previous round, per explicit instruction.
+
+### Process note
+Preview artifact was built and published this round (this request did ask to see it), but the user then said mid-task not to bother with previews going forward for newsletter changes — merged straight to `main` on their explicit "just merge and I will test" instruction. Verified via a full local render (copy-paste of the real function against the real Mamazul post) that the DOM order is correct — body → Claim → View in browser → sign-off → frequency → unsubscribe — before merging, same rigor as every other change, just without the extra artifact-publishing step this time.
