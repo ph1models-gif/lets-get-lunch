@@ -22,7 +22,7 @@ export default function LookupPage() {
       setLoading(true)
       const { data } = await supabase
         .from('restaurants')
-        .select('id,name,cuisine,neighborhood,address')
+        .select('id,slug,name,cuisine,neighborhood,address')
         .eq('is_active', true)
         .order('name')
       setRestaurants(data || [])
@@ -30,8 +30,8 @@ export default function LookupPage() {
     })()
   }, [authed])
 
-  function copyUrl(id: string) {
-    const url = 'https://www.letsgetlunch.nyc/restaurants/' + id
+  function copyUrl(id: string, slug: string | null) {
+    const url = 'https://www.letsgetlunch.nyc/restaurants/' + (slug || id)
     navigator.clipboard.writeText(url)
     setCopiedId(id)
     setTimeout(() => setCopiedId(null), 1500)
@@ -96,7 +96,7 @@ export default function LookupPage() {
         </p>
 
         {filtered.map(r => {
-          const url = 'letsgetlunch.nyc/restaurants/' + r.id
+          const url = 'letsgetlunch.nyc/restaurants/' + (r.slug || r.id)
           return (
             <div key={r.id} style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: 16, marginBottom: 10 }}>
               <div style={{ fontWeight: 600, color: '#111827' }}>{r.name}</div>
@@ -104,7 +104,7 @@ export default function LookupPage() {
               <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 10 }}>{r.address}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <a href={'https://www.' + url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: '#4A9FD5', textDecoration: 'none', wordBreak: 'break-all' }}>{url}</a>
-                <button onClick={() => copyUrl(r.id)} style={{ fontSize: 12, padding: '4px 10px', border: '1px solid #4A9FD5', color: copiedId === r.id ? '#fff' : '#4A9FD5', background: copiedId === r.id ? '#4A9FD5' : '#fff', borderRadius: 6, cursor: 'pointer' }}>
+                <button onClick={() => copyUrl(r.id, r.slug)} style={{ fontSize: 12, padding: '4px 10px', border: '1px solid #4A9FD5', color: copiedId === r.id ? '#fff' : '#4A9FD5', background: copiedId === r.id ? '#4A9FD5' : '#fff', borderRadius: 6, cursor: 'pointer' }}>
                   {copiedId === r.id ? 'Copied!' : 'Copy'}
                 </button>
               </div>

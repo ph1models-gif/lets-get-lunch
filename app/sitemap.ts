@@ -24,11 +24,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const { data } = await supabase
       .from('restaurants')
-      .select('id, created_at')
+      .select('slug, created_at')
       .eq('is_active', true)
+      .not('slug', 'is', null)
     if (data) {
       restaurantPages = data.map((r) => ({
-        url: `${BASE}/restaurants/${r.id}`,
+        url: `${BASE}/restaurants/${r.slug}`,
         lastModified: r.created_at ? new Date(r.created_at) : new Date(),
         changeFrequency: 'weekly' as const,
         priority: 0.8,

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '../../../../lib/supabaseAdmin'
+import { generateUniqueSlug } from '../../../../lib/restaurantSlug'
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,8 +12,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: 'Bad params' }, { status: 400 })
     }
 
+    const { data: existingSlugRows } = await supabaseAdmin.from('restaurants').select('slug').not('slug', 'is', null)
+    const existingSlugs = new Set((existingSlugRows || []).map(r => r.slug as string))
+    const slug = generateUniqueSlug(form.name, form.neighborhood, existingSlugs)
+
     const { data: rest, error: insErr } = await supabaseAdmin.from('restaurants').insert({
       name: form.name,
+      slug,
       address: form.address,
       neighborhood: form.neighborhood,
       cuisine: form.cuisine,

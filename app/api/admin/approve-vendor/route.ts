@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '../../../../lib/supabaseAdmin'
+import { generateUniqueSlug } from '../../../../lib/restaurantSlug'
 
 
 export async function POST(req: NextRequest) {
@@ -26,9 +27,14 @@ export async function POST(req: NextRequest) {
 
     // lat/lng are geocoded client-side (in admin) and passed in the request body.
 
+    const { data: existingSlugRows } = await supabaseAdmin.from('restaurants').select('slug').not('slug', 'is', null)
+    const existingSlugs = new Set((existingSlugRows || []).map(r => r.slug as string))
+    const slug = generateUniqueSlug(vendor.restaurant_name, vendor.neighborhood, existingSlugs)
+
     // Insert restaurant
     const { data: rest, error: insErr } = await supabaseAdmin.from('restaurants').insert({
       name: vendor.restaurant_name,
+      slug,
       cuisine: vendor.cuisine,
       neighborhood: vendor.neighborhood,
       address: vendor.address,

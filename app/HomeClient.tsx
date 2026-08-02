@@ -200,7 +200,7 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
           const deal = r.deals?.[0];
           const isExclusive = !!deal?.is_exclusive;
           return (
-            <a key={r.id} href={`/restaurants/${r.id}`}
+            <a key={r.id} href={`/restaurants/${r.slug}`}
               className={`block bg-white rounded-2xl border hover:shadow-md transition-all no-underline ${CARD_MIN_HEIGHT} ${isExclusive ? 'border-2 border-[#4A9FD5]' : 'border-gray-200 hover:border-[#4A9FD5]'}`}>
               <div className="h-44 rounded-t-2xl overflow-hidden bg-gray-50 relative">
                 {r.photo_url
