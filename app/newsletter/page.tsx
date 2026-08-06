@@ -17,7 +17,7 @@ function getSupabase() {
 
 export const metadata: Metadata = {
   title: "Newsletter — Let's Get Lunch",
-  description: "NYC lunch news, new prix-fixe deals, and neighborhood picks from Let's Get Lunch.",
+  description: "NYC lunch news, new prix-fixe specials, and neighborhood picks from Let's Get Lunch.",
 };
 
 interface Post {
@@ -50,7 +50,7 @@ export default async function NewsletterArchive() {
         <div className="text-center mb-8">
           <a href="/"><img src="/logo.jpg" alt="Let's Get Lunch" className="h-24 w-auto rounded-2xl inline-block" /></a>
           <h1 className="font-[family-name:var(--font-bebas)] tracking-wide text-3xl text-gray-800 mt-4">Newsletter</h1>
-          <p className="text-sm text-gray-500 mt-1">NYC lunch news, new deals, and neighborhood picks.</p>
+          <p className="text-sm text-gray-500 mt-1">NYC lunch news, new specials, and neighborhood picks.</p>
         </div>
 
         <NewsletterSignup />
@@ -88,7 +88,7 @@ export default async function NewsletterArchive() {
         )}
 
         <p className="text-center mt-8">
-          <a href="/" className="text-sm text-[#4A9FD5] hover:underline">← Back to lunch deals</a>
+          <a href="/" className="text-sm text-[#4A9FD5] hover:underline">← Back to lunch specials</a>
         </p>
       </div>
     </main>

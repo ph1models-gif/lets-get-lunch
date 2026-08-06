@@ -82,7 +82,7 @@ export default function EmailPreferences() {
               {saved && <p className="text-center text-sm text-[#4A9FD5] mt-3 font-medium">Saved ✓</p>}
               <p className="text-center mt-5">
                 {unsubbed ? (
-                  <span className="text-xs text-gray-500">You&apos;ve been unsubscribed. You can still browse and claim deals anytime.</span>
+                  <span className="text-xs text-gray-500">You&apos;ve been unsubscribed. You can still browse and claim specials anytime.</span>
                 ) : (
                   <button onClick={unsubscribeAll} disabled={saving} className="text-xs text-gray-500 hover:underline">Unsubscribe from all emails</button>
                 )}
@@ -92,7 +92,7 @@ export default function EmailPreferences() {
         </div>
       </div>
       <p className="text-center mt-5">
-        <a href="/" className="text-sm text-[#4A9FD5] hover:underline">← Back to lunch deals</a>
+        <a href="/" className="text-sm text-[#4A9FD5] hover:underline">← Back to lunch specials</a>
       </p>
     </main>
   );

@@ -29,7 +29,7 @@ function UnsubscribeInner() {
           <>
             <h1 style={{ fontSize: 24, fontWeight: 700, color: '#111', marginBottom: 8 }}>You're unsubscribed</h1>
             <p style={{ color: '#666', fontSize: 16, lineHeight: 1.5 }}>
-              We won't email <strong>{email}</strong> about lunch deals anymore. You can still browse
+              We won't email <strong>{email}</strong> about lunch specials anymore. You can still browse
               {' '}<a href="https://www.letsgetlunch.nyc" style={{ color: '#4A9FD5', textDecoration: 'none' }}>Let's Get Lunch</a> anytime.
             </p>
           </>

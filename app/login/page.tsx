@@ -184,7 +184,7 @@ export default function LoginPage() {
           </div>
         )}
       </div>
-      <p className="text-xs text-gray-400 mt-6"><a href="/" className="hover:text-gray-600">← Back to lunch deals</a></p>
+      <p className="text-xs text-gray-400 mt-6"><a href="/" className="hover:text-gray-600">← Back to lunch specials</a></p>
     </main>
   );
 }

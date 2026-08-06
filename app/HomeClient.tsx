@@ -126,7 +126,7 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
           <span className="text-xl">🍽️</span>
           <div className="flex flex-col leading-tight md:hidden">
             <span className="font-[family-name:var(--font-bebas)] tracking-wide text-2xl text-gray-900">Let&apos;s Get <span className="text-[#4A9FD5]">Lunch</span></span>
-            <span className="text-[11px] text-gray-500 -mt-0.5">NYC&apos;s best lunch deals, <span className="text-[#4A9FD5]">at the table.</span></span>
+            <span className="text-[11px] text-gray-500 -mt-0.5">NYC&apos;s best lunch specials, <span className="text-[#4A9FD5]">at the table.</span></span>
           </div>
           <span className="hidden md:block font-semibold text-gray-900 text-lg">Let&apos;s Get Lunch</span>
         </div>
@@ -139,7 +139,7 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
             </div>
           ) : (
             claimMode ? (
-              <a href="/signup" className="text-sm bg-gray-900 text-white px-5 py-2 rounded-full font-semibold hover:bg-black shadow-sm text-center leading-tight max-w-[140px] sm:max-w-none">Claim <span className="text-[#4A9FD5]">exclusive</span> deals</a>
+              <a href="/signup" className="text-sm bg-gray-900 text-white px-5 py-2 rounded-full font-semibold hover:bg-black shadow-sm text-center leading-tight max-w-[140px] sm:max-w-none">Claim <span className="text-[#4A9FD5]">exclusive</span> specials</a>
             ) : (
               <a href={loginHref} className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full font-medium hover:bg-[#3a8fc5]">Sign in</a>
             )
@@ -149,10 +149,10 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
 
       <section className="bg-gradient-to-b from-[#EEF6FC] to-white px-4 pt-3 pb-3 md:pt-6 md:pb-4 text-center">
         <h1 className="hidden md:block text-2xl md:text-4xl font-bold text-gray-900 mb-2">
-          NYC&apos;s best lunch deals, <span className="text-[#4A9FD5]">at the table.</span>
+          NYC&apos;s best lunch specials, <span className="text-[#4A9FD5]">at the table.</span>
         </h1>
         <p className="hidden md:block text-gray-500 text-sm max-w-xl mx-auto mb-4">
-          Prix-fixe deals across NYC · Real tables · Most under $35
+          Prix-fixe specials across NYC · Real tables · Most under $35
         </p>
         <div className="max-w-lg mx-auto flex gap-2 mb-4">
           <NeighborhoodSearch
@@ -238,7 +238,7 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
                   {r.wifi && <span className="text-xs bg-blue-50 text-[#4A9FD5] px-2 py-1 rounded-full font-medium">📶 WiFi</span>}
                 </div>
                 <div className="w-full py-2.5 bg-[#4A9FD5] text-white rounded-xl text-sm font-medium text-center">
-                  {isExclusive ? 'View exclusive deal' : 'View deal'}
+                  {isExclusive ? 'View exclusive special' : 'View special'}
                 </div>
               </div>
             </a>
@@ -255,7 +255,7 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
             <h2 className="text-2xl font-bold text-gray-900 mb-3">Know someone who&apos;d love this?</h2>
             <p className="text-gray-500 max-w-md mx-auto mb-6">Share Let&apos;s Get Lunch with a friend who eats out often.</p>
             <button onClick={async () => {
-              const shareData = { title: 'Let\'s Get Lunch', text: 'Check out the best prix-fixe lunch deals in NYC!', url: 'https://www.letsgetlunch.nyc' };
+              const shareData = { title: 'Let\'s Get Lunch', text: 'Check out the best prix-fixe lunch specials in NYC!', url: 'https://www.letsgetlunch.nyc' };
               if (navigator.share) {
                 try { await navigator.share(shareData); } catch (e) { /* user cancelled */ }
               } else {

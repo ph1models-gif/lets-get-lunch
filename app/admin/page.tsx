@@ -612,7 +612,7 @@ export default function AdminPage() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-500 mb-1">Deal description</label>
+                      <label className="block text-xs text-gray-500 mb-1">Special description</label>
                       <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={vendorEditForm.special || ''} onChange={e => setVendorEditForm((f: any) => ({...f, special: e.target.value}))} />
                     </div>
                     <div>
@@ -805,10 +805,10 @@ export default function AdminPage() {
               </div>
 
               <div className="border-t pt-4">
-                <h3 className="font-medium text-gray-800 mb-3">Lunch deal</h3>
+                <h3 className="font-medium text-gray-800 mb-3">Lunch special</h3>
                 <div className="grid grid-cols-2 gap-4 mb-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Deal description *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Special description *</label>
                     <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={addForm.special} onChange={e => setAddForm(f => ({...f, special: e.target.value}))} placeholder="e.g. Pasta + salad + dessert" />
                   </div>
                   <div>
@@ -998,7 +998,7 @@ export default function AdminPage() {
                           </div>
                         )}
                         <div className="mt-2 text-xs text-gray-400">
-                          {v.special && <span>Deal: {v.special} · </span>}
+                          {v.special && <span>Special: {v.special} · </span>}
                           {v.price && <span>${v.price} · </span>}
                           {v.hours && <span>{v.hours}</span>}
                         </div>
@@ -1103,7 +1103,7 @@ export default function AdminPage() {
                   {/* Confirm delete */}
                   {confirmDelete === r.id && (
                     <div className="px-6 py-4 bg-red-50 border-b border-red-100 flex items-center justify-between">
-                      <p className="text-sm text-red-700 font-medium">Permanently delete <strong>{r.name}</strong> and all its deals?</p>
+                      <p className="text-sm text-red-700 font-medium">Permanently delete <strong>{r.name}</strong> and all its specials?</p>
                       <div className="flex gap-2">
                         <button onClick={() => setConfirmDelete(null)} className="text-sm px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-white">Cancel</button>
                         <button onClick={() => deleteRestaurant(r.id)} className="text-sm px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium">Yes, delete</button>
@@ -1179,10 +1179,10 @@ export default function AdminPage() {
 
                       {/* Deal */}
                       <div className="border-t border-gray-100 pt-4">
-                        <p className="text-xs font-medium text-gray-600 mb-3">Lunch deal</p>
+                        <p className="text-xs font-medium text-gray-600 mb-3">Lunch special</p>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs text-gray-500 mb-1">Deal description</label>
+                            <label className="block text-xs text-gray-500 mb-1">Special description</label>
                             <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={editForm.deal_special || ''} onChange={e => setEditForm(f => ({ ...f, deal_special: e.target.value }))} placeholder="e.g. Pasta + salad + dessert" />
                           </div>
                           <div>
@@ -1296,7 +1296,7 @@ export default function AdminPage() {
                     <div className="px-6 py-4 grid grid-cols-3 gap-4 text-sm text-gray-600">
                       <div><span className="text-gray-400">Address</span><br />{r.address || '—'}</div>
                       <div><span className="text-gray-400">Hours</span><br />{r.hours || '—'}</div>
-                      <div><span className="text-gray-400">Deal</span><br />{deal?.is_exclusive && <span className="inline-block mr-2 text-xs font-semibold bg-[#4A9FD5] text-white px-2 py-0.5 rounded-full">✦ EXCLUSIVE</span>}{deal?.special || '—'}</div>
+                      <div><span className="text-gray-400">Special</span><br />{deal?.is_exclusive && <span className="inline-block mr-2 text-xs font-semibold bg-[#4A9FD5] text-white px-2 py-0.5 rounded-full">✦ EXCLUSIVE</span>}{deal?.special || '—'}</div>
                       <div><span className="text-gray-400">Days</span><br />{
                         deal?.days && deal.days.length > 0
                           ? deal.days.length === 7 ? 'Daily'

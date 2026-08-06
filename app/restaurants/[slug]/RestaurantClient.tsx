@@ -266,7 +266,7 @@ export default function RestaurantClient() {
 
   function handleShare() {
     const url = window.location.href;
-    const text = `Check out this lunch deal at ${r?.name} — ${r?.deals?.[0]?.special} for $${r?.deals?.[0]?.price}!`;
+    const text = `Check out this lunch special at ${r?.name} — ${r?.deals?.[0]?.special} for $${r?.deals?.[0]?.price}!`;
     if (navigator.share) {
       navigator.share({ title: 'Let\'s Get Lunch', text, url }).catch(() => {});
     } else {
@@ -376,7 +376,7 @@ export default function RestaurantClient() {
         <p className="text-gray-400 text-sm mb-6">Prix-fixe lunch</p>
 
         <div className="bg-[#EEF6FC] rounded-2xl p-6 mb-6">
-          <h2 className="font-semibold text-gray-900 mb-3 text-lg">Today&apos;s lunch deal</h2>
+          <h2 className="font-semibold text-gray-900 mb-3 text-lg">Today&apos;s lunch special</h2>
           {deal?.is_exclusive && (
             <span className="inline-block mb-3 text-xs font-semibold bg-[#4A9FD5] text-white px-3 py-1 rounded-full">
               ✦ Exclusive to Let&apos;s Get Lunch members
@@ -431,7 +431,7 @@ export default function RestaurantClient() {
 
         <button onClick={handleShare}
           className="w-full border border-gray-200 text-gray-600 py-3 rounded-xl font-medium text-sm hover:bg-gray-50 transition-colors mt-3 flex items-center justify-center gap-2">
-          📤 Share this deal with a friend
+          📤 Share this special with a friend
         </button>
       </div>
 
@@ -627,7 +627,7 @@ export default function RestaurantClient() {
                 <div className="text-center py-4">
                   <div className="text-5xl mb-3">🍽️</div>
                   <h2 className="text-2xl font-bold text-gray-900 mb-1">Got it — here&apos;s how to grab this lunch</h2>
-                  <p className="text-gray-500 mb-4">We&apos;ve noted your interest in this lunch deal at {r.name}</p>
+                  <p className="text-gray-500 mb-4">We&apos;ve noted your interest in this lunch special at {r.name}</p>
                   <div className="bg-[#EEF6FC] rounded-2xl py-5 px-6 mb-4 text-left">
                     <p className="text-sm text-gray-700 mb-3">{r.name} isn&apos;t a Let&apos;s Get Lunch partner yet, so we can&apos;t book your table directly. Call ahead or just walk in — and mention you saw the lunch special on Let&apos;s Get Lunch.</p>
                     {r.phone && (
@@ -653,7 +653,7 @@ export default function RestaurantClient() {
                     Done
                   </button>
                   <button onClick={() => {
-                    const text = `I just found a lunch deal at ${r.name} on Let's Get Lunch! Check it out:`;
+                    const text = `I just found a lunch special at ${r.name} on Let's Get Lunch! Check it out:`;
                     const url = window.location.href;
                     if (navigator.share) {
                       navigator.share({ title: 'Let\'s Get Lunch', text, url }).catch(() => {});
@@ -663,7 +663,7 @@ export default function RestaurantClient() {
                     }
                   }}
                     className="w-full text-[#4A9FD5] py-3 rounded-xl font-medium text-sm hover:bg-[#EEF6FC] transition-colors mt-2">
-                    📤 Tell a friend about this deal
+                    📤 Tell a friend about this special
                   </button>
                 </div>
               )}

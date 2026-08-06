@@ -71,7 +71,7 @@ export default function SignupPage() {
             </div>
           </a>
           <h1 className="text-xl font-semibold text-gray-800">Create your free account</h1>
-          <p className="text-sm text-gray-500 mt-1">Claim exclusive NYC lunch deals — free to join</p>
+          <p className="text-sm text-gray-500 mt-1">Claim exclusive NYC lunch specials — free to join</p>
         </div>
 
         <div className="bg-white rounded-2xl p-8 shadow-sm">
@@ -152,7 +152,7 @@ export default function SignupPage() {
         </div>
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          ← <a href="/" className="hover:underline">Back to lunch deals</a>
+          ← <a href="/" className="hover:underline">Back to lunch specials</a>
         </p>
       </div>
     </main>

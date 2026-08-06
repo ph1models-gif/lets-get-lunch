@@ -16,14 +16,14 @@ export default function TermsPage() {
           <p className="text-sm text-gray-500 mt-1">Last updated: May 26, 2026</p>
         </div>
         <div className="bg-white rounded-2xl p-8 shadow-sm text-gray-700 text-base leading-relaxed space-y-5">
-          <p>Welcome to Let&apos;s Get Lunch. By using letsgetlunch.nyc you agree to these terms. The service is a directory of New York City prix-fixe lunch deals and a reservation-request tool, provided for informational and convenience purposes.</p>
+          <p>Welcome to Let&apos;s Get Lunch. By using letsgetlunch.nyc you agree to these terms. The service is a directory of New York City prix-fixe lunch specials and a reservation-request tool, provided for informational and convenience purposes.</p>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Reservations</h2>
-            <p>For most listings, requesting a reservation notifies the restaurant or directs you to call or visit them. Let&apos;s Get Lunch does not guarantee a table, specific pricing, availability, or that any particular lunch deal will be honored. Those decisions rest with each individual restaurant.</p>
+            <p>For most listings, requesting a reservation notifies the restaurant or directs you to call or visit them. Let&apos;s Get Lunch does not guarantee a table, specific pricing, availability, or that any particular lunch special will be honored. Those decisions rest with each individual restaurant.</p>
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Listing accuracy</h2>
-            <p>We work to keep listings accurate, but deals, hours, and prices may change without notice and are controlled by the restaurants. We are not responsible for restaurant-side changes or for any difference between a listing and your actual experience.</p>
+            <p>We work to keep listings accurate, but specials, hours, and prices may change without notice and are controlled by the restaurants. We are not responsible for restaurant-side changes or for any difference between a listing and your actual experience.</p>
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Acceptable use</h2>
@@ -42,7 +42,7 @@ export default function TermsPage() {
             <p>Questions about these terms? Email <a href="mailto:brian@letsgetlunch.nyc" className="text-[#4A9FD5] hover:underline">brian@letsgetlunch.nyc</a>.</p>
           </div>
         </div>
-        <p className="text-center mt-6"><a href="/" className="text-sm text-[#4A9FD5] hover:underline">&larr; Back to lunch deals</a></p>
+        <p className="text-center mt-6"><a href="/" className="text-sm text-[#4A9FD5] hover:underline">&larr; Back to lunch specials</a></p>
       </div>
     </main>
   );

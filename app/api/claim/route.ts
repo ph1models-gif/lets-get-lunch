@@ -109,7 +109,7 @@ function claimEmail(displayCode: string, size: number, rest: any, deal: any, ema
       <p style="color:#444;font-size:16px"><strong>No reservation needed</strong> - just walk in during lunch hours and show this code to your server or at the host stand.</p>
       <div style="border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin:24px 0">
         <p style="margin:0 0 8px;color:#666;font-size:13px">Lunch details</p>
-        <p style="margin:4px 0;font-size:15px"><strong>Deal:</strong> ${deal.special}</p>
+        <p style="margin:4px 0;font-size:15px"><strong>Special:</strong> ${deal.special}</p>
         <p style="margin:4px 0;font-size:15px"><strong>Price:</strong> $${deal.price} per person</p>
         <p style="margin:4px 0;font-size:15px"><strong>Party:</strong> ${size} ${people}</p>
         <p style="margin:4px 0;font-size:15px"><strong>Address:</strong> ${rest.address}</p>

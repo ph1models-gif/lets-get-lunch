@@ -12,8 +12,14 @@ export const metadata: Metadata = {
     shortcut: [{ url: '/favicon.jpg', type: 'image/jpeg' }],
     apple: [{ url: '/favicon.jpg' }],
   },
-  title: "Let's Get Lunch — NYC Prix-Fixe Lunch Deals",
-  description: "Discover great prix-fixe lunch deals at hundreds of NYC restaurants. Real sit-down tables, fast service, most under $35. Find your lunch today.",
+  title: "Let's Get Lunch — Exclusive NYC Lunch Specials",
+  description: "Discover great prix-fixe lunch specials at hundreds of NYC restaurants. Real sit-down tables, fast service, most under $35. Find your lunch today.",
+  openGraph: {
+    title: "Let's Get Lunch — Exclusive NYC Lunch Specials",
+    description: "Discover great prix-fixe lunch specials at hundreds of NYC restaurants. Real sit-down tables, fast service, most under $35. Find your lunch today.",
+    siteName: "Let's Get Lunch",
+    type: 'website',
+  },
 };
 
 export default function RootLayout({

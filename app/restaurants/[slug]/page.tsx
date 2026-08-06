@@ -40,8 +40,8 @@ export async function generateMetadata(
   { params }: { params: { slug: string } }
 ): Promise<Metadata> {
   const fallback: Metadata = {
-    title: "Lunch Deal — NYC Prix-Fixe | Let's Get Lunch",
-    description: 'Discover great prix-fixe lunch deals at hundreds of NYC restaurants. Real sit-down tables, fast service, most under $35. Find your lunch today.',
+    title: "Lunch Special — NYC Prix-Fixe | Let's Get Lunch",
+    description: 'Discover great prix-fixe lunch specials at hundreds of NYC restaurants. Real sit-down tables, fast service, most under $35. Find your lunch today.',
     robots: { index: false, follow: false },
   }
   try {
