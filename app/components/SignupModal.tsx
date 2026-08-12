@@ -55,7 +55,7 @@ export default function SignupModal({ onClose }: { onClose: () => void }) {
             Get Access to Exclusive Lunch Specials at letsgetlunch.nyc
           </p>
           <p id="signup-modal-body" className="text-[13px] font-normal text-gray-900 leading-[1.35] mt-2">
-            Claim your free account. NYC&apos;s best sit-down lunches, right around the corner. No reservation needed.
+            Claim your free account. NYC&apos;s best sit-down lunches, right around the corner.
           </p>
         </div>
         <div className="grid grid-cols-2 border-t border-black/10">
