@@ -5,12 +5,12 @@ import { Restaurant } from '../types';
 interface Props {
   onPanReady?: (fn: (lat: number, lng: number) => void) => void;
   onBoundsChange?: (bounds: {north: number, south: number, east: number, west: number}) => void;
-  onLocationSettled?: () => void;
+  onGeolocationResolved?: () => void;
   activeIds?: string[];
   restaurants: Restaurant[];
 }
 
-export default function MapInner({ onPanReady, activeIds, onBoundsChange, onLocationSettled, restaurants }: Props) {
+export default function MapInner({ onPanReady, activeIds, onBoundsChange, onGeolocationResolved, restaurants }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const markersRef = useRef<Map<string, any>>(new Map());
   const activeIdsRef = useRef<string[] | undefined>(activeIds);
@@ -208,28 +208,9 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange, onLoca
       }
     });
 
-    // Fires onLocationSettled exactly once: either 2s-trigger-eligible after
-    // the map recenters on the user's location, or (if location is denied,
-    // unavailable, or outside NYC) after the map's default view has settled.
-    // The two conditions below ("default view idle" and "geolocation outcome
-    // is one that doesn't recenter the map") can resolve in either order, so
-    // we only fire once both are true.
-    let settledFired = false;
-    let defaultViewIdle = false;
-    let nonRecenterOutcomeKnown = false;
-    const fireSettled = () => {
-      if (settledFired) return;
-      settledFired = true;
-      if (onLocationSettled) onLocationSettled();
-    };
-    const maybeFireFromDefaultView = () => {
-      if (defaultViewIdle && nonRecenterOutcomeKnown) fireSettled();
-    };
-    g.event.addListenerOnce(map, 'idle', () => {
-      defaultViewIdle = true;
-      maybeFireFromDefaultView();
-    });
-
+    // Fires onGeolocationResolved as soon as the user has responded to the
+    // browser's location prompt — Allow or Don't Allow — independent of
+    // whatever the map does with that answer.
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(pos => {
         const userLatLng = {lat: pos.coords.latitude, lng: pos.coords.longitude};
@@ -246,21 +227,15 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange, onLoca
         if (inNYC) {
           map.panTo(userLatLng);
           map.setZoom(15);
-          // Map has recentered on the user — wait for it to go idle again.
-          g.event.addListenerOnce(map, 'idle', fireSettled);
-        } else {
-          // Outside NYC, stay at Madison Square Park default (already set)
-          nonRecenterOutcomeKnown = true;
-          maybeFireFromDefaultView();
         }
+        // If outside NYC, stay at Madison Square Park default (already set)
+        if (onGeolocationResolved) onGeolocationResolved();
       }, () => {
         // Permission denied or position unavailable — map stays at default.
-        nonRecenterOutcomeKnown = true;
-        maybeFireFromDefaultView();
+        if (onGeolocationResolved) onGeolocationResolved();
       });
-    } else {
-      nonRecenterOutcomeKnown = true;
-      maybeFireFromDefaultView();
+    } else if (onGeolocationResolved) {
+      onGeolocationResolved();
     }
   }
 

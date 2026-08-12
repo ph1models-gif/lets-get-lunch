@@ -8,7 +8,7 @@ type MapProps = {
   onPanReady?: (fn: (lat: number, lng: number) => void) => void;
   activeIds?: string[];
   onBoundsChange?: (bounds: {north: number, south: number, east: number, west: number}) => void;
-  onLocationSettled?: () => void;
+  onGeolocationResolved?: () => void;
   restaurants: Restaurant[];
 };
 
@@ -21,7 +21,7 @@ function MapPlaceholder() {
   return <div style={{width:'100%',height:'50vh',maxHeight:'420px',minHeight:'280px',background:'#EEF2F7',display:'flex',alignItems:'center',justifyContent:'center'}}><p style={{color:'#888'}}>Loading map...</p></div>;
 }
 
-export default function Map({ onPanReady, activeIds, onBoundsChange, onLocationSettled, restaurants }: MapProps) {
+export default function Map({ onPanReady, activeIds, onBoundsChange, onGeolocationResolved, restaurants }: MapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [shouldMount, setShouldMount] = useState(false);
 
@@ -54,7 +54,7 @@ export default function Map({ onPanReady, activeIds, onBoundsChange, onLocationS
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7_zRNFDRW4iNar9OJA-89Om449JheFm0&v=weekly&loading=async"
             strategy="lazyOnload"
           />
-          <MapInner onPanReady={onPanReady} activeIds={activeIds} onBoundsChange={onBoundsChange} onLocationSettled={onLocationSettled} restaurants={restaurants} />
+          <MapInner onPanReady={onPanReady} activeIds={activeIds} onBoundsChange={onBoundsChange} onGeolocationResolved={onGeolocationResolved} restaurants={restaurants} />
         </>
       ) : (
         <MapPlaceholder />

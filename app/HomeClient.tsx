@@ -37,7 +37,7 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
   const userFirstNameRef = useRef('');
   useEffect(() => { userFirstNameRef.current = userFirstName; }, [userFirstName]);
 
-  const handleLocationSettled = useCallback(() => {
+  const handleGeolocationResolved = useCallback(() => {
     // Scoped to /claim only — the rest of the site is unaffected. Read the
     // path directly (rather than the claimMode state) so this is correct
     // regardless of timing relative to the mount effect that sets it.
@@ -215,7 +215,7 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
         </div>
       </section>
 
-      <MapComponent onPanReady={(fn) => { mapPanRef.current = fn; }} activeIds={filtered.map(r => r.id)} onBoundsChange={setMapBounds} onLocationSettled={handleLocationSettled} restaurants={restaurants} />
+      <MapComponent onPanReady={(fn) => { mapPanRef.current = fn; }} activeIds={filtered.map(r => r.id)} onBoundsChange={setMapBounds} onGeolocationResolved={handleGeolocationResolved} restaurants={restaurants} />
 
       <section className="px-4 py-3">
         <p className="text-sm text-gray-500">{filtered.length} lunch {filtered.length === 1 ? 'special' : 'specials'} in this area · Scroll for details ↓</p>
