@@ -5,11 +5,12 @@ import { Restaurant } from '../types';
 interface Props {
   onPanReady?: (fn: (lat: number, lng: number) => void) => void;
   onBoundsChange?: (bounds: {north: number, south: number, east: number, west: number}) => void;
+  onLocationSettled?: () => void;
   activeIds?: string[];
   restaurants: Restaurant[];
 }
 
-export default function MapInner({ onPanReady, activeIds, onBoundsChange, restaurants }: Props) {
+export default function MapInner({ onPanReady, activeIds, onBoundsChange, onLocationSettled, restaurants }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const markersRef = useRef<Map<string, any>>(new Map());
   const activeIdsRef = useRef<string[] | undefined>(activeIds);
@@ -207,6 +208,28 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange, restau
       }
     });
 
+    // Fires onLocationSettled exactly once: either 2s-trigger-eligible after
+    // the map recenters on the user's location, or (if location is denied,
+    // unavailable, or outside NYC) after the map's default view has settled.
+    // The two conditions below ("default view idle" and "geolocation outcome
+    // is one that doesn't recenter the map") can resolve in either order, so
+    // we only fire once both are true.
+    let settledFired = false;
+    let defaultViewIdle = false;
+    let nonRecenterOutcomeKnown = false;
+    const fireSettled = () => {
+      if (settledFired) return;
+      settledFired = true;
+      if (onLocationSettled) onLocationSettled();
+    };
+    const maybeFireFromDefaultView = () => {
+      if (defaultViewIdle && nonRecenterOutcomeKnown) fireSettled();
+    };
+    g.event.addListenerOnce(map, 'idle', () => {
+      defaultViewIdle = true;
+      maybeFireFromDefaultView();
+    });
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(pos => {
         const userLatLng = {lat: pos.coords.latitude, lng: pos.coords.longitude};
@@ -223,9 +246,21 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange, restau
         if (inNYC) {
           map.panTo(userLatLng);
           map.setZoom(15);
+          // Map has recentered on the user — wait for it to go idle again.
+          g.event.addListenerOnce(map, 'idle', fireSettled);
+        } else {
+          // Outside NYC, stay at Madison Square Park default (already set)
+          nonRecenterOutcomeKnown = true;
+          maybeFireFromDefaultView();
         }
-        // If outside NYC, stay at Madison Square Park default (already set)
-      }, () => {});
+      }, () => {
+        // Permission denied or position unavailable — map stays at default.
+        nonRecenterOutcomeKnown = true;
+        maybeFireFromDefaultView();
+      });
+    } else {
+      nonRecenterOutcomeKnown = true;
+      maybeFireFromDefaultView();
     }
   }
 

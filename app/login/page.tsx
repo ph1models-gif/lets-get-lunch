@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { track } from '@vercel/analytics';
 import { supabase } from '../../lib/supabase';
 
 import { NEIGHBORHOODS, NEIGHBORHOOD_GROUPS } from '../../lib/neighborhoods';
@@ -64,6 +65,7 @@ export default function LoginPage() {
         neighborhood: signUpForm.neighborhood || null,
       });
     }
+    track('signup_completed');
     setSuccess("You're in! You can now make reservations.");
     const raw = new URLSearchParams(window.location.search).get('next') || '';
     const safe = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/';

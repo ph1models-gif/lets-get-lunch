@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { track } from '@vercel/analytics';
 import { supabase } from '../../lib/supabase';
 
 import { NEIGHBORHOODS, NEIGHBORHOOD_GROUPS } from '../../lib/neighborhoods';
@@ -41,6 +42,7 @@ export default function SignupPage() {
         email: form.email,
         neighborhood: form.neighborhood || null,
       });
+      track('signup_completed');
       setSuccess(true);
       const raw = new URLSearchParams(window.location.search).get('next') || '';
       const safe = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/';

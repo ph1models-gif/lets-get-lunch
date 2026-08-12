@@ -1,10 +1,18 @@
 'use client';
+import dynamic from 'next/dynamic';
 import MapComponent from './components/Map';
 import NeighborhoodSearch from './components/NeighborhoodSearch';
-import { useState, useRef, useEffect } from 'react';
+import StickySignupButton from './components/StickySignupButton';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import Image from 'next/image';
 import { HOMEPAGE_RESTAURANT_SELECT, Restaurant } from './types';
+import { getCookie } from '../lib/cookies';
+import { SIGNUP_MODAL_DELAY_MS, SIGNUP_MODAL_COOKIE } from '../lib/signupModal';
+
+// Lazy-loaded: the modal is never needed for LCP (it's intentionally delayed
+// by SIGNUP_MODAL_DELAY_MS anyway), so keep it out of the initial bundle.
+const SignupModal = dynamic(() => import('./components/SignupModal'), { ssr: false });
 
 const CARD_MIN_HEIGHT = 'min-h-[384px]';
 
@@ -23,6 +31,24 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
   const [userFirstName, setUserFirstName] = useState('');
   const [claimMode, setClaimMode] = useState(false);
   const [loginHref, setLoginHref] = useState('/login');
+  const [showSignupModal, setShowSignupModal] = useState(false);
+  // Kept in sync via effect below so the delayed timer always reads the
+  // current logged-in state instead of a stale closure value.
+  const userFirstNameRef = useRef('');
+  useEffect(() => { userFirstNameRef.current = userFirstName; }, [userFirstName]);
+
+  const handleLocationSettled = useCallback(() => {
+    // Scoped to /claim only — the rest of the site is unaffected. Read the
+    // path directly (rather than the claimMode state) so this is correct
+    // regardless of timing relative to the mount effect that sets it.
+    if (!window.location.pathname.startsWith('/claim')) return;
+    setTimeout(() => {
+      if (userFirstNameRef.current) return; // logged in, never show
+      if (getCookie(SIGNUP_MODAL_COOKIE)) return; // already seen within the last 7 days
+      setShowSignupModal(true);
+    }, SIGNUP_MODAL_DELAY_MS);
+  }, []);
+
   useEffect(() => {
     if (typeof window !== 'undefined' && window.location.pathname.startsWith('/claim')) {
       setClaimMode(true);
@@ -189,7 +215,7 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
         </div>
       </section>
 
-      <MapComponent onPanReady={(fn) => { mapPanRef.current = fn; }} activeIds={filtered.map(r => r.id)} onBoundsChange={setMapBounds} restaurants={restaurants} />
+      <MapComponent onPanReady={(fn) => { mapPanRef.current = fn; }} activeIds={filtered.map(r => r.id)} onBoundsChange={setMapBounds} onLocationSettled={handleLocationSettled} restaurants={restaurants} />
 
       <section className="px-4 py-3">
         <p className="text-sm text-gray-500">{filtered.length} lunch {filtered.length === 1 ? 'special' : 'specials'} in this area · Scroll for details ↓</p>
@@ -327,6 +353,9 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
           )}
         </div>
       </footer>
+
+      {claimMode && !userFirstName && <StickySignupButton href={loginHref.replace('/login', '/signup')} />}
+      {showSignupModal && <SignupModal onClose={() => setShowSignupModal(false)} />}
     </main>
   );
 }
