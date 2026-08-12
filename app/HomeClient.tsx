@@ -2,7 +2,6 @@
 import dynamic from 'next/dynamic';
 import MapComponent from './components/Map';
 import NeighborhoodSearch from './components/NeighborhoodSearch';
-import StickySignupButton from './components/StickySignupButton';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import Image from 'next/image';
@@ -354,7 +353,6 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
         </div>
       </footer>
 
-      {claimMode && !userFirstName && <StickySignupButton href={loginHref.replace('/login', '/signup')} />}
       {showSignupModal && <SignupModal onClose={() => setShowSignupModal(false)} />}
     </main>
   );
