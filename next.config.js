@@ -39,6 +39,26 @@ const nextConfig = {
     // has no legitimate use here - empty array closes the leak.
     imageSizes: [],
   },
+  async headers() {
+    return [
+      {
+        // Never let a CDN/browser cache an old service worker script - the
+        // whole update mechanism relies on the browser re-checking this file.
+        source: '/sw.js',
+        headers: [
+          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+          { key: 'Service-Worker-Allowed', value: '/' },
+        ],
+      },
+      {
+        source: '/manifest.webmanifest',
+        headers: [
+          { key: 'Content-Type', value: 'application/manifest+json' },
+          { key: 'Cache-Control', value: 'public, max-age=3600' },
+        ],
+      },
+    ];
+  },
 }
 
 module.exports = nextConfig
