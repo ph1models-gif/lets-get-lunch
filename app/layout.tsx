@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { appleSplashScreens } from "../lib/appleSplashScreens";
 import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
 import InstallPrompt from "./components/InstallPrompt";
+import { INSTALL_PROMPT_ENABLED } from "../lib/pwa";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -58,7 +59,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} ${bebas.variable}`}>
         {children}
-        <InstallPrompt />
+        {INSTALL_PROMPT_ENABLED && <InstallPrompt />}
         <ServiceWorkerRegister />
         <Analytics />
       </body>

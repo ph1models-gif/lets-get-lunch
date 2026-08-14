@@ -1,3 +1,9 @@
+// Master switch for the install banner/hint UI (Android bottom banner + iOS
+// "Add to Home Screen" hint). Flip to true to turn prompting back on - the
+// manifest/service worker/icons stay live either way, so installing manually
+// via the browser menu always works regardless of this flag.
+export const INSTALL_PROMPT_ENABLED = false;
+
 // Cookie used to suppress the iOS "Add to Home Screen" hint once dismissed.
 export const IOS_INSTALL_HINT_COOKIE = 'lgl_ios_install_hint_dismissed';
 export const IOS_INSTALL_HINT_SUPPRESS_DAYS = 30;
