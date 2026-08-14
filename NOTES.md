@@ -1,5 +1,30 @@
 # Let's Get Lunch — Project Notes
-**Last updated: May 10, 2026 (late evening)**
+**Last updated: August 14, 2026**
+
+## ✅ PWA: capability shipped, install prompt off (Aug 13-14, 2026)
+
+- Merged `pwa-install-support` to main and deployed. Site is now a real
+  installable PWA — manifest, service worker (`public/sw.js`), full icon +
+  splash-screen set (generated via `scripts/generate-icons.js` from the
+  circular favicon mark as placeholder source — rerun once a dedicated
+  icon-source logo exists). Verified installable via Chrome's
+  `Page.getInstallabilityErrors` CDP check against the production build
+  (zero errors).
+- Service worker only caches static assets/shell; never intercepts Supabase
+  or `/api/*`, so listings/specials always come from the network.
+- Decision: ship the capability but keep the install *prompt* dark for now.
+  Manual install (Chrome menu → Install, iOS Share → Add to Home Screen)
+  works everywhere; nothing prompts on its own, on any page (including
+  `/claim`, which already had its own prior sticky-banner fatigue problem —
+  see git history around a20ca02).
+- The switch: `INSTALL_PROMPT_ENABLED` in `lib/pwa.ts` (currently `false`).
+  `app/layout.tsx` only mounts `<InstallPrompt />` when that flag is true —
+  flip it and redeploy to bring back the Android banner (20s-delayed,
+  14-day dismiss suppression) and iOS hint (30-day dismiss suppression)
+  exactly as built. `InstallPrompt.tsx` itself is untouched and still has
+  its own internal `/claim`-suppression logic, in case that page needs
+  different handling than the rest of the site whenever this gets
+  re-enabled.
 
 ## ✅ Recently Fixed (May 18-19, 2026 — long session)
 
