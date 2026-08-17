@@ -16,12 +16,24 @@ const config: CapacitorConfig = {
     contentInset: 'automatic',
   },
   plugins: {
-    // Webview stays edge-to-edge (matches the existing installed-PWA
-    // behavior, which already sets viewport-fit=cover); the site's own CSS
-    // pads sticky headers with env(safe-area-inset-top) to clear the notch.
+    // overlaysWebView:false reserves a real native status bar area (drawn
+    // by iOS, independent of the webview's own content/scroll state)
+    // instead of relying on page content showing through behind a
+    // transparent status bar - overlaysWebView:true went blank during
+    // top-of-page overscroll bounce, since the bounce temporarily pulls
+    // the page's background away from y=0 with nothing behind it.
+    // The header's env(safe-area-inset-top) CSS padding still applies to
+    // the installed PWA (which does render edge-to-edge) but harmlessly
+    // resolves to 0 here, since the webview itself no longer extends
+    // under the status bar.
     StatusBar: {
-      style: 'DARK',
-      overlaysWebView: true,
+      // Capacitor names this after the BAR it suits, not the icon color:
+      // 'LIGHT' -> dark icons (for our white/light bar). 'DARK' would give
+      // white icons, invisible against white - confirmed by reading
+      // node_modules/@capacitor/status-bar's iOS source directly.
+      style: 'LIGHT',
+      overlaysWebView: false,
+      backgroundColor: '#FFFFFF',
     },
   },
 };
