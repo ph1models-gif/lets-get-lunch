@@ -37,3 +37,12 @@ next-env.d.ts
 check.mjs
 pcheck.mjs
 backups/
+
+# Capacitor / Xcode
+ios/App/Pods/
+ios/App/build/
+ios/App/DerivedData/
+ios/.build/
+ios/App/App/capacitor.config.json
+*.xcuserstate
+xcuserdata/
