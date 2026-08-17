@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { appleSplashScreens } from "../lib/appleSplashScreens";
 import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
 import InstallPrompt from "./components/InstallPrompt";
+import CapacitorExternalLinks from "./components/CapacitorExternalLinks";
 import { INSTALL_PROMPT_ENABLED } from "../lib/pwa";
 import "./globals.css";
 
@@ -61,6 +62,7 @@ export default function RootLayout({
         {children}
         {INSTALL_PROMPT_ENABLED && <InstallPrompt />}
         <ServiceWorkerRegister />
+        <CapacitorExternalLinks />
         <Analytics />
       </body>
     </html>

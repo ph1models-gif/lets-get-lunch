@@ -1,6 +1,19 @@
 'use client';
 import React, { useEffect, useRef } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { Restaurant } from '../types';
+
+// Web: open in a new tab (keeps the map/list in place). Native app: the
+// whole site runs in one webview, so window.open('_blank') would otherwise
+// hand off to Safari - navigate in place instead.
+function navigateToRestaurant(slug: string) {
+  const url = `/restaurants/${slug}`;
+  if (Capacitor.isNativePlatform()) {
+    window.location.href = url;
+  } else {
+    window.open(url, '_blank');
+  }
+}
 
 interface Props {
   onPanReady?: (fn: (lat: number, lng: number) => void) => void;
@@ -146,7 +159,7 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange, onGeol
           <div style="font-size:15px;font-weight:700;color:#4A9FD5">${deal ? '$' + deal.price : ''}</div>
         </div>
       `;
-      content.addEventListener('click', () => { window.open(`/restaurants/${r.id}`, '_blank'); });
+      content.addEventListener('click', () => { navigateToRestaurant(r.slug); });
 
       const popup = new g.InfoWindow({ content, disableAutoPan: false });
 
@@ -176,13 +189,13 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange, onGeol
           const iwOuter = document.querySelector('.gm-style-iw');
           if (iwOuter) {
             (iwOuter as HTMLElement).addEventListener('click', () => {
-              window.open(`/restaurants/${r.id}`, '_blank');
+              navigateToRestaurant(r.slug);
             });
           }
         });
       } else {
         // Desktop: click pin to navigate directly
-        mk.addListener('click', () => { window.open(`/restaurants/${r.id}`, '_blank'); });
+        mk.addListener('click', () => { navigateToRestaurant(r.slug); });
 
         // Desktop: hover pin to open, hover card to keep open, click to navigate
         mk.addListener('mouseover', () => {
@@ -202,7 +215,7 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange, onGeol
           if (iwOuter) {
             iwOuter.addEventListener('mouseover', () => { cardHovered = true; });
             iwOuter.addEventListener('mouseout', () => { cardHovered = false; maybeClose(); });
-            iwOuter.addEventListener('click', () => { window.open(`/restaurants/${r.id}`, '_blank'); });
+            iwOuter.addEventListener('click', () => { navigateToRestaurant(r.slug); });
           }
         });
       }

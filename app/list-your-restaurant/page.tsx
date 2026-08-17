@@ -152,7 +152,7 @@ export default function ListYourRestaurant() {
 
   return (
     <main className="min-h-screen bg-white">
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
+      <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 pb-3 pt-[calc(12px+env(safe-area-inset-top))] flex items-center justify-between">
         <a href="/" className="flex items-center gap-2">
           <span className="text-xl">🍽️</span>
           <span className="font-semibold text-gray-900">Let&apos;s Get Lunch</span>

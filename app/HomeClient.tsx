@@ -146,7 +146,7 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
 
   return (
     <main className="min-h-screen bg-white">
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
+      <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 pb-3 pt-[calc(12px+env(safe-area-inset-top))] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-xl">🍽️</span>
           <div className="flex flex-col leading-tight md:hidden">
