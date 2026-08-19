@@ -5,6 +5,7 @@ import { appleSplashScreens } from "../lib/appleSplashScreens";
 import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
 import InstallPrompt from "./components/InstallPrompt";
 import CapacitorExternalLinks from "./components/CapacitorExternalLinks";
+import OneSignalInit from "./components/OneSignalInit";
 import { INSTALL_PROMPT_ENABLED } from "../lib/pwa";
 import "./globals.css";
 
@@ -63,6 +64,7 @@ export default function RootLayout({
         {INSTALL_PROMPT_ENABLED && <InstallPrompt />}
         <ServiceWorkerRegister />
         <CapacitorExternalLinks />
+        <OneSignalInit />
         <Analytics />
       </body>
     </html>
