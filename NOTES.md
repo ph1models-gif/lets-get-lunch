@@ -1,5 +1,31 @@
 # Let's Get Lunch — Project Notes
-**Last updated: August 14, 2026**
+**Last updated: August 19, 2026**
+
+## ✅ Native iOS app: all 3 stages done (Aug 17-19, 2026)
+
+- Stage 1 (Capacitor scaffold, SPM-based iOS project, runs on device) and
+  Stage 3 (status bar/safe-area, in-app nav instead of Safari handoff, app
+  icon, launch screen) were already done. Stage 2 - OneSignal push
+  notifications - shipped Aug 19: `onesignal-cordova-plugin` installed, Push
+  Notifications + Background Modes capabilities added, `app/components/
+  OneSignalInit.tsx` initializes OneSignal and requests permission on native
+  launch, and ties OneSignal's external user ID to the signed-in Supabase
+  user via `onAuthStateChange` (login/logout) so future notifications can be
+  targeted at specific diners.
+- Native-only, gated behind `Capacitor.isNativePlatform()`, dynamically
+  imported - importing the OneSignal plugin statically crashed the website's
+  entire server build (`window is not defined` during prerender) since the
+  plugin touches `window` at module load. Caught via `npm run build` before
+  it shipped; the website itself never loads this plugin.
+- Verified end-to-end on a physical device: signed Xcode build, Push
+  Notifications capability auto-registered with Apple during signing, test
+  push sent from the OneSignal dashboard and received on the phone.
+- Gotcha: OneSignal's dashboard setup wizard initially saved the Apple Push
+  config under "macOS configuration" instead of iOS - fixed by Brian,
+  pushes work now. Worth a second look if push ever silently stops working.
+- Full project context (stack, tables, constraints, Capacitor setup) now
+  lives in `CLAUDE.md` at the repo root instead of being re-explained each
+  session.
 
 ## ✅ PWA: capability shipped, install prompt off (Aug 13-14, 2026)
 
