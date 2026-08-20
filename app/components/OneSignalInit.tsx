@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { Capacitor } from '@capacitor/core';
 import { supabase } from '../../lib/supabase';
 
@@ -15,8 +16,14 @@ const ONESIGNAL_APP_ID = '88dcd075-0812-4abb-81ce-4ccefd838744';
 // user (read-only: OneSignal stores the id/token mapping on its own side,
 // nothing is written to Supabase here) so notifications can be targeted at
 // specific diners later.
+//
+// Tapping a push deep-links into the app: set a custom "url" field
+// (Additional Data, in the OneSignal dashboard composer) to a relative
+// path like /restaurants/royal-35, and the tap navigates there instead of
+// just opening to the homepage.
 export default function OneSignalInit() {
-  const cleanupRef = useRef<() => void>();
+  const router = useRouter();
+  const cleanupFns = useRef<Array<() => void>>([]);
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
@@ -40,15 +47,24 @@ export default function OneSignalInit() {
           OneSignal.logout();
         }
       });
+      cleanupFns.current.push(() => authListener.subscription.unsubscribe());
 
-      cleanupRef.current = () => authListener.subscription.unsubscribe();
+      const onClick = (event: { notification: { additionalData: unknown }; result: { url?: string } }) => {
+        const data = event.notification.additionalData as { url?: string } | null;
+        const raw = data?.url ?? event.result?.url ?? '';
+        const path = raw.startsWith('/') && !raw.startsWith('//') ? raw : null;
+        if (path) router.push(path);
+      };
+      OneSignal.Notifications.addEventListener('click', onClick);
+      cleanupFns.current.push(() => OneSignal.Notifications.removeEventListener('click', onClick));
     });
 
     return () => {
       cancelled = true;
-      cleanupRef.current?.();
+      cleanupFns.current.forEach((fn) => fn());
+      cleanupFns.current = [];
     };
-  }, []);
+  }, [router]);
 
   return null;
 }
