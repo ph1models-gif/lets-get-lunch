@@ -30,6 +30,7 @@ export default function ListYourRestaurant() {
   const [mainPreview, setMainPreview] = useState<string | null>(null);
   const [extraPhotos, setExtraPhotos] = useState<File[]>([]);
   const [extraPreviews, setExtraPreviews] = useState<string[]>([]);
+  const [dragPhotoIndex, setDragPhotoIndex] = useState<number | null>(null);
 
   const [form, setForm] = useState({
     restaurant: '', contact: '', email: '', phone: '',
@@ -63,6 +64,28 @@ export default function ListYourRestaurant() {
   const removeExtra = (i: number) => {
     setExtraPhotos(ps => ps.filter((_,j)=>j!==i));
     setExtraPreviews(ps => ps.filter((_,j)=>j!==i));
+  };
+
+  const reorderExtra = (from: number, to: number) => {
+    if (from === to || from < 0 || to < 0 || from >= extraPhotos.length || to >= extraPhotos.length) return;
+    setExtraPhotos(f => { const a = [...f]; const [item] = a.splice(from, 1); a.splice(to, 0, item); return a; });
+    setExtraPreviews(p => { const a = [...p]; const [item] = a.splice(from, 1); a.splice(to, 0, item); return a; });
+  };
+
+  // Swaps an extra photo into the main slot, bumping the old main photo into
+  // the extras row - so fixing which shot is "main" doesn't need a
+  // remove-and-reupload round trip.
+  const makeMainFromExtra = (i: number) => {
+    const file = extraPhotos[i];
+    const preview = extraPreviews[i];
+    const restFiles = extraPhotos.filter((_, j) => j !== i);
+    const restPreviews = extraPreviews.filter((_, j) => j !== i);
+    if (mainPhoto) restFiles.unshift(mainPhoto);
+    if (mainPreview) restPreviews.unshift(mainPreview);
+    setMainPhoto(file);
+    setMainPreview(preview);
+    setExtraPhotos(restFiles.slice(0, 3));
+    setExtraPreviews(restPreviews.slice(0, 3));
   };
 
   const uploadFile = async (file: File): Promise<string | null> => {
@@ -314,14 +337,26 @@ export default function ListYourRestaurant() {
               <label className="block text-sm font-semibold text-gray-800 mb-1">
                 Additional photos <span className="text-gray-400 font-normal">(up to 3, optional)</span>
               </label>
-              <p className="text-xs text-gray-500 mb-3">Add one photo at a time. These appear in a gallery on your detail page.</p>
+              <p className="text-xs text-gray-500 mb-3">Add one photo at a time. Drag to reorder, or use ★ to swap one in as the main photo.</p>
 
               {extraPreviews.length > 0 && (
                 <div className="grid grid-cols-3 gap-3 mb-3">
                   {extraPreviews.map((p, i) => (
-                    <div key={i} className="relative">
-                      <Image src={p} alt={`Extra photo ${i+1}`} width={200} height={96} className="w-full h-24 object-cover rounded-xl" unoptimized />
-                      <button type="button" onClick={() => removeExtra(i)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
+                    <div key={i}
+                      draggable
+                      onDragStart={() => setDragPhotoIndex(i)}
+                      onDragOver={e => e.preventDefault()}
+                      onDrop={e => { e.preventDefault(); if (dragPhotoIndex !== null) reorderExtra(dragPhotoIndex, i); setDragPhotoIndex(null); }}
+                      onDragEnd={() => setDragPhotoIndex(null)}
+                    >
+                      <div className={`relative cursor-grab active:cursor-grabbing ${dragPhotoIndex === i ? 'opacity-40' : ''}`}>
+                        <Image src={p} alt={`Extra photo ${i+1}`} width={200} height={96} className="w-full h-24 object-cover rounded-xl" unoptimized />
+                        <button type="button" onClick={() => removeExtra(i)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
+                      </div>
+                      <div className="flex items-center justify-center mt-1">
+                        <button type="button" onClick={() => makeMainFromExtra(i)}
+                          className="text-[10px] px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50" title="Set as main photo">★ Main</button>
+                      </div>
                     </div>
                   ))}
                 </div>

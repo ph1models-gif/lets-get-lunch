@@ -161,6 +161,10 @@ export default function AdminPage() {
   const [editMainPreview, setEditMainPreview] = useState<string | null>(null)
   const [editExtraFiles, setEditExtraFiles] = useState<File[]>([])
   const [editExtraPreviews, setEditExtraPreviews] = useState<string[]>([])
+  // Shared across all three photo-reorder grids (active listing / pending
+  // submission / add listing) - safe because only one tab's grid is ever
+  // mounted at a time.
+  const [dragPhotoIndex, setDragPhotoIndex] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [addForm, setAddForm] = useState({
@@ -510,12 +514,12 @@ export default function AdminPage() {
     setEditForm(f => ({ ...f, photo_urls: (f.photo_urls || []).filter(u => u !== url) }))
   }
 
-  function moveExtraPhoto(index: number, delta: number) {
+  function reorderExtraPhoto(from: number, to: number) {
     setEditForm(f => {
       const urls = [...(f.photo_urls || [])]
-      const target = index + delta
-      if (target < 0 || target >= urls.length) return f
-      ;[urls[index], urls[target]] = [urls[target], urls[index]]
+      if (from === to || from < 0 || to < 0 || from >= urls.length || to >= urls.length) return f
+      const [item] = urls.splice(from, 1)
+      urls.splice(to, 0, item)
       return { ...f, photo_urls: urls }
     })
   }
@@ -539,12 +543,12 @@ export default function AdminPage() {
     setVendorEditForm((f: any) => ({ ...f, photo_urls: (f.photo_urls || []).filter((u: string) => u !== url) }))
   }
 
-  function moveVendorExtraPhoto(index: number, delta: number) {
+  function reorderVendorExtraPhoto(from: number, to: number) {
     setVendorEditForm((f: any) => {
       const urls = [...(f.photo_urls || [])]
-      const target = index + delta
-      if (target < 0 || target >= urls.length) return f
-      ;[urls[index], urls[target]] = [urls[target], urls[index]]
+      if (from === to || from < 0 || to < 0 || from >= urls.length || to >= urls.length) return f
+      const [item] = urls.splice(from, 1)
+      urls.splice(to, 0, item)
       return { ...f, photo_urls: urls }
     })
   }
@@ -563,11 +567,10 @@ export default function AdminPage() {
   // so reordering/promoting just reorders the locally-picked files and their
   // object-URL previews in lockstep - upload order (in submitNewRestaurant)
   // is what ends up as photo_urls order.
-  function moveAddExtraPhoto(index: number, delta: number) {
-    const target = index + delta
-    if (target < 0 || target >= addExtraFiles.length) return
-    setAddExtraFiles(f => { const a = [...f];[a[index], a[target]] = [a[target], a[index]]; return a })
-    setAddExtraPreviews(p => { const a = [...p];[a[index], a[target]] = [a[target], a[index]]; return a })
+  function reorderAddExtraPhoto(from: number, to: number) {
+    if (from === to || from < 0 || to < 0 || from >= addExtraFiles.length || to >= addExtraFiles.length) return
+    setAddExtraFiles(f => { const a = [...f]; const [item] = a.splice(from, 1); a.splice(to, 0, item); return a })
+    setAddExtraPreviews(p => { const a = [...p]; const [item] = a.splice(from, 1); a.splice(to, 0, item); return a })
   }
 
   function makeAddMainPhoto(index: number) {
@@ -787,21 +790,23 @@ export default function AdminPage() {
                       </div>
 
                       <div>
-                        <p className="text-xs text-gray-400 mb-1">Extra photos (up to 3) — use the arrows to reorder, ★ to swap with the main photo</p>
+                        <p className="text-xs text-gray-400 mb-1">Extra photos (up to 3) — drag to reorder, ★ to swap with the main photo</p>
                         <div className="flex gap-2 flex-wrap">
-                          {(vendorEditForm.photo_urls || []).map((url: string, i: number, arr: string[]) => (
-                            <div key={i} className="w-28">
-                              <div className="relative">
+                          {(vendorEditForm.photo_urls || []).map((url: string, i: number) => (
+                            <div key={i} className="w-28"
+                              draggable
+                              onDragStart={() => setDragPhotoIndex(i)}
+                              onDragOver={e => e.preventDefault()}
+                              onDrop={e => { e.preventDefault(); if (dragPhotoIndex !== null) reorderVendorExtraPhoto(dragPhotoIndex, i); setDragPhotoIndex(null) }}
+                              onDragEnd={() => setDragPhotoIndex(null)}
+                            >
+                              <div className={`relative cursor-grab active:cursor-grabbing ${dragPhotoIndex === i ? 'opacity-40' : ''}`}>
                                 <img src={url} alt="" className="w-28 h-20 object-cover rounded-lg cursor-pointer" onClick={() => setLightboxUrl(url)} />
                                 <button type="button" onClick={() => removeVendorExtraPhoto(url)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
                               </div>
-                              <div className="flex items-center justify-between mt-1 gap-1">
-                                <button type="button" onClick={() => moveVendorExtraPhoto(i, -1)} disabled={i === 0}
-                                  className="text-xs px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 disabled:opacity-30 hover:bg-gray-50" title="Move earlier">‹</button>
+                              <div className="flex items-center justify-center mt-1">
                                 <button type="button" onClick={() => makeVendorMainPhoto(url)}
                                   className="text-[10px] px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50" title="Set as main photo">★ Main</button>
-                                <button type="button" onClick={() => moveVendorExtraPhoto(i, 1)} disabled={i === arr.length - 1}
-                                  className="text-xs px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 disabled:opacity-30 hover:bg-gray-50" title="Move later">›</button>
                               </div>
                             </div>
                           ))}
@@ -998,24 +1003,26 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Extra photos (up to 3) — use the arrows to reorder, ★ to swap with the main photo</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Extra photos (up to 3) — drag to reorder, ★ to swap with the main photo</label>
                   <div className="flex gap-2 flex-wrap">
                     {addExtraPreviews.map((url, i) => (
-                      <div key={i} className="w-28">
-                        <div className="relative">
+                      <div key={i} className="w-28"
+                        draggable
+                        onDragStart={() => setDragPhotoIndex(i)}
+                        onDragOver={e => e.preventDefault()}
+                        onDrop={e => { e.preventDefault(); if (dragPhotoIndex !== null) reorderAddExtraPhoto(dragPhotoIndex, i); setDragPhotoIndex(null) }}
+                        onDragEnd={() => setDragPhotoIndex(null)}
+                      >
+                        <div className={`relative cursor-grab active:cursor-grabbing ${dragPhotoIndex === i ? 'opacity-40' : ''}`}>
                           <img src={url} alt="" className="w-28 h-20 object-cover rounded-lg" />
                           <button type="button" onClick={() => {
                             setAddExtraFiles(f => f.filter((_, j) => j !== i))
                             setAddExtraPreviews(p => p.filter((_, j) => j !== i))
                           }} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
                         </div>
-                        <div className="flex items-center justify-between mt-1 gap-1">
-                          <button type="button" onClick={() => moveAddExtraPhoto(i, -1)} disabled={i === 0}
-                            className="text-xs px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 disabled:opacity-30 hover:bg-gray-50" title="Move earlier">‹</button>
+                        <div className="flex items-center justify-center mt-1">
                           <button type="button" onClick={() => makeAddMainPhoto(i)}
                             className="text-[10px] px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50" title="Set as main photo">★ Main</button>
-                          <button type="button" onClick={() => moveAddExtraPhoto(i, 1)} disabled={i === addExtraPreviews.length - 1}
-                            className="text-xs px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 disabled:opacity-30 hover:bg-gray-50" title="Move later">›</button>
                         </div>
                       </div>
                     ))}
@@ -1446,21 +1453,23 @@ export default function AdminPage() {
 
                         {/* Extra photos */}
                         <div>
-                          <p className="text-xs text-gray-500 mb-1">Extra photos (up to 3) — use the arrows to reorder, ★ to swap with the main photo</p>
+                          <p className="text-xs text-gray-500 mb-1">Extra photos (up to 3) — drag to reorder, ★ to swap with the main photo</p>
                           <div className="flex gap-2 flex-wrap">
-                            {(editForm.photo_urls || []).map((url, i, arr) => (
-                              <div key={i} className="w-28">
-                                <div className="relative">
+                            {(editForm.photo_urls || []).map((url, i) => (
+                              <div key={i} className="w-28"
+                                draggable
+                                onDragStart={() => setDragPhotoIndex(i)}
+                                onDragOver={e => e.preventDefault()}
+                                onDrop={e => { e.preventDefault(); if (dragPhotoIndex !== null) reorderExtraPhoto(dragPhotoIndex, i); setDragPhotoIndex(null) }}
+                                onDragEnd={() => setDragPhotoIndex(null)}
+                              >
+                                <div className={`relative cursor-grab active:cursor-grabbing ${dragPhotoIndex === i ? 'opacity-40' : ''}`}>
                                   <img src={url} alt="" className="w-28 h-20 object-cover rounded-lg" />
                                   <button onClick={() => removeExistingPhoto(url)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
                                 </div>
-                                <div className="flex items-center justify-between mt-1 gap-1">
-                                  <button type="button" onClick={() => moveExtraPhoto(i, -1)} disabled={i === 0}
-                                    className="text-xs px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 disabled:opacity-30 hover:bg-gray-50" title="Move earlier">‹</button>
+                                <div className="flex items-center justify-center mt-1">
                                   <button type="button" onClick={() => makeMainPhoto(url)}
                                     className="text-[10px] px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50" title="Set as main photo">★ Main</button>
-                                  <button type="button" onClick={() => moveExtraPhoto(i, 1)} disabled={i === arr.length - 1}
-                                    className="text-xs px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 disabled:opacity-30 hover:bg-gray-50" title="Move later">›</button>
                                 </div>
                               </div>
                             ))}
