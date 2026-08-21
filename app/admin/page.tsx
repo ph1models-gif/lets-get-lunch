@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 
 import { NEIGHBORHOODS, NEIGHBORHOOD_GROUPS } from '../../lib/neighborhoods';
 import { CUISINES } from '../../lib/cuisines';
+import NewsletterPanel from './NewsletterPanel';
 
 type Vendor = {
   id: string
@@ -146,7 +147,7 @@ function ReservationsView({ reservations, resView }: { reservations: any[], resV
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false)
   const [pw, setPw] = useState('')
-  const [tab, setTab] = useState<'pending' | 'restaurants' | 'reservations' | 'add' | 'users' | 'contacts'>('pending')
+  const [tab, setTab] = useState<'pending' | 'restaurants' | 'reservations' | 'add' | 'users' | 'contacts' | 'newsletter'>('pending')
 
   const [vendors, setVendors] = useState<Vendor[]>([])
   const [vendorLoading, setVendorLoading] = useState(false)
@@ -197,6 +198,14 @@ export default function AdminPage() {
     if (authed && tab === 'users') fetchUsers()
     if (authed && tab === 'contacts') fetchContacts()
   }, [authed, tab])
+
+  // Deep-link support for the old /newsletter/admin bookmark, which now
+  // redirects to /admin?tab=newsletter.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('tab') === 'newsletter') {
+      setTab('newsletter')
+    }
+  }, [])
 
   async function fetchAllVendors() {
     const { data } = await supabase.from('vendors').select('*').order('created_at', { ascending: false })
@@ -559,10 +568,10 @@ export default function AdminPage() {
         </div>
 
         <div className="flex gap-2 mb-6 border-b border-gray-200">
-          {((['pending', 'restaurants', 'reservations', 'add', 'users', 'contacts'] as const)).map(t => (
+          {((['pending', 'restaurants', 'reservations', 'add', 'users', 'contacts', 'newsletter'] as const)).map(t => (
             <button key={t} onClick={() => setTab(t as any)}
               className={`pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${tab === t ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
-              {t === 'pending' ? 'Pending submissions' : t === 'restaurants' ? 'Active listings' : t === 'reservations' ? 'Reservations' : t === 'add' ? '+ Add listing' : t === 'users' ? 'Users' : 'Contacts'}
+              {t === 'pending' ? 'Pending submissions' : t === 'restaurants' ? 'Active listings' : t === 'reservations' ? 'Reservations' : t === 'add' ? '+ Add listing' : t === 'users' ? 'Users' : t === 'contacts' ? 'Contacts' : 'Newsletter'}
             </button>
           ))}
         </div>
@@ -1056,6 +1065,8 @@ export default function AdminPage() {
             )}
           </div>
         )}
+
+        {tab === 'newsletter' && <NewsletterPanel pw={pw} />}
 
         {tab === 'restaurants' && (() => {
           const filteredRests = restaurants.filter(r => {
