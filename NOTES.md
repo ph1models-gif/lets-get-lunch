@@ -1,5 +1,27 @@
 # Let's Get Lunch — Project Notes
-**Last updated: August 19, 2026**
+**Last updated: August 21, 2026**
+
+## ✅ Newsletter: web claim button + hidden raw link (Aug 21, 2026)
+
+- Posts are authored with a plain `/restaurants/{slug}` link in the body
+  pointing at the deal being written about. The email already stripped that
+  raw link out of the body and rendered it as a styled "Claim this exclusive
+  lunch" button instead (`lib/announcementEmail.ts`) — but the web post page
+  (`/newsletter/[slug]`) had no equivalent: it rendered the raw body
+  untouched, so the URL showed as visible link text, and there was no button
+  at all.
+- Pulled the shared "find the restaurant link, strip it from the body"
+  logic out of `announcementEmail.ts` into `lib/postClaimLink.ts` so email
+  and web read from the exact same source instead of two copies drifting
+  apart. `app/newsletter/[slug]/page.tsx` now uses it too: strips the raw
+  URL before rendering the body, and adds the same "Claim this exclusive
+  lunch" button (same blue pill style) right after the body — same position
+  as the email version, right before the "View in browser" / "Back to
+  newsletter" links respectively. Posts with no restaurant link just get no
+  button, on both email and web, same as before.
+- Nothing else about post authoring changed — still just write the plain
+  restaurant link at the end of the body like before (e.g. the Mamazul
+  post); it's picked up automatically on both channels.
 
 ## ✅ Native iOS app: all 3 stages done (Aug 17-19, 2026)
 
@@ -23,6 +45,24 @@
 - Gotcha: OneSignal's dashboard setup wizard initially saved the Apple Push
   config under "macOS configuration" instead of iOS - fixed by Brian,
   pushes work now. Worth a second look if push ever silently stops working.
+- Aug 19: fixed the "near me" map geolocation silently failing on native -
+  WKWebView never showed the system location prompt because `Info.plist`
+  had no `NSLocationWhenInUseUsageDescription` string. Added it; the
+  existing geolocation code in the map needed no changes.
+- Aug 19: added push deep-linking. `OneSignalInit.tsx`'s notification-click
+  handler now reads a custom `url` field (from the OneSignal dashboard
+  composer's "Additional Data") and navigates straight there via
+  `router.push` (e.g. tapping a push about Royal 35 opens
+  `/restaurants/royal-35-steakhouse` in-app) instead of always landing on
+  the homepage. No admin UI for this yet - the `url` field is set by hand
+  per-push in the OneSignal composer.
+- Verified Aug 21 on a physical device: sent a real test push with
+  `url` = `/restaurants/royal-35-steakhouse` in Additional Data, tapped it,
+  landed on the Royal 35 page inside the app (not Safari). Gotcha hit along
+  the way: OneSignal's composer has a separate "Launch URL" field that, if
+  set, has the native SDK open it directly in Safari itself before the
+  app's own click handler runs - keep that field blank and only use
+  Additional Data for in-app deep links.
 - Full project context (stack, tables, constraints, Capacitor setup) now
   lives in `CLAUDE.md` at the repo root instead of being re-explained each
   session.

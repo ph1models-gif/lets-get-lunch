@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { marked } from 'marked';
 import { createClient } from '@supabase/supabase-js';
+import { extractRestaurantSlug } from '../../../lib/postClaimLink';
 
 const BASE = 'https://www.letsgetlunch.nyc';
 
@@ -78,7 +79,8 @@ export default async function NewsletterPost(
   const post = await getPost(params.slug);
   if (!post) notFound();
 
-  const html = marked.parse(post.body, { async: false }) as string;
+  const { cleanBody, restaurantSlug } = extractRestaurantSlug(post.body || '');
+  const html = marked.parse(cleanBody, { async: false }) as string;
 
   return (
     <main className="min-h-screen bg-[#EEF6FC] px-4 pt-10 pb-16">
@@ -104,6 +106,16 @@ export default async function NewsletterPost(
               className="prose prose-sm sm:prose-base max-w-none mt-6 prose-headings:font-[family-name:var(--font-bebas)] prose-headings:tracking-wide prose-headings:text-gray-900 prose-a:text-[#4A9FD5]"
               dangerouslySetInnerHTML={{ __html: html }}
             />
+            {restaurantSlug && (
+              <div className="text-center mt-2">
+                <a
+                  href={`/restaurants/${restaurantSlug}`}
+                  className="inline-block bg-[#4A9FD5] text-white text-sm font-bold rounded-lg px-6 py-3 no-underline"
+                >
+                  Claim this exclusive lunch
+                </a>
+              </div>
+            )}
           </div>
         </article>
 
