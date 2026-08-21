@@ -2,8 +2,20 @@
 import { useState } from 'react';
 import { track } from '@vercel/analytics';
 import { supabase } from '../../lib/supabase';
+import { APPLE_AUTH_ENABLED } from '../../lib/auth';
 
 import { NEIGHBORHOODS, NEIGHBORHOOD_GROUPS } from '../../lib/neighborhoods';
+
+// Apple's Human Interface Guidelines require their own wordmark ("Sign in
+// with Apple", not "Continue with") and logo glyph on the button.
+function AppleLogo() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.06 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.033-.013-3.182-1.22-3.215-4.857-.03-3.04 2.485-4.497 2.598-4.57-1.429-2.09-3.638-2.324-4.415-2.376-2.006-.163-3.688 1.09-4.591 1.09zm3.53-3.243c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.817-.78.896-1.454 2.338-1.276 3.715 1.336.104 2.71-.688 3.563-1.703z"/>
+    </svg>
+  );
+}
+
 function validatePassword(pw: string): string | null {
   if (pw.length < 8) return 'Password must be at least 8 characters.';
   if (!/[A-Z]/.test(pw)) return 'Password must include at least one uppercase letter.';
@@ -35,8 +47,35 @@ export default function LoginPage() {
 
   async function handleGoogle() {
     setLoading(true); setError('');
+    // Already signed in (e.g. a stale /login bookmark or tab): don't kick off
+    // a fresh OAuth round trip, which would silently swap in whichever
+    // Google account gets picked - just continue on as the current session.
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const raw = new URLSearchParams(window.location.search).get('next') || '';
+      const safe = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/';
+      window.location.href = safe;
+      return;
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
+      options: { redirectTo: `${window.location.origin}/auth/callback${window.location.search}` },
+    });
+    if (error) { setError(error.message); setLoading(false); }
+  }
+
+  async function handleApple() {
+    setLoading(true); setError('');
+    // Same already-signed-in guard as Google, above.
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const raw = new URLSearchParams(window.location.search).get('next') || '';
+      const safe = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/';
+      window.location.href = safe;
+      return;
+    }
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'apple',
       options: { redirectTo: `${window.location.origin}/auth/callback${window.location.search}` },
     });
     if (error) { setError(error.message); setLoading(false); }
@@ -97,6 +136,13 @@ export default function LoginPage() {
 
         {tab === 'signup' ? (
           <div className="space-y-4">
+            {APPLE_AUTH_ENABLED && (
+              <button onClick={handleApple} disabled={loading}
+                className="w-full flex items-center justify-center gap-2 bg-black text-white py-3.5 rounded-xl font-medium text-base hover:bg-gray-900 transition-colors disabled:opacity-50">
+                <AppleLogo />
+                Sign in with Apple
+              </button>
+            )}
             <button onClick={handleGoogle} disabled={loading}
               className="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white text-gray-700 py-3.5 rounded-xl font-medium text-base hover:bg-gray-50 transition-colors disabled:opacity-50">
               <img src="https://www.google.com/favicon.ico" width="18" height="18" alt="" />
@@ -152,6 +198,13 @@ export default function LoginPage() {
           </div>
         ) : (
           <div className="space-y-4">
+            {APPLE_AUTH_ENABLED && (
+              <button onClick={handleApple} disabled={loading}
+                className="w-full flex items-center justify-center gap-2 bg-black text-white py-3.5 rounded-xl font-medium text-base hover:bg-gray-900 transition-colors disabled:opacity-50">
+                <AppleLogo />
+                Sign in with Apple
+              </button>
+            )}
             <button onClick={handleGoogle} disabled={loading}
               className="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white text-gray-700 py-3.5 rounded-xl font-medium text-base hover:bg-gray-50 transition-colors disabled:opacity-50">
               <img src="https://www.google.com/favicon.ico" width="18" height="18" alt="" />
