@@ -170,7 +170,9 @@ export default function AdminPage() {
     contact_name: '', contact_email: '', contact_phone: '', website: ''
   })
   const [addMainFile, setAddMainFile] = useState<File | null>(null)
+  const [addMainPreview, setAddMainPreview] = useState<string | null>(null)
   const [addExtraFiles, setAddExtraFiles] = useState<File[]>([])
+  const [addExtraPreviews, setAddExtraPreviews] = useState<string[]>([])
   const [editingVendorId, setEditingVendorId] = useState<string | null>(null)
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
   const [listingSearch, setListingSearch] = useState('')
@@ -178,7 +180,9 @@ export default function AdminPage() {
   const [listingCuisine, setListingCuisine] = useState('')
   const [showHidden, setShowHidden] = useState(false)
   const [vendorMainFile, setVendorMainFile] = useState<File | null>(null)
+  const [vendorMainPreview, setVendorMainPreview] = useState<string | null>(null)
   const [vendorExtraFiles, setVendorExtraFiles] = useState<File[]>([])
+  const [vendorExtraPreviews, setVendorExtraPreviews] = useState<string[]>([])
   const [vendorEditForm, setVendorEditForm] = useState<any>({})
   const [addSaving, setAddSaving] = useState(false)
   const [addSuccess, setAddSuccess] = useState('')
@@ -317,7 +321,9 @@ export default function AdminPage() {
       setAddSuccess(`✅ ${addForm.name} added and live on the site!`)
       setAddForm({ name: '', address: '', neighborhood: '', cuisine: '', hours: '', bio: '', special: '', price: '', work_friendly: false, wifi: false, days: ['Mon','Tue','Wed','Thu','Fri'], contact_name: '', contact_email: '', contact_phone: '', website: '' })
       setAddMainFile(null)
+      setAddMainPreview(null)
       setAddExtraFiles([])
+      setAddExtraPreviews([])
     } else {
       setAddError(data.error || 'Failed to save restaurant. Try again.')
     }
@@ -527,6 +533,56 @@ export default function AdminPage() {
     setEditMainPreview(null)
   }
 
+  // Same reorder/promote helpers as above, for the pending-submission
+  // (vendor) edit form's already-uploaded photos.
+  function removeVendorExtraPhoto(url: string) {
+    setVendorEditForm((f: any) => ({ ...f, photo_urls: (f.photo_urls || []).filter((u: string) => u !== url) }))
+  }
+
+  function moveVendorExtraPhoto(index: number, delta: number) {
+    setVendorEditForm((f: any) => {
+      const urls = [...(f.photo_urls || [])]
+      const target = index + delta
+      if (target < 0 || target >= urls.length) return f
+      ;[urls[index], urls[target]] = [urls[target], urls[index]]
+      return { ...f, photo_urls: urls }
+    })
+  }
+
+  function makeVendorMainPhoto(url: string) {
+    setVendorEditForm((f: any) => {
+      const urls = (f.photo_urls || []).filter((u: string) => u !== url)
+      if (f.photo_url) urls.unshift(f.photo_url)
+      return { ...f, photo_url: url, photo_urls: urls.slice(0, 3) }
+    })
+    setVendorMainFile(null)
+    setVendorMainPreview(null)
+  }
+
+  // Add-listing form has no already-uploaded photos yet (nothing's saved),
+  // so reordering/promoting just reorders the locally-picked files and their
+  // object-URL previews in lockstep - upload order (in submitNewRestaurant)
+  // is what ends up as photo_urls order.
+  function moveAddExtraPhoto(index: number, delta: number) {
+    const target = index + delta
+    if (target < 0 || target >= addExtraFiles.length) return
+    setAddExtraFiles(f => { const a = [...f];[a[index], a[target]] = [a[target], a[index]]; return a })
+    setAddExtraPreviews(p => { const a = [...p];[a[index], a[target]] = [a[target], a[index]]; return a })
+  }
+
+  function makeAddMainPhoto(index: number) {
+    const file = addExtraFiles[index]
+    const preview = addExtraPreviews[index]
+    const restFiles = addExtraFiles.filter((_, i) => i !== index)
+    const restPreviews = addExtraPreviews.filter((_, i) => i !== index)
+    if (addMainFile) restFiles.unshift(addMainFile)
+    if (addMainPreview) restPreviews.unshift(addMainPreview)
+    setAddMainFile(file)
+    setAddMainPreview(preview)
+    setAddExtraFiles(restFiles.slice(0, 3))
+    setAddExtraPreviews(restPreviews.slice(0, 3))
+  }
+
   async function doLogin() {
     const res = await fetch('/api/admin/login', {
       method: 'POST',
@@ -700,35 +756,85 @@ export default function AdminPage() {
                     </div>
                     <div className="border-t pt-3">
                       <label className="block text-xs text-gray-500 mb-2">Photos (click to enlarge)</label>
-                      <div className="flex gap-2 flex-wrap mb-3">
-                        {vendorEditForm.photo_url && (
-                          <div className="relative">
-                            <img src={vendorEditForm.photo_url} alt="Main" className="w-40 h-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity border-2 border-transparent hover:border-[#4A9FD5]" onClick={(e) => { e.stopPropagation(); setLightboxUrl(vendorEditForm.photo_url); }} />
-                            <span className="absolute top-1 left-1 bg-black bg-opacity-50 text-white text-[10px] px-1 rounded">Main</span>
+
+                      <div className="mb-3">
+                        <p className="text-xs text-gray-400 mb-1">Main photo</p>
+                        {vendorMainPreview ? (
+                          <div className="relative w-40">
+                            <img src={vendorMainPreview} alt="" className="w-40 h-28 object-cover rounded-lg" />
+                            <button type="button" onClick={() => { setVendorMainFile(null); setVendorMainPreview(null) }} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
                           </div>
-                        )}
-                        {vendorEditForm.photo_urls?.map((url: string, i: number) => (
-                          <img key={i} src={url} alt={`Extra ${i+1}`} className="w-40 h-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity border-2 border-transparent hover:border-[#4A9FD5]" onClick={(e) => { e.stopPropagation(); setLightboxUrl(url); }} />
-                        ))}
-                        {!vendorEditForm.photo_url && (!vendorEditForm.photo_urls || vendorEditForm.photo_urls.length === 0) && (
-                          <p className="text-xs text-gray-400">No photos uploaded</p>
+                        ) : vendorEditForm.photo_url ? (
+                          <div className="relative w-40">
+                            <img src={vendorEditForm.photo_url} alt="" className="w-40 h-28 object-cover rounded-lg cursor-pointer" onClick={() => setLightboxUrl(vendorEditForm.photo_url)} />
+                            <label className="absolute bottom-1 right-1 bg-black bg-opacity-60 text-white text-xs px-2 py-0.5 rounded cursor-pointer">
+                              Replace
+                              <input type="file" accept="image/*" className="hidden" onChange={e => {
+                                const f = e.target.files?.[0]
+                                if (f) { setVendorMainFile(f); setVendorMainPreview(URL.createObjectURL(f)) }
+                              }} />
+                            </label>
+                          </div>
+                        ) : (
+                          <label className="flex items-center gap-2 text-sm text-orange-500 cursor-pointer border border-dashed border-orange-300 rounded-lg px-4 py-3 w-40 justify-center">
+                            + Add photo
+                            <input type="file" accept="image/*" className="hidden" onChange={e => {
+                              const f = e.target.files?.[0]
+                              if (f) { setVendorMainFile(f); setVendorMainPreview(URL.createObjectURL(f)) }
+                            }} />
+                          </label>
                         )}
                       </div>
-                      <div className="space-y-2">
-                        <div>
-                          <label className="block text-xs text-gray-500 mb-1">Replace main photo</label>
-                          <input type="file" accept="image/*" onChange={e => setVendorMainFile(e.target.files?.[0] || null)} className="text-xs" />
-                        </div>
-                        <div>
-                          <label className="block text-xs text-gray-500 mb-1">Replace extra photos</label>
-                          <input type="file" accept="image/*" multiple onChange={e => setVendorExtraFiles(Array.from(e.target.files || []).slice(0, 3))} className="text-xs" />
+
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">Extra photos (up to 3) — use the arrows to reorder, ★ to swap with the main photo</p>
+                        <div className="flex gap-2 flex-wrap">
+                          {(vendorEditForm.photo_urls || []).map((url: string, i: number, arr: string[]) => (
+                            <div key={i} className="w-28">
+                              <div className="relative">
+                                <img src={url} alt="" className="w-28 h-20 object-cover rounded-lg cursor-pointer" onClick={() => setLightboxUrl(url)} />
+                                <button type="button" onClick={() => removeVendorExtraPhoto(url)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
+                              </div>
+                              <div className="flex items-center justify-between mt-1 gap-1">
+                                <button type="button" onClick={() => moveVendorExtraPhoto(i, -1)} disabled={i === 0}
+                                  className="text-xs px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 disabled:opacity-30 hover:bg-gray-50" title="Move earlier">‹</button>
+                                <button type="button" onClick={() => makeVendorMainPhoto(url)}
+                                  className="text-[10px] px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50" title="Set as main photo">★ Main</button>
+                                <button type="button" onClick={() => moveVendorExtraPhoto(i, 1)} disabled={i === arr.length - 1}
+                                  className="text-xs px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 disabled:opacity-30 hover:bg-gray-50" title="Move later">›</button>
+                              </div>
+                            </div>
+                          ))}
+                          {vendorExtraPreviews.map((url, i) => (
+                            <div key={`new-${i}`} className="relative">
+                              <img src={url} alt="" className="w-24 h-16 object-cover rounded-lg border-2 border-orange-300" />
+                              <button type="button" onClick={() => {
+                                setVendorExtraFiles(f => f.filter((_, j) => j !== i))
+                                setVendorExtraPreviews(p => p.filter((_, j) => j !== i))
+                              }} className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">×</button>
+                            </div>
+                          ))}
+                          {((vendorEditForm.photo_urls?.length || 0) + vendorExtraPreviews.length) < 3 && (
+                            <label className="w-24 h-16 border border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 text-xs cursor-pointer hover:border-orange-300">
+                              + Add
+                              <input type="file" accept="image/*" className="hidden" onChange={e => {
+                                const f = e.target.files?.[0]
+                                if (f) {
+                                  setVendorExtraFiles(prev => [...prev, f])
+                                  setVendorExtraPreviews(prev => [...prev, URL.createObjectURL(f)])
+                                }
+                              }} />
+                            </label>
+                          )}
                         </div>
                       </div>
                     </div>
 
                     <div className="flex gap-3 pt-2">
                       <button onClick={async () => {
-                        // Upload new photos if selected
+                        // Upload new photos if selected. Existing photo_url/photo_urls
+                        // already reflect any reorder/remove/promote done above, so
+                        // newly uploaded extras are appended, not a full replace.
                         let photoUrl = vendorEditForm.photo_url;
                         let photoUrls = vendorEditForm.photo_urls || [];
                         if (vendorMainFile) {
@@ -751,21 +857,23 @@ export default function AdminPage() {
                               newUrls.push(urlData.publicUrl);
                             }
                           }
-                          photoUrls = newUrls;
+                          photoUrls = [...photoUrls, ...newUrls].slice(0, 3);
                         }
                         const updatedVendor = {...vendorEditForm, photo_url: photoUrl, photo_urls: photoUrls};
                         await fetch('/api/admin/vendor-update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw, id: v.id, patch: updatedVendor }) });
                         approveVendor({...v, ...updatedVendor});
                         setEditingVendorId(null);
                         setVendorMainFile(null);
+                        setVendorMainPreview(null);
                         setVendorExtraFiles([]);
+                        setVendorExtraPreviews([]);
                       }} className="flex-1 bg-green-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-green-700">Save & Approve</button>
                       <button onClick={() => setEditingVendorId(null)} className="flex-1 bg-gray-100 text-gray-600 rounded-lg py-2 text-sm font-medium hover:bg-gray-200">Cancel</button>
                     </div>
                   </div>
                 ) : (
                   <div className="flex gap-3">
-                    <button onClick={() => { setEditingVendorId(v.id); setVendorEditForm({...v}); }} className="flex-1 bg-blue-500 text-white rounded-lg py-2 text-sm font-medium hover:bg-blue-600">Review & Edit</button>
+                    <button onClick={() => { setEditingVendorId(v.id); setVendorEditForm({...v}); setVendorMainFile(null); setVendorMainPreview(null); setVendorExtraFiles([]); setVendorExtraPreviews([]); }} className="flex-1 bg-blue-500 text-white rounded-lg py-2 text-sm font-medium hover:bg-blue-600">Review & Edit</button>
                     <button onClick={() => approveVendor(v)} className="flex-1 bg-green-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-green-700">Quick Approve</button>
                     <button onClick={() => rejectVendor(v.id)} className="flex-1 bg-red-100 text-red-700 rounded-lg py-2 text-sm font-medium hover:bg-red-200">Reject</button>
                   </div>
@@ -870,13 +978,60 @@ export default function AdminPage() {
 
               <div className="border-t pt-4">
                 <h3 className="font-medium text-gray-800 mb-3">Photos</h3>
+
                 <div className="mb-3">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Main photo</label>
-                  <input type="file" accept="image/*" onChange={e => setAddMainFile(e.target.files?.[0] || null)} className="text-sm" />
+                  {addMainPreview ? (
+                    <div className="relative w-40">
+                      <img src={addMainPreview} alt="" className="w-40 h-28 object-cover rounded-lg" />
+                      <button type="button" onClick={() => { setAddMainFile(null); setAddMainPreview(null) }} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
+                    </div>
+                  ) : (
+                    <label className="flex items-center gap-2 text-sm text-orange-500 cursor-pointer border border-dashed border-orange-300 rounded-lg px-4 py-3 w-40 justify-center">
+                      + Add photo
+                      <input type="file" accept="image/*" className="hidden" onChange={e => {
+                        const f = e.target.files?.[0]
+                        if (f) { setAddMainFile(f); setAddMainPreview(URL.createObjectURL(f)) }
+                      }} />
+                    </label>
+                  )}
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Extra photos (up to 3)</label>
-                  <input type="file" accept="image/*" multiple onChange={e => setAddExtraFiles(Array.from(e.target.files || []).slice(0, 3))} className="text-sm" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Extra photos (up to 3) — use the arrows to reorder, ★ to swap with the main photo</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {addExtraPreviews.map((url, i) => (
+                      <div key={i} className="w-28">
+                        <div className="relative">
+                          <img src={url} alt="" className="w-28 h-20 object-cover rounded-lg" />
+                          <button type="button" onClick={() => {
+                            setAddExtraFiles(f => f.filter((_, j) => j !== i))
+                            setAddExtraPreviews(p => p.filter((_, j) => j !== i))
+                          }} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
+                        </div>
+                        <div className="flex items-center justify-between mt-1 gap-1">
+                          <button type="button" onClick={() => moveAddExtraPhoto(i, -1)} disabled={i === 0}
+                            className="text-xs px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 disabled:opacity-30 hover:bg-gray-50" title="Move earlier">‹</button>
+                          <button type="button" onClick={() => makeAddMainPhoto(i)}
+                            className="text-[10px] px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50" title="Set as main photo">★ Main</button>
+                          <button type="button" onClick={() => moveAddExtraPhoto(i, 1)} disabled={i === addExtraPreviews.length - 1}
+                            className="text-xs px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 disabled:opacity-30 hover:bg-gray-50" title="Move later">›</button>
+                        </div>
+                      </div>
+                    ))}
+                    {addExtraPreviews.length < 3 && (
+                      <label className="w-24 h-16 border border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 text-xs cursor-pointer hover:border-orange-300">
+                        + Add
+                        <input type="file" accept="image/*" className="hidden" onChange={e => {
+                          const f = e.target.files?.[0]
+                          if (f) {
+                            setAddExtraFiles(prev => [...prev, f])
+                            setAddExtraPreviews(prev => [...prev, URL.createObjectURL(f)])
+                          }
+                        }} />
+                      </label>
+                    )}
+                  </div>
                 </div>
               </div>
 
