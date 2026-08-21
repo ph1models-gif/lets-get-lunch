@@ -1,6 +1,47 @@
 # Let's Get Lunch — Project Notes
 **Last updated: August 21, 2026**
 
+## ✅ Auth: native Google sign-in fixed, already-signed-in bug fixed, Sign in with Apple built behind a flag (Aug 21, 2026)
+
+- Root cause of native Google sign-in breaking: not Google's own anti-embedded-
+  webview policy as first suspected, but Capacitor's own WKWebView navigation
+  policy - any top-level navigation to a domain outside the app's configured
+  website gets handed off to the full Safari app (`UIApplication.shared.open`)
+  and cancelled in the webview, confirmed by reading
+  `WebViewDelegationHandler.swift` directly. So tapping "Continue with Google"
+  bounced the user out of the app into standalone Safari, where completing
+  sign-in landed them on the website in a separate browser context - signed in
+  there, but not back in the app.
+- Fixed by intercepting the button before that navigation ever starts:
+  `app/login/page.tsx` / `app/signup/page.tsx` now branch on
+  `Capacitor.isNativePlatform()` - on native, get the OAuth URL without letting
+  Supabase auto-redirect (`skipBrowserRedirect`), and open it via
+  `@capacitor/browser`'s in-app sheet instead, with `redirectTo` pointed at a
+  new custom URL scheme (`nyc.letsgetlunch.app://auth-callback`) instead of the
+  website's `/auth/callback`. A new native-only component,
+  `app/components/CapacitorAuthCallback.tsx` (mounted in `layout.tsx`, same
+  `Capacitor.isNativePlatform()` + lazy-import guard pattern as
+  `OneSignalInit.tsx`), catches that deep link via `@capacitor/app`'s
+  `appUrlOpen`, closes the sheet, pulls the tokens out of the URL (the site
+  uses Supabase's implicit flow, not PKCE, so no code-exchange step needed),
+  and calls `setSession()`. Confirmed working end-to-end on a physical device.
+- The website's own `/auth/callback/page.tsx` and `lib/supabase.ts` are
+  untouched by any of this - deliberately kept out of scope since every
+  sign-in on the site, web and app alike, goes through the former.
+- Separately fixed a real bug: clicking "Continue with Google" while already
+  signed in fired a fresh OAuth round trip with no session check - confirmed
+  in Supabase's SDK that completing a new OAuth sign-in always overwrites
+  whatever session was already stored, so picking a different Google account
+  would silently swap the signed-in user with no warning. Now checks
+  `getUser()` first and just continues on if already signed in, instead of
+  starting a new OAuth flow.
+- Added a "Sign in with Apple" button (mirrors the Google button exactly -
+  same guard, same error handling, same native in-app-browser flow) for
+  Guideline 4.8 compliance ahead of App Store submission. Gated behind
+  `APPLE_AUTH_ENABLED` in `lib/auth.ts`, currently `false` - won't render
+  anywhere until the Apple provider is configured in the Supabase Auth
+  dashboard and that flag is flipped.
+
 ## ✅ Newsletter: web claim button + hidden raw link (Aug 21, 2026)
 
 - Posts are authored with a plain `/restaurants/{slug}` link in the body
