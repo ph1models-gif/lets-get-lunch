@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
       work_friendly: vendor.work_friendly === 'yes',
       wifi: vendor.wifi === 'yes',
       website: vendor.website || null,
+      phone: vendor.phone || null,
       is_active: true, lat, lng,
     }).select().single()
 

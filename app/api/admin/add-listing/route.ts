@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
       photo_url: photoUrl ?? null,
       photo_urls: photoUrls ?? [],
       website: form.website || null,
+      phone: form.contact_phone || null,
       is_active: true,
       lat: lat ?? null,
       lng: lng ?? null,

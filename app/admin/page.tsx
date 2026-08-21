@@ -42,6 +42,7 @@ type Restaurant = {
   is_active: boolean
   lat: number | null
   lng: number | null
+  phone: string | null
 }
 
 type Deal = {
@@ -374,6 +375,7 @@ export default function AdminPage() {
       work_friendly: r.work_friendly || false,
       wifi: r.wifi || false,
       website: r.website || '',
+      phone: r.phone || '',
     })
   }
 
@@ -440,6 +442,7 @@ export default function AdminPage() {
       work_friendly: editForm.work_friendly || false,
       wifi: editForm.wifi || false,
       website: editForm.website || null,
+      phone: editForm.phone || null,
     }
     const existingDeal = deals.find(d => d.restaurant_id === r.id)
     const dealPayload = {
@@ -1128,6 +1131,10 @@ export default function AdminPage() {
                           <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={editForm.website || ''} onChange={e => setEditForm(f => ({ ...f, website: e.target.value }))} placeholder="https://example.com" />
                         </div>
                         <div>
+                          <label className="block text-xs text-gray-500 mb-1">Phone</label>
+                          <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={editForm.phone || ''} onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))} placeholder="(212) 555-0100" />
+                        </div>
+                        <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">Cuisine</label>
                           <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={editForm.cuisine || ''} onChange={e => setEditForm(f => ({ ...f, cuisine: e.target.value }))}>
                             <option value="">Select cuisine...</option>
@@ -1164,7 +1171,7 @@ export default function AdminPage() {
                       {/* Bio */}
                       <div>
                         <label className="block text-xs font-medium text-gray-600 mb-1">One-line bio</label>
-                        <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={editForm.bio || ''} onChange={e => setEditForm(f => ({ ...f, bio: e.target.value }))} placeholder="e.g. Hip, airy eatery with Asian-inspired vegan dishes" maxLength={300} />
+                        <textarea className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-y" rows={3} value={editForm.bio || ''} onChange={e => setEditForm(f => ({ ...f, bio: e.target.value }))} placeholder="e.g. Hip, airy eatery with Asian-inspired vegan dishes" maxLength={300} />
                         <div className="flex gap-4 mt-3">
                           <label className="flex items-center gap-2 text-sm cursor-pointer">
                             <input type="checkbox" checked={!!editForm.work_friendly} onChange={e => setEditForm(f => ({ ...f, work_friendly: e.target.checked }))} />
@@ -1183,7 +1190,7 @@ export default function AdminPage() {
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label className="block text-xs text-gray-500 mb-1">Special description</label>
-                            <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={editForm.deal_special || ''} onChange={e => setEditForm(f => ({ ...f, deal_special: e.target.value }))} placeholder="e.g. Pasta + salad + dessert" />
+                            <textarea className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-y" rows={3} value={editForm.deal_special || ''} onChange={e => setEditForm(f => ({ ...f, deal_special: e.target.value }))} placeholder="e.g. Pasta + salad + dessert" />
                           </div>
                           <div>
                             <label className="block text-xs text-gray-500 mb-1">Price ($)</label>
@@ -1308,6 +1315,7 @@ export default function AdminPage() {
                       <div><span className="text-gray-400">Bio</span><br />{r.bio || <span className="text-gray-300">None</span>}</div>
                       <div><span className="text-gray-400">Lat/lng</span><br />{r.lat && r.lng ? `${r.lat.toFixed(4)}, ${r.lng.toFixed(4)}` : <span className="text-amber-600">Missing — won't show on map</span>}</div>
                       <div><span className="text-gray-400">Website</span><br />{r.website ? <a href={r.website} target="_blank" rel="noopener noreferrer" className="text-[#4A9FD5] hover:underline">{r.website}</a> : <span className="text-gray-300">None</span>}</div>
+                      <div><span className="text-gray-400">Phone</span><br />{r.phone ? <a href={`tel:${r.phone}`} className="text-[#4A9FD5] hover:underline">{r.phone}</a> : <span className="text-gray-300">None</span>}</div>
                       {(() => {
                         const v = vendors.find(v => v.restaurant_name === r.name);
                         return v ? (
