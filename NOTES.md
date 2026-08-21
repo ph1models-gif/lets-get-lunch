@@ -38,9 +38,17 @@
 - Added a "Sign in with Apple" button (mirrors the Google button exactly -
   same guard, same error handling, same native in-app-browser flow) for
   Guideline 4.8 compliance ahead of App Store submission. Gated behind
-  `APPLE_AUTH_ENABLED` in `lib/auth.ts`, currently `false` - won't render
-  anywhere until the Apple provider is configured in the Supabase Auth
-  dashboard and that flag is flipped.
+  `APPLE_AUTH_ENABLED` in `lib/auth.ts`.
+- Aug 21: Apple provider configured in Supabase (Services ID
+  `nyc.letsgetlunch.signin`, Sign in with Apple key from the Apple Developer
+  portal, Team ID `5J2F6GZ9C8`) and `APPLE_AUTH_ENABLED` flipped to `true` -
+  button is live on both the website and the app. Gotcha: Supabase's Apple
+  provider wants a signed JWT as its "Secret Key (for OAuth)" field, not the
+  raw `.p8` file content - generated locally with Node's built-in `crypto`
+  (ES256, `dsaEncoding: 'ieee-p1363'` for the raw-format signature JWT
+  needs), no dependencies added to the project. That secret expires ~6
+  months from generation (~Feb 2027) per Apple/Supabase's own limit -
+  regenerate the same way when it does.
 
 ## ✅ Newsletter: web claim button + hidden raw link (Aug 21, 2026)
 
