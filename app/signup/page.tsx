@@ -165,6 +165,11 @@ export default function SignupPage() {
             <div className="space-y-4">
               {error && <p className="text-red-500 text-sm bg-red-50 px-4 py-3 rounded-xl">{error}</p>}
 
+              <button onClick={handleGoogle} disabled={loading}
+                className="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white text-gray-700 py-3.5 rounded-xl font-medium text-base hover:bg-gray-50 transition-colors disabled:opacity-50">
+                <img src="https://www.google.com/favicon.ico" width="18" height="18" alt="" />
+                Continue with Google
+              </button>
               {APPLE_AUTH_ENABLED && (
                 <button onClick={handleApple} disabled={loading}
                   className="w-full flex items-center justify-center gap-2 bg-black text-white py-3.5 rounded-xl font-medium text-base hover:bg-gray-900 transition-colors disabled:opacity-50">
@@ -172,11 +177,6 @@ export default function SignupPage() {
                   Sign in with Apple
                 </button>
               )}
-              <button onClick={handleGoogle} disabled={loading}
-                className="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white text-gray-700 py-3.5 rounded-xl font-medium text-base hover:bg-gray-50 transition-colors disabled:opacity-50">
-                <img src="https://www.google.com/favicon.ico" width="18" height="18" alt="" />
-                Continue with Google
-              </button>
               <div className="flex items-center gap-3 my-1">
                 <div className="flex-1 h-px bg-gray-200"></div>
                 <span className="text-xs text-gray-400">or</span>
