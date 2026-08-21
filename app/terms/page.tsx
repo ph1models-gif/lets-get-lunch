@@ -1,4 +1,4 @@
-{/* Boilerplate drafted for Google OAuth verification; not lawyer-reviewed. Have counsel review before scaling. */}
+{/* Boilerplate drafted for Google/Apple OAuth verification and App Store review; not lawyer-reviewed. Have counsel review before scaling. */}
 export const metadata = { title: "Terms of Service" };
 
 export default function TermsPage() {
@@ -13,13 +13,13 @@ export default function TermsPage() {
             </div>
           </a>
           <h1 className="text-2xl font-bold text-gray-900">Terms of Service</h1>
-          <p className="text-sm text-gray-500 mt-1">Last updated: May 26, 2026</p>
+          <p className="text-sm text-gray-500 mt-1">Last updated: August 21, 2026</p>
         </div>
         <div className="bg-white rounded-2xl p-8 shadow-sm text-gray-700 text-base leading-relaxed space-y-5">
-          <p>Welcome to Let&apos;s Get Lunch. By using letsgetlunch.nyc you agree to these terms. The service is a directory of New York City prix-fixe lunch specials and a reservation-request tool, provided for informational and convenience purposes.</p>
+          <p>Welcome to Let&apos;s Get Lunch. By using letsgetlunch.nyc or the Let&apos;s Get Lunch iOS app (together, &quot;the service&quot;) you agree to these terms. The service is a directory of New York City prix-fixe lunch specials, a reservation-request tool, and a way to claim exclusive deals at partner restaurants, provided for informational and convenience purposes.</p>
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Reservations</h2>
-            <p>For most listings, requesting a reservation notifies the restaurant or directs you to call or visit them. Let&apos;s Get Lunch does not guarantee a table, specific pricing, availability, or that any particular lunch special will be honored. Those decisions rest with each individual restaurant.</p>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">Reservations and claimed deals</h2>
+            <p>For most listings, requesting a reservation notifies the restaurant or directs you to call or visit them. For exclusive deals, claiming one generates a redemption code you present at the restaurant. Either way, Let&apos;s Get Lunch does not guarantee a table, specific pricing, availability, or that any particular lunch special will be honored. Those decisions rest with each individual restaurant.</p>
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Listing accuracy</h2>
@@ -31,7 +31,7 @@ export default function TermsPage() {
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Accounts</h2>
-            <p>You are responsible for activity under your account. We may suspend or remove accounts that violate these terms or abuse the service.</p>
+            <p>You can create an account with email and password, or sign in with Google or Apple. You are responsible for activity under your account. We may suspend or remove accounts that violate these terms or abuse the service.</p>
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Disclaimer and liability</h2>

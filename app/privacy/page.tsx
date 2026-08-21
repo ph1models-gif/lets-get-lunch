@@ -1,4 +1,4 @@
-{/* Boilerplate drafted for Google OAuth verification; not lawyer-reviewed. Have counsel review before scaling. */}
+{/* Boilerplate drafted for Google/Apple OAuth verification and App Store review; not lawyer-reviewed. Have counsel review before scaling. */}
 export const metadata = { title: "Privacy Policy" };
 
 export default function PrivacyPage() {
@@ -13,13 +13,13 @@ export default function PrivacyPage() {
             </div>
           </a>
           <h1 className="text-2xl font-bold text-gray-900">Privacy Policy</h1>
-          <p className="text-sm text-gray-500 mt-1">Last updated: May 31, 2026</p>
+          <p className="text-sm text-gray-500 mt-1">Last updated: August 21, 2026</p>
         </div>
         <div className="bg-white rounded-2xl p-8 shadow-sm text-gray-700 text-base leading-relaxed space-y-5">
-          <p>Let&apos;s Get Lunch (&quot;we,&quot; &quot;us&quot;) operates letsgetlunch.nyc, a directory of New York City prix-fixe lunch specials where you can browse listings and make reservation requests. This policy explains what we collect and how we use it.</p>
+          <p>Let&apos;s Get Lunch (&quot;we,&quot; &quot;us&quot;) operates letsgetlunch.nyc and the Let&apos;s Get Lunch iOS app, a directory of New York City prix-fixe lunch specials where you can browse listings, make reservation requests, and claim exclusive deals. This policy explains what we collect and how we use it, on the website and in the app alike.</p>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">What we collect</h2>
-            <p>When you create an account, we collect your name, email address, and optionally the neighborhood where you typically eat lunch. If you sign in with Google, we receive your name, email address, and profile picture from Google. When you make a reservation request, we collect the details of that request, such as the restaurant, date, and party size.</p>
+            <p>When you create an account, we collect your name, email address, and optionally the neighborhood where you typically eat lunch. If you sign in with Google or Apple, we receive your name and email address from that provider — if you choose Apple&apos;s &quot;Hide My Email&quot; option, we receive a private relay address instead of your real one, which still works normally for account and email purposes. When you make a reservation request, we collect the details of that request, such as the restaurant, date, and party size. When you claim an exclusive deal, we generate a redemption code tied to your account and that deal, which you present at the restaurant. If you use the map&apos;s &quot;near me&quot; feature or grant the app location permission, we use your device&apos;s location in the moment to show nearby specials — we don&apos;t store a history of your location. If you enable push notifications in the app, we tag your device with your account ID so we can send you relevant notifications.</p>
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">How we use it</h2>
@@ -27,7 +27,7 @@ export default function PrivacyPage() {
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Service providers</h2>
-            <p>We rely on a small number of trusted providers to operate the service, and share data with them only for that purpose: Supabase (authentication and database), Resend (transactional email), Vercel (hosting), and Google (optional sign-in).</p>
+            <p>We rely on a small number of trusted providers to operate the service, and share data with them only for that purpose: Supabase (authentication and database), Resend (transactional email), Vercel (hosting), Google and Apple (optional sign-in), and OneSignal (push notifications in the iOS app).</p>
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Analytics</h2>
@@ -35,7 +35,7 @@ export default function PrivacyPage() {
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Your choices</h2>
-            <p>You can request access to, correction of, or deletion of your personal data at any time by emailing us, and we will respond within a reasonable time.</p>
+            <p>You can request access to, correction of, or deletion of your personal data at any time by emailing us, and we will respond within a reasonable time. You can turn off push notifications at any time in your device&apos;s Settings, and you can revoke location access at any time in your browser or device settings.</p>
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Contact</h2>
