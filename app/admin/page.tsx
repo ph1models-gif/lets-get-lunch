@@ -495,6 +495,29 @@ export default function AdminPage() {
     setEditForm(f => ({ ...f, photo_urls: (f.photo_urls || []).filter(u => u !== url) }))
   }
 
+  function moveExtraPhoto(index: number, delta: number) {
+    setEditForm(f => {
+      const urls = [...(f.photo_urls || [])]
+      const target = index + delta
+      if (target < 0 || target >= urls.length) return f
+      ;[urls[index], urls[target]] = [urls[target], urls[index]]
+      return { ...f, photo_urls: urls }
+    })
+  }
+
+  // Swaps a thumbnail into the main photo slot, bumping the old main photo
+  // into the thumbnail row - so reordering across all 4 slots never needs a
+  // delete-and-reupload round trip.
+  function makeMainPhoto(url: string) {
+    setEditForm(f => {
+      const urls = (f.photo_urls || []).filter(u => u !== url)
+      if (f.photo_url) urls.unshift(f.photo_url)
+      return { ...f, photo_url: url, photo_urls: urls.slice(0, 3) }
+    })
+    setEditMainFile(null)
+    setEditMainPreview(null)
+  }
+
   async function doLogin() {
     const res = await fetch('/api/admin/login', {
       method: 'POST',
@@ -1257,12 +1280,22 @@ export default function AdminPage() {
 
                         {/* Extra photos */}
                         <div>
-                          <p className="text-xs text-gray-500 mb-1">Extra photos (up to 3)</p>
+                          <p className="text-xs text-gray-500 mb-1">Extra photos (up to 3) — use the arrows to reorder, ★ to swap with the main photo</p>
                           <div className="flex gap-2 flex-wrap">
-                            {(editForm.photo_urls || []).map((url, i) => (
-                              <div key={i} className="relative">
-                                <img src={url} alt="" className="w-24 h-16 object-cover rounded-lg" />
-                                <button onClick={() => removeExistingPhoto(url)} className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">×</button>
+                            {(editForm.photo_urls || []).map((url, i, arr) => (
+                              <div key={i} className="w-28">
+                                <div className="relative">
+                                  <img src={url} alt="" className="w-28 h-20 object-cover rounded-lg" />
+                                  <button onClick={() => removeExistingPhoto(url)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
+                                </div>
+                                <div className="flex items-center justify-between mt-1 gap-1">
+                                  <button type="button" onClick={() => moveExtraPhoto(i, -1)} disabled={i === 0}
+                                    className="text-xs px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 disabled:opacity-30 hover:bg-gray-50" title="Move earlier">‹</button>
+                                  <button type="button" onClick={() => makeMainPhoto(url)}
+                                    className="text-[10px] px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 hover:bg-gray-50" title="Set as main photo">★ Main</button>
+                                  <button type="button" onClick={() => moveExtraPhoto(i, 1)} disabled={i === arr.length - 1}
+                                    className="text-xs px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 disabled:opacity-30 hover:bg-gray-50" title="Move later">›</button>
+                                </div>
                               </div>
                             ))}
                             {editExtraPreviews.map((url, i) => (
