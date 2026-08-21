@@ -55,6 +55,17 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>nyc.letsgetlunch.app.auth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>nyc.letsgetlunch.app</string>
+			</array>
+		</dict>
+	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Let's Get Lunch uses your location to show lunch specials near you on the map.</string>
 	<key>UISupportedInterfaceOrientations</key>

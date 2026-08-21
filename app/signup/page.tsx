@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { track } from '@vercel/analytics';
 import { supabase } from '../../lib/supabase';
 import { APPLE_AUTH_ENABLED } from '../../lib/auth';
+import { Capacitor } from '@capacitor/core';
 
 import { NEIGHBORHOODS, NEIGHBORHOOD_GROUPS } from '../../lib/neighborhoods';
 
@@ -68,11 +69,34 @@ export default function SignupPage() {
     // Already signed in (e.g. a stale /signup bookmark or tab): don't kick off
     // a fresh OAuth round trip, which would silently swap in whichever
     // Google account gets picked - just continue on as the current session.
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
+    // getUser() (not getSession()) so a stale/expired local session can't
+    // false-positive this check.
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
       const raw = new URLSearchParams(window.location.search).get('next') || '';
       const safe = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/';
       window.location.href = safe;
+      return;
+    }
+    if (Capacitor.isNativePlatform()) {
+      // Google refuses to load its sign-in screen inside this app's own
+      // embedded webview - get the auth URL without letting Supabase
+      // auto-redirect to it, and open it in the system in-app browser
+      // instead. redirectTo points at this app's own custom URL scheme;
+      // CapacitorAuthCallback.tsx (mounted in layout.tsx) catches it coming
+      // back and finishes the sign-in - the website's own /auth/callback is
+      // untouched by this and not part of the native path at all.
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `nyc.letsgetlunch.app://auth-callback${window.location.search}`,
+          skipBrowserRedirect: true,
+        },
+      });
+      if (error || !data?.url) { setError(error?.message || 'Could not start sign-in.'); setLoading(false); return; }
+      const { Browser } = await import('@capacitor/browser');
+      await Browser.open({ url: data.url });
+      setLoading(false);
       return;
     }
     const { error } = await supabase.auth.signInWithOAuth({
@@ -85,11 +109,26 @@ export default function SignupPage() {
   async function handleApple() {
     setLoading(true); setError('');
     // Same already-signed-in guard as Google, above.
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
       const raw = new URLSearchParams(window.location.search).get('next') || '';
       const safe = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/';
       window.location.href = safe;
+      return;
+    }
+    if (Capacitor.isNativePlatform()) {
+      // Same native in-app-browser + custom-scheme handoff as Google, above.
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo: `nyc.letsgetlunch.app://auth-callback${window.location.search}`,
+          skipBrowserRedirect: true,
+        },
+      });
+      if (error || !data?.url) { setError(error?.message || 'Could not start sign-in.'); setLoading(false); return; }
+      const { Browser } = await import('@capacitor/browser');
+      await Browser.open({ url: data.url });
+      setLoading(false);
       return;
     }
     const { error } = await supabase.auth.signInWithOAuth({
