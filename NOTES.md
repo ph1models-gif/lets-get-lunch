@@ -1,5 +1,44 @@
 # Let's Get Lunch — Project Notes
-**Last updated: August 21, 2026**
+**Last updated: August 22, 2026**
+
+## ⏳ Submitted to the App Store, awaiting review (Aug 21-22, 2026)
+
+- V1 (1.0, build 1) submitted for App Store review the evening of Aug 21.
+  Waiting on Apple - typical turnaround 24-48 hours.
+- What shipped in this pass: restricted the app to iPhone-only (was
+  universal iPhone+iPad by Capacitor's default, but iPad was never tested -
+  simpler to leave that for later), pre-answered the export-compliance
+  question (`ITSAppUsesNonExemptEncryption: false` in Info.plist, standard
+  HTTPS only), replaced the newsletter page's standalone email-capture form
+  with a real "Sign up for Let's Get Lunch" account signup (confirmed
+  against production data that `profiles.email_frequency` already defaults
+  to `'weekly'`, so a real account gets the newsletter automatically -
+  removed the now-fully-unused `NewsletterSignup.tsx` and
+  `/api/newsletter-signup` route entirely), and updated Privacy Policy /
+  Terms to cover Apple sign-in, the app, push notifications, and location
+  use.
+- App Store Connect setup done: app record created, category (Food & Drink),
+  description/keywords/support+marketing URLs, App Privacy nutrition label
+  (Location - not linked to identity; Name/Email/User ID/Device ID - linked
+  to identity; all "App Functionality" only, nothing for
+  tracking/ads/analytics), age rating (Infrequent/Mild alcohol reference -
+  restaurant listings mention things like "craft cocktails," so "None"
+  would've been inaccurate), Digital Services Act trader status, App Review
+  Information with a real test account + notes on how to test the claim
+  flow. Free Apps Agreement already active; skipped bank account/tax forms
+  since there's no paid content.
+- Screenshots: captured on an iPhone 17 Pro Max simulator, then resized
+  locally with `sips` to 1284x2778 (iPhone 17 Pro Max's native resolution
+  isn't one of Apple's accepted screenshot sizes for the 6.5" slot - had to
+  downscale to match).
+- Build: archived and uploaded via `xcodebuild archive` from the command
+  line + Xcode Organizer's "Distribute App" flow, rather than sitting
+  through a full interactive Xcode session.
+- Gotcha for next time: an image accidentally got embedded as literal code
+  in `AppDelegate.swift` (`#imageLiteral(...)`) - happens if a screenshot
+  gets dragged onto Xcode's editor while a source file is focused. Caught
+  before it was ever committed; worth remembering if a native build
+  mysteriously fails to compile after screenshot-heavy back-and-forth.
 
 ## ✅ Auth: native Google sign-in fixed, already-signed-in bug fixed, Sign in with Apple built behind a flag (Aug 21, 2026)
 
