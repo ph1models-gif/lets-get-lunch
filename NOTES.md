@@ -1,5 +1,42 @@
 # Let's Get Lunch — Project Notes
-**Last updated: August 22, 2026**
+**Last updated: August 25, 2026**
+
+## ⏳ App Store: 2nd rejection (Aug 25) - building account deletion now
+
+- 1st rejection (Aug 21-22, Guideline 2.1 "Information Needed") was resolved by
+  replying in the Resolution Center with a detailed Notes writeup (app
+  description, device tested - iPhone 15 Pro / iOS 18.7.8, demo account,
+  external services list, regional/regulated-industry answers) plus a
+  physical-device screen recording. That reply auto-resubmitted the app -
+  no separate "Add for Review" click needed for this rejection type.
+- 2nd rejection (Aug 25, reviewed on iPad Air 11" M3): **Guideline 5.1.1(v)
+  - Data Collection and Storage**. Real, legitimate gap - the app has no
+  in-app account deletion, only deactivation-free sign-out. Apple requires
+  actual self-service deletion, not just a "contact us to delete" email
+  flow. This needs real code, not just a reply.
+- Decisions made with Brian for the fix:
+  - Claims and reservations are **anonymized, not deleted**, when an
+    account is deleted - strip name/email/user-id linkage but keep the
+    redemption/reservation records themselves, since restaurant partners
+    need redemption counts to keep adding up (their core promise as a
+    partner). This is a deliberate exception to full erasure, specifically
+    because `claims` is redemption data restaurants rely on, per the
+    project's own "claims table is sensitive" note - anonymizing instead
+    of deleting was Brian's explicit call, not assumed.
+  - New account menu replacing the current "Hi, {name}" + separate "Sign
+    Out" link in the header (in both HomeClient.tsx and
+    RestaurantClient.tsx): a dropdown with **My Claims** (their claimed
+    specials, codes, dates), **Preferred Lunch Area** (single neighborhood,
+    becomes default map center), **Account Settings** (email + the new
+    Delete Account flow), **Sign Out**. Mobile-friendly (tap to open/tap
+    outside to close).
+  - Privacy Policy needs updating too - currently says deletion requests go
+    through email only; needs to mention in-app deletion, and the
+    anonymize-not-delete handling for claims/reservations specifically.
+  - Once built, needs a *new* screen recording (physical device) showing
+    sign-in -> find account deletion -> complete flow, replied into the
+    same Resolution Center thread.
+- Not yet built as of this note - about to start implementation.
 
 ## ⏳ Submitted to the App Store, awaiting review (Aug 21-22, 2026)
 
