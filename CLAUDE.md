@@ -69,5 +69,16 @@ than walking through diffs. Verify claims about "what's done" against the
 actual code/git history rather than taking prior-session summaries at face
 value.
 
+When a task requires Brian to run something himself (a terminal command, a
+SQL statement in Supabase's editor, anything outside what I can do directly),
+give him more than the bare command. Always include: which app to open (e.g.
+"Supabase dashboard > SQL Editor", "Terminal"); exactly what to paste, with
+any placeholder clearly marked and what to replace it with; what to leave
+alone / not touch; what he should see when it works; what it means if it
+fails or errors, and whether that's safe to ignore or needs to come back to
+me; and whether anything needs to happen first (ordering/dependencies). He'd
+rather have four extra sentences of explanation than make a mistake against
+production.
+
 ## Environment
 macOS 15.7.3, Xcode 26.1. Local builds only, no CI.
