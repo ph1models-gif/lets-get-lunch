@@ -1,5 +1,50 @@
 # Let's Get Lunch — Project Notes
-**Last updated: August 25, 2026**
+**Last updated: August 26, 2026**
+
+## 🔧 Diagnosed both live bugs (Aug 26, 2026) — My Claims already fixed & deployed; Account deletion blocked on a DB constraint, migration needed
+
+- **My Claims (Bug 1): already fixed, confirmed live, no action needed.**
+  The two fixes from earlier today (`5e81e9b` "don't assume FK-embedded
+  joins", `29c8462` "disable caching on the route") were already on `main`
+  and deployed before this diagnosis session started — this session's
+  local checkout was just stale (36 commits behind `origin/main`; pulled
+  up to date first). Verified end-to-end against *production*, not just by
+  reading the code: created a disposable test account + a `claims` row
+  directly via the service-role key, signed in as that test user, hit the
+  live `/api/account/claims` route within a second of creating the claim —
+  it came back immediately, no staleness. Test account/claim fully deleted
+  afterward.
+
+- **Account deletion (Bug 2): real bug, root cause confirmed live, fix is
+  a DB migration, not a code change.**
+  `app/api/account/delete/route.ts` anonymizes by setting
+  `claims.user_id` (and `reservations.name`/`contact`) to `null` — but per
+  the live schema (checked via the Supabase REST OpenAPI spec with the
+  service-role key), `claims.user_id` is `NOT NULL` with no default, and so
+  are `reservations.name`/`contact`. Confirmed live with the same
+  disposable-account method as above: called `POST /api/account/delete` as
+  a test user with one seeded claim, got back
+  `{"error":"Failed to process account data"}`, and the claims row came
+  back completely untouched — the anonymize-claims step fails on the NOT
+  NULL constraint before the flow ever reaches profile/auth deletion.
+  Anyone who has ever made a claim hits this (and, separately, anyone
+  who's made a reservation would hit the same class of failure on
+  `reservations.name`/`contact`). Test account/claim/profile/auth user all
+  deleted again afterward — nothing left in production from testing.
+  - The route's own logic is already correct for a world where these
+    columns are nullable — no code change needed once the schema allows it.
+  - Couldn't apply the fix myself: no direct Postgres connection in this
+    environment (no `DATABASE_URL`/psql), and the service-role REST key
+    can do table reads/writes but not DDL. Needs Brian to run this in
+    Supabase's SQL Editor — no redeploy required afterward, the code is
+    already live and waiting on the schema:
+    ```sql
+    ALTER TABLE claims ALTER COLUMN user_id DROP NOT NULL;
+    ALTER TABLE reservations ALTER COLUMN name DROP NOT NULL;
+    ALTER TABLE reservations ALTER COLUMN contact DROP NOT NULL;
+    ```
+  - **BLOCKED on Brian running the SQL above.** Once run, retry account
+    deletion with a real (or throwaway) account to confirm end-to-end.
 
 ## ⏳ App Store: 2nd rejection (Aug 25) - building account deletion now
 
