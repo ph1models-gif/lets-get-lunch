@@ -2,6 +2,7 @@
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
+import AccountMenu from '../../components/AccountMenu';
 
 interface Restaurant {
   id: string;
@@ -321,11 +322,7 @@ export default function RestaurantClient() {
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 pb-3 pt-[calc(12px+env(safe-area-inset-top))] flex items-center justify-between">
         <a href="/" className="text-[#4A9FD5] text-sm font-medium">&larr; Back to results</a>
         {userFirstName ? (
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600">Hi, {userFirstName}</span>
-            <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }}
-              className="text-sm text-gray-400 hover:text-gray-600">Sign out</button>
-          </div>
+          <AccountMenu userFirstName={userFirstName} />
         ) : (
           <a href={loginHref} className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full font-medium hover:bg-[#3a8fc5]">Sign in</a>
         )}
