@@ -186,19 +186,46 @@ function PreferredAreaModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+const EMAIL_FREQUENCY_OPTIONS: { value: string; label: string; desc: string }[] = [
+  { value: 'daily', label: 'Daily', desc: "Today's exclusive lunches" },
+  { value: 'weekly', label: 'Weekly', desc: 'The Monday roundup' },
+  { value: 'monthly', label: 'Monthly', desc: 'Once a month' },
+  { value: 'off', label: 'Off', desc: "No emails — I'll check the map myself" },
+];
+
 function AccountSettingsModal({ onClose }: { onClose: () => void }) {
   const [email, setEmail] = useState('');
+  const [frequency, setFrequency] = useState<string | null>(null);
+  const [savingFrequency, setSavingFrequency] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user?.email) setEmail(user.email);
-    });
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      if (user.email) setEmail(user.email);
+      const { data } = await supabase.from('profiles').select('email_frequency').eq('id', user.id).single();
+      setFrequency(data?.email_frequency || 'weekly');
+    })();
   }, []);
+
+  async function handleFrequencyChange(value: string) {
+    const prev = frequency;
+    setFrequency(value);
+    setSavingFrequency(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setFrequency(prev); setSavingFrequency(false); return; }
+    const { error } = await supabase
+      .from('profiles')
+      .update({ email_frequency: value, email_pref_updated_at: new Date().toISOString() })
+      .eq('id', user.id);
+    if (error) setFrequency(prev);
+    setSavingFrequency(false);
+  }
 
   return (
     <div className="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl max-w-sm w-full p-6 relative" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-white rounded-2xl max-w-sm w-full p-6 relative max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600" aria-label="Close">
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -208,6 +235,21 @@ function AccountSettingsModal({ onClose }: { onClose: () => void }) {
         <div className="mb-6">
           <p className="text-xs text-gray-500 mb-1">Email</p>
           <p className="text-sm text-gray-800">{email || '—'}</p>
+        </div>
+        <div className="mb-6">
+          <p className="text-sm font-medium text-gray-900 mb-1">Email frequency</p>
+          <p className="text-xs text-gray-500 mb-3">How often should we send you lunch?</p>
+          {EMAIL_FREQUENCY_OPTIONS.map((o) => (
+            <button
+              key={o.value}
+              onClick={() => handleFrequencyChange(o.value)}
+              disabled={savingFrequency || frequency === null}
+              className={`w-full text-left px-4 py-2.5 rounded-xl mb-2 border transition-colors disabled:opacity-60 ${frequency === o.value ? 'border-[#4A9FD5] bg-[#EEF6FC]' : 'border-gray-200 hover:bg-gray-50'}`}
+            >
+              <span className="text-sm font-medium text-gray-900">{o.label}</span>
+              <span className="block text-xs text-gray-500">{o.desc}</span>
+            </button>
+          ))}
         </div>
         <div className="border-t border-gray-100 pt-4">
           <button
