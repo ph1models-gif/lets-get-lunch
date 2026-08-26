@@ -96,7 +96,7 @@ function MyClaimsModal({ onClose }: { onClose: () => void }) {
       const token = session?.access_token;
       if (!token) { setError('You need to be signed in.'); return; }
       try {
-        const res = await fetch('/api/account/claims', { headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch('/api/account/claims', { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
         const json = await res.json();
         if (!res.ok) { setError(json.error || 'Failed to load claims.'); return; }
         setClaims(json.claims);

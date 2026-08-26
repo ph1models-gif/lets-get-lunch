@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin as supabase } from '../../../../lib/supabaseAdmin'
 
+// Per-user data behind a bearer token — never cache/statically-optimize
+// this route, or one user's response can get served to (or reused for) a
+// later request.
+export const dynamic = 'force-dynamic'
+
 // claims is a sensitive table (real redemption codes) with no client-facing
 // RLS read access, so this route reads it server-side with the service
 // role key and returns only this user's own rows.
