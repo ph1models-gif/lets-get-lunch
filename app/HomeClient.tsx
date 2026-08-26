@@ -1,7 +1,7 @@
 'use client';
 import dynamic from 'next/dynamic';
 import MapComponent from './components/Map';
-import NeighborhoodSearch from './components/NeighborhoodSearch';
+import NeighborhoodSearch, { NEIGHBORHOOD_COORDS } from './components/NeighborhoodSearch';
 import AccountMenu from './components/AccountMenu';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
@@ -27,6 +27,9 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
   const [walkInOnly, setWalkInOnly] = useState(false);
   const [selectedHood, setSelectedHood] = useState('');
   const mapPanRef = useRef<((lat: number, lng: number) => void) | null>(null);
+  const [mapReady, setMapReady] = useState(false);
+  const [preferredCoords, setPreferredCoords] = useState<{lat: number, lng: number} | null>(null);
+  const pannedToPreferredRef = useRef(false);
   const [mapBounds, setMapBounds] = useState<{north: number, south: number, east: number, west: number} | null>(null);
   const [userFirstName, setUserFirstName] = useState('');
   const [claimMode, setClaimMode] = useState(false);
@@ -77,9 +80,11 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
     // Check auth state and listen for changes
     const checkUser = async (user: any) => {
       if (user) {
-        const { data } = await supabase.from('profiles').select('name').eq('id', user.id).single();
+        const { data } = await supabase.from('profiles').select('name, neighborhood').eq('id', user.id).single();
         if (data?.name) setUserFirstName(data.name.split(' ')[0]);
         else setUserFirstName('there');
+        const coords = data?.neighborhood ? NEIGHBORHOOD_COORDS[data.neighborhood] : null;
+        if (coords) setPreferredCoords({ lat: coords.lat, lng: coords.lng });
       } else {
         setUserFirstName('');
       }
@@ -93,6 +98,17 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
       authListener.subscription.unsubscribe();
     };
   }, []);
+
+  // Pan to the signed-in user's preferred lunch neighborhood once, as soon
+  // as both the map and the profile lookup are ready (order between the two
+  // isn't guaranteed). Never re-pans after that, so it doesn't fight manual
+  // map interaction later in the session.
+  useEffect(() => {
+    if (pannedToPreferredRef.current) return;
+    if (!mapReady || !preferredCoords || !mapPanRef.current) return;
+    pannedToPreferredRef.current = true;
+    mapPanRef.current(preferredCoords.lat, preferredCoords.lng);
+  }, [mapReady, preferredCoords]);
 
   const CUISINE_PILLS: { label: string; value: string }[] = [
     { label: 'Italian', value: 'Italian' },
@@ -211,7 +227,7 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
         </div>
       </section>
 
-      <MapComponent onPanReady={(fn) => { mapPanRef.current = fn; }} activeIds={filtered.map(r => r.id)} onBoundsChange={setMapBounds} onGeolocationResolved={handleGeolocationResolved} restaurants={restaurants} />
+      <MapComponent onPanReady={(fn) => { mapPanRef.current = fn; setMapReady(true); }} activeIds={filtered.map(r => r.id)} onBoundsChange={setMapBounds} onGeolocationResolved={handleGeolocationResolved} restaurants={restaurants} />
 
       <section className="px-4 py-3">
         <p className="text-sm text-gray-500">{filtered.length} lunch {filtered.length === 1 ? 'special' : 'specials'} in this area · Scroll for details ↓</p>

@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 
-const NEIGHBORHOODS: Record<string, {borough: string, lat: number, lng: number}> = {
+export const NEIGHBORHOOD_COORDS: Record<string, {borough: string, lat: number, lng: number}> = {
   "Midtown": {borough:"Manhattan",lat:40.7549,lng:-73.9840},
   "Upper East Side": {borough:"Manhattan",lat:40.7736,lng:-73.9566},
   "Upper West Side": {borough:"Manhattan",lat:40.7870,lng:-73.9754},
@@ -91,7 +91,7 @@ export default function NeighborhoodSearch({ onChange, onSelect }: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
   const results = query.length >= 1
-    ? Object.entries(NEIGHBORHOODS)
+    ? Object.entries(NEIGHBORHOOD_COORDS)
         .filter(([name]) => name.toLowerCase().includes(query.toLowerCase()))
         .sort(([a], [b]) => {
           const q = query.toLowerCase();

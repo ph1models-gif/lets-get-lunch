@@ -1,9 +1,12 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import { NEIGHBORHOODS } from '../../lib/neighborhoods';
 
 export default function AccountMenu({ userFirstName }: { userFirstName: string }) {
   const [open, setOpen] = useState(false);
+  const [showClaims, setShowClaims] = useState(false);
+  const [showArea, setShowArea] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -33,7 +36,19 @@ export default function AccountMenu({ userFirstName }: { userFirstName: string }
         </svg>
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+        <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+          <button
+            onClick={() => { setShowClaims(true); setOpen(false); }}
+            className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+          >
+            My Claims
+          </button>
+          <button
+            onClick={() => { setShowArea(true); setOpen(false); }}
+            className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+          >
+            Preferred Lunch Area
+          </button>
           <button
             onClick={() => { setShowSettings(true); setOpen(false); }}
             className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
@@ -48,8 +63,126 @@ export default function AccountMenu({ userFirstName }: { userFirstName: string }
           </button>
         </div>
       )}
+      {showClaims && <MyClaimsModal onClose={() => setShowClaims(false)} />}
+      {showArea && <PreferredAreaModal onClose={() => setShowArea(false)} />}
       {showSettings && <AccountSettingsModal onClose={() => setShowSettings(false)} />}
     </div>
+  );
+}
+
+function ModalShell({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  return (
+    <div className="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl max-w-sm w-full p-6 relative max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600" aria-label="Close">
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{title}</h2>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function MyClaimsModal({ onClose }: { onClose: () => void }) {
+  const [claims, setClaims] = useState<any[] | null>(null);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) { setError('You need to be signed in.'); return; }
+      try {
+        const res = await fetch('/api/account/claims', { headers: { Authorization: `Bearer ${token}` } });
+        const json = await res.json();
+        if (!res.ok) { setError(json.error || 'Failed to load claims.'); return; }
+        setClaims(json.claims);
+      } catch (e) {
+        setError('Failed to load claims.');
+      }
+    })();
+  }, []);
+
+  return (
+    <ModalShell title="My Claims" onClose={onClose}>
+      {error && <p className="text-sm text-red-600">{error}</p>}
+      {!error && claims === null && <p className="text-sm text-gray-500">Loading…</p>}
+      {!error && claims?.length === 0 && <p className="text-sm text-gray-500">You haven&apos;t claimed any exclusive specials yet.</p>}
+      {claims && claims.length > 0 && (
+        <div className="space-y-3">
+          {claims.map((c, i) => (
+            <div key={i} className="border border-gray-100 rounded-xl p-3">
+              <p className="text-sm font-medium text-gray-900">{c.restaurant_name || 'Restaurant'}</p>
+              {c.special && <p className="text-xs text-gray-500 mb-1">{c.special}</p>}
+              <div className="flex items-center justify-between mt-1">
+                <span className="text-sm font-semibold text-[#4A9FD5]">{c.display_code}</span>
+                {c.created_at && (
+                  <span className="text-xs text-gray-400">{new Date(c.created_at).toLocaleDateString()}</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </ModalShell>
+  );
+}
+
+function PreferredAreaModal({ onClose }: { onClose: () => void }) {
+  const [neighborhood, setNeighborhood] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase.from('profiles').select('neighborhood').eq('id', user.id).single();
+      if (data?.neighborhood) setNeighborhood(data.neighborhood);
+    })();
+  }, []);
+
+  async function handleSave() {
+    setSaving(true);
+    setError('');
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setError('You need to be signed in.'); setSaving(false); return; }
+    const { error: updateErr } = await supabase
+      .from('profiles')
+      .update({ neighborhood: neighborhood || null })
+      .eq('id', user.id);
+    setSaving(false);
+    if (updateErr) { setError('Failed to save. Please try again.'); return; }
+    setSaved(true);
+    setTimeout(() => window.location.reload(), 600);
+  }
+
+  return (
+    <ModalShell title="Preferred Lunch Area" onClose={onClose}>
+      <p className="text-sm text-gray-600 mb-4">
+        Pick the neighborhood you usually eat lunch in — the map will open centered there.
+      </p>
+      <select
+        value={neighborhood}
+        onChange={(e) => setNeighborhood(e.target.value)}
+        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base mb-4 focus:outline-none focus:border-[#4A9FD5]"
+      >
+        <option value="">No preference</option>
+        {NEIGHBORHOODS.map((n) => <option key={n} value={n}>{n}</option>)}
+      </select>
+      {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
+      <button
+        onClick={handleSave}
+        disabled={saving}
+        className="w-full py-2.5 rounded-full text-sm font-semibold text-white bg-[#4A9FD5] hover:bg-[#3a8fc5] disabled:opacity-50"
+      >
+        {saving ? 'Saving…' : saved ? 'Saved!' : 'Save'}
+      </button>
+    </ModalShell>
   );
 }
 
