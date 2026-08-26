@@ -13,7 +13,7 @@ export default function PrivacyPage() {
             </div>
           </a>
           <h1 className="text-2xl font-bold text-gray-900">Privacy Policy</h1>
-          <p className="text-sm text-gray-500 mt-1">Last updated: August 21, 2026</p>
+          <p className="text-sm text-gray-500 mt-1">Last updated: August 25, 2026</p>
         </div>
         <div className="bg-white rounded-2xl p-8 shadow-sm text-gray-700 text-base leading-relaxed space-y-5">
           <p>Let&apos;s Get Lunch (&quot;we,&quot; &quot;us&quot;) operates letsgetlunch.nyc and the Let&apos;s Get Lunch iOS app, a directory of New York City prix-fixe lunch specials where you can browse listings, make reservation requests, and claim exclusive deals. This policy explains what we collect and how we use it, on the website and in the app alike.</p>
@@ -35,7 +35,7 @@ export default function PrivacyPage() {
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Your choices</h2>
-            <p>You can request access to, correction of, or deletion of your personal data at any time by emailing us, and we will respond within a reasonable time. You can turn off push notifications at any time in your device&apos;s Settings, and you can revoke location access at any time in your browser or device settings.</p>
+            <p>You can delete your account at any time from Account Settings in the app or on the website (tap your name in the top right, then Account Settings). This permanently deletes your profile and sign-in. Any exclusive deal codes you&apos;ve claimed or reservation requests you&apos;ve made stay on record — our restaurant partners rely on that redemption history — but we remove your name and email from them so they can no longer be traced back to you. You can also request access to, correction of, or deletion of your personal data at any time by emailing us, and we will respond within a reasonable time. You can turn off push notifications at any time in your device&apos;s Settings, and you can revoke location access at any time in your browser or device settings.</p>
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Contact</h2>

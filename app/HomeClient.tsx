@@ -2,6 +2,7 @@
 import dynamic from 'next/dynamic';
 import MapComponent from './components/Map';
 import NeighborhoodSearch from './components/NeighborhoodSearch';
+import AccountMenu from './components/AccountMenu';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import Image from 'next/image';
@@ -157,11 +158,7 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
         </div>
         <div className="flex gap-3">
 {userFirstName ? (
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600">Hi, {userFirstName}</span>
-              <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }}
-                className="text-sm text-gray-400 hover:text-gray-600">Sign out</button>
-            </div>
+            <AccountMenu userFirstName={userFirstName} />
           ) : (
             claimMode ? (
               <a href="/signup" className="text-sm bg-gray-900 text-white px-5 py-2 rounded-full font-semibold hover:bg-black shadow-sm text-center leading-tight max-w-[140px] sm:max-w-none">Claim <span className="text-[#4A9FD5]">exclusive</span> specials</a>
