@@ -1,7 +1,7 @@
 # Let's Get Lunch — Project Notes
 **Last updated: August 26, 2026**
 
-## 🔧 Diagnosed both live bugs (Aug 26, 2026) — My Claims already fixed & deployed; Account deletion blocked on a DB constraint, migration needed
+## ✅ Both live bugs resolved (Aug 26, 2026) — My Claims was already fixed; Account deletion fixed via DB migration, verified end-to-end
 
 - **My Claims (Bug 1): already fixed, confirmed live, no action needed.**
   The two fixes from earlier today (`5e81e9b` "don't assume FK-embedded
@@ -43,8 +43,21 @@
     ALTER TABLE reservations ALTER COLUMN name DROP NOT NULL;
     ALTER TABLE reservations ALTER COLUMN contact DROP NOT NULL;
     ```
-  - **BLOCKED on Brian running the SQL above.** Once run, retry account
-    deletion with a real (or throwaway) account to confirm end-to-end.
+  - **RESOLVED — Brian ran the SQL above.** Re-verified live immediately
+    after: created a fresh disposable test account with both a seeded
+    `claims` row and a seeded `reservations` row, signed in as that user,
+    called `POST /api/account/delete` for real — got `{"success":true}`.
+    Confirmed after: the `claims` row survived with `user_id: null` (code/
+    party size/restaurant/deal intact — exactly the anonymize-not-delete
+    behavior the feature was designed for), the `reservations` row survived
+    with `user_id`/`name`/`contact` all `null`, the `profiles` row was
+    gone, and the Supabase auth user was gone (404 on lookup). Deleted the
+    leftover fake claim/reservation rows afterward (not real redemptions,
+    no reason to leave test data in partner-facing counts) — nothing left
+    in production from testing. **Both App Store 5.1.1(v) bugs are done.**
+    Next step for App Store submission (not a code task): record the new
+    physical-device screen recording of the full delete flow and reply in
+    the Resolution Center thread.
 
 ## ⏳ App Store: 2nd rejection (Aug 25) - building account deletion now
 
