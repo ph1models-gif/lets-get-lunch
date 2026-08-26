@@ -24,17 +24,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to process account data' }, { status: 500 })
     }
 
-    // reservations has no user_id column (never linked to accounts) — the
-    // only link back to this person is the raw contact string they typed.
-    if (user.email) {
-      const { error: resErr } = await supabase
-        .from('reservations')
-        .update({ name: null, contact: null })
-        .ilike('contact', user.email)
-      if (resErr) {
-        console.error('Delete account — reservations anonymize error:', resErr)
-        return NextResponse.json({ error: 'Failed to process account data' }, { status: 500 })
-      }
+    // Reservations made while signed in carry user_id directly; older rows
+    // (or ones made before this account existed under a different flow) are
+    // only linked by the raw contact string typed at the time — match both.
+    const reservationFilters = [`user_id.eq.${user.id}`]
+    if (user.email) reservationFilters.push(`contact.ilike.${user.email}`)
+    const { error: resErr } = await supabase
+      .from('reservations')
+      .update({ user_id: null, name: null, contact: null })
+      .or(reservationFilters.join(','))
+    if (resErr) {
+      console.error('Delete account — reservations anonymize error:', resErr)
+      return NextResponse.json({ error: 'Failed to process account data' }, { status: 500 })
     }
 
     const { error: profileErr } = await supabase.from('profiles').delete().eq('id', user.id)
