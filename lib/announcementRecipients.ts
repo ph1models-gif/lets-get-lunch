@@ -19,6 +19,7 @@ export async function getAnnouncementRecipients(): Promise<AnnouncementRecipient
     .from('profiles')
     .select('email, email_pref_token')
     .neq('email_frequency', 'off')
+    .eq('marketing_opt_in', true)
   if (profErr) throw profErr
 
   return (profiles || []).filter(

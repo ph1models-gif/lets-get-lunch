@@ -10,7 +10,7 @@ function generateCode(): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { restaurant_id, restaurant_name, name, contact, party_size, preferred_time } = await req.json()
+    const { restaurant_id, restaurant_name, name, contact, party_size, preferred_time, user_id } = await req.json()
 
     const code = generateCode()
 
@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
       preferred_time,
       code,
       status: 'pending',
+      user_id: user_id || null,
     })
 
     if (dbError) {

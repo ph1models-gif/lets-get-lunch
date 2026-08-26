@@ -27,6 +27,7 @@ function validatePassword(pw: string): string | null {
 
 export default function SignupPage() {
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '', neighborhood: '' });
+  const [marketingOptIn, setMarketingOptIn] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -54,6 +55,7 @@ export default function SignupPage() {
         id: data.user.id, name: fullName,
         email: form.email,
         neighborhood: form.neighborhood || null,
+        marketing_opt_in: marketingOptIn,
       });
       track('signup_completed');
       setSuccess(true);
@@ -224,6 +226,12 @@ export default function SignupPage() {
                   {NEIGHBORHOODS.map(n => <option key={n} value={n}>{n}</option>)}
                 </select>
               </div>
+
+              <label className="flex items-start gap-2.5 cursor-pointer">
+                <input type="checkbox" checked={marketingOptIn} onChange={e => setMarketingOptIn(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-[#4A9FD5]" />
+                <span className="text-sm text-gray-600">Send me new lunch specials as they go live.</span>
+              </label>
 
               <button onClick={handleSignUp} disabled={loading}
                 className="w-full bg-[#4A9FD5] text-white py-3.5 rounded-xl font-semibold text-base hover:bg-[#3a8fc5] transition-colors disabled:opacity-50 mt-2">

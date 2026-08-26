@@ -71,6 +71,7 @@ export default function RestaurantClient() {
   // Auth
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [marketingOptIn, setMarketingOptIn] = useState(true);
   const [signInEmail, setSignInEmail] = useState('');
   const [signInPassword, setSignInPassword] = useState('');
 
@@ -180,6 +181,7 @@ export default function RestaurantClient() {
         name: `${form.firstName} ${form.lastName}`,
         email: form.email,
         contact: form.email,
+        marketing_opt_in: marketingOptIn,
       });
       setUserFirstName(form.firstName);
       setUserName(`${form.firstName} ${form.lastName}`);
@@ -579,6 +581,11 @@ export default function RestaurantClient() {
                         <p className="text-red-500 text-xs mt-1">Passwords do not match.</p>
                       )}
                     </div>
+                    <label className="flex items-start gap-2.5 cursor-pointer">
+                      <input type="checkbox" checked={marketingOptIn} onChange={e => setMarketingOptIn(e.target.checked)}
+                        className="mt-0.5 w-4 h-4 accent-[#4A9FD5]" />
+                      <span className="text-sm text-gray-600">Send me new lunch specials as they go live.</span>
+                    </label>
                     <button onClick={handleCreateAndReserve} disabled={submitting || !password || password !== confirmPassword}
                       className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50">
                       {submitting ? 'Confirming...' : 'Confirm Reservation'}
