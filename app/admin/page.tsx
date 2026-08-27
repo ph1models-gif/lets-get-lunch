@@ -91,8 +91,34 @@ function ReservationsView({ reservations, resView }: { reservations: any[], resV
 
   const repeatCount = Object.values(contactCount).filter(c => c > 1).length
 
+  // Demand by restaurant — who's actually getting booked through the
+  // honest non-partner hand-off, sorted highest first. This is the "warm
+  // sales list" data: proof of real diner demand at a restaurant that
+  // isn't a partner yet, useful for outreach.
+  const byRestaurant: Record<string, { name: string; count: number; guests: number }> = {}
+  filtered.forEach((r: any) => {
+    const name = r.restaurants?.name || 'Unknown restaurant'
+    if (!byRestaurant[name]) byRestaurant[name] = { name, count: 0, guests: 0 }
+    byRestaurant[name].count++
+    byRestaurant[name].guests += r.party_size || 1
+  })
+  const topRestaurants = Object.values(byRestaurant).sort((a, b) => b.count - a.count)
+
   return (
     <div className="space-y-3">
+      {topRestaurants.length > 0 && (
+        <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6">
+          <p className="text-sm font-semibold text-gray-900 mb-3">Demand by restaurant</p>
+          <div className="space-y-1.5 max-h-64 overflow-y-auto">
+            {topRestaurants.map(rr => (
+              <div key={rr.name} className="flex items-center justify-between text-sm">
+                <span className="text-gray-700">{rr.name}</span>
+                <span className="text-gray-400">{rr.count} booking{rr.count === 1 ? '' : 's'} · {rr.guests} guest{rr.guests === 1 ? '' : 's'}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="bg-orange-50 rounded-xl p-4 text-center">
           <p className="text-2xl font-bold text-orange-600">{filtered.length}</p>
