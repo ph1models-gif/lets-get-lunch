@@ -1,6 +1,91 @@
 # Let's Get Lunch — Project Notes
 **Last updated: August 27, 2026**
 
+## ✅ Admin: Hours dropdown missing 1pm start times (Aug 27, 2026)
+
+`HOURS_OPTIONS` in `app/admin/page.tsx` only offered start times from
+10:30am through 12pm - a restaurant that opens at 1pm Mon-Fri (came up
+while onboarding a new exclusive listing) had no matching option in any
+of the three places that dropdown is used (Add Listing, pending-vendor
+review, active-listing edit). Added 1pm-3pm through 1pm-5pm.
+
+## ✅ RBAC Phase A: LIVE and confirmed working (Aug 27, 2026)
+
+Full migration run successfully in Supabase's SQL Editor (in small verified
+chunks - see the gotcha below) and Brian's own admin account confirmed
+working end-to-end: signed in at `/admin/login`, landed on `/admin/
+permissions`, old password-gated `/admin` confirmed still working
+unaffected. Olga has been invited from that screen. Phase A is DONE, not
+just built - this is the first real per-user Supabase Auth identity this
+app has ever had, alongside the original `ADMIN_SECRET` flow (untouched,
+Phase B territory to retire it later).
+
+### GOTCHA — copy/pasting multi-line SQL from chat into Supabase's SQL Editor is unreliable, watch for this every time
+Hit THREE distinct corruption modes running this one migration, none of
+them a real SQL bug:
+1. A big multi-statement paste silently lost its `create or replace
+   function ... as $$` header, so Postgres tried to parse the function
+   *body* as top-level SQL (`syntax error at or near "if"`).
+2. A paste came through completely empty (`syntax error at end of input,
+   LINE 0`) - traced to a manual click-and-drag selection across a
+   multi-line code block, not an actual system problem (confirmed the SQL
+   runner itself was fine via a manually-typed `select 1;`).
+3. Worst one: a stray "●" bullet character got inserted at the start of a
+   line and threw a normal syntax error - easy to catch. But the SAME
+   category of corruption almost certainly ALSO silently mangled a
+   `create policy` statement in an earlier successful-looking paste
+   (reported "Success. No rows returned" with no error) - the policy
+   simply didn't end up matching anything, discovered only because I
+   independently tested the RLS-scoped query myself (via an admin-
+   generated session, service-role key from this environment) and got an
+   empty result even though the underlying row definitely existed. **A
+   "Success" message from the SQL Editor is not proof a multi-statement
+   paste executed as intended** if any individual statement's semantics
+   could silently no-op (an idempotent `drop policy if exists` + `create
+   policy` is exactly this shape - if the create half got corrupted in a
+   way that's still valid SQL, e.g. a fine-but-wrong predicate, you'd see
+   no error at all).
+- Fix that worked: use the code block's copy-button (not manual
+  click-drag) and paste one small, single-purpose chunk at a time -
+  ideally followed by a direct read-only verification query - rather than
+  one giant multi-hundred-line block. Painful but reliable. If a *whole
+  migration* reports success with no errors, still worth independently
+  verifying anything security-critical (an RLS policy, in this case)
+  actually behaves as intended before trusting it, rather than taking
+  "Success" at face value.
+
+### What was built (all pushed to `main`)
+- `lib/auth/getUserFromRequest.ts`, `/api/admin/{grant-access,
+  revoke-access,invite-editor,list-editors}`, `/admin/login`,
+  `/admin/permissions`, `/admin/editor` — see the Aug 27 "RBAC Phase A
+  build started" entry below for full detail on each.
+- `supabase/migrations/20260812_rbac.sql` — now actually applied to
+  production, not just written.
+
+### NOT built yet — proposed, plan agreed, execution paused for now
+Brian asked for an edit-history / audit-log feature: track every change
+made to a restaurant or special (who, when, old value → new value per
+field), shown as a new tab in the existing `/admin` panel, with a
+"Revert this edit" button per entry. Agreed approach before pausing:
+- New `edit_history` table + an `AFTER UPDATE` trigger on `restaurants`
+  and `deals` that snapshots both the before and after row as jsonb -
+  fires regardless of who makes the edit (Olga via RLS, or Brian via the
+  old service-role panel), so `editor_user_id` naturally ends up NULL for
+  service-role edits and a real UUID for RLS-authenticated editor edits -
+  no extra logic needed to tell them apart.
+- Revert = restore the row to that entry's stored "before" snapshot.
+- Open question Brian hasn't answered yet: log *only* Olga's edits, or
+  *everyone's* (leaning everyone, his call).
+- Reassurance already confirmed true, not just assumed: editors cannot
+  delete a restaurant or a deal at all - no DELETE RLS policy exists for
+  the editor role, enforced at the database level. So this feature is
+  about undoing a bad *edit*, not recovering a deletion - there's no
+  deletion path for editors to recover from in the first place.
+- **Not started.** Explicitly paused per Brian's own "let's log this
+  idea for now" - resume when he says go.
+
+## Reservations data cleanup + map crash fix + demand view (Aug 27, 2026)
+
 ## Reservations data cleanup + map crash fix + demand view (Aug 27, 2026)
 
 - Deleted 45 reservation rows tied to Brian's own known test accounts
