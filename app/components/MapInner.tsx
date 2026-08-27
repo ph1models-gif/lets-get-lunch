@@ -47,12 +47,36 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange, onGeol
   }, [activeIds]);
 
   useEffect(() => {
-    if ((window as any).google) { initMap(); return; }
+    if (mapsReady()) { safeInitMap(); return; }
     const interval = setInterval(() => {
-      if ((window as any).google) { clearInterval(interval); initMap(); }
+      if (mapsReady()) { clearInterval(interval); safeInitMap(); }
     }, 50);
     return () => clearInterval(interval);
   }, []);
+
+  // `window.google` can exist as a bare object before the actual maps.Map/
+  // Marker/InfoWindow/SymbolPath/event classes it exposes are populated —
+  // checking only the top-level object was racy and, on a slower
+  // connection, could let initMap() run against half-initialized classes
+  // and throw. Check for the exact symbols initMap() actually uses.
+  function mapsReady() {
+    const g = (window as any).google;
+    return !!(g && g.maps && g.maps.Map && g.maps.Marker && g.maps.InfoWindow && g.maps.SymbolPath && g.maps.event);
+  }
+
+  // Belt-and-suspenders: initMap() touches a lot of Google Maps surface
+  // area and third-party data (restaurant lat/lng). If anything in there
+  // still throws despite the readiness check above, don't let it become an
+  // uncaught exception that blanks the whole page — log it and retry a
+  // few times instead of crashing.
+  function safeInitMap(attempt = 0) {
+    try {
+      initMap();
+    } catch (err) {
+      console.error('Map init failed:', err);
+      if (attempt < 3) setTimeout(() => safeInitMap(attempt + 1), 300);
+    }
+  }
 
   function initMap() {
     if (!ref.current) return;
