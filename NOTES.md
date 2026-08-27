@@ -1,6 +1,23 @@
 # Let's Get Lunch — Project Notes
 **Last updated: August 27, 2026**
 
+## ✅ Claims party size: DB check constraint never matched the app's raised cap (Aug 27, 2026)
+
+- An older commit ("Claim flow: raise party size cap to 8...") raised the app-layer cap on exclusive claims
+  to 8, but the database's own `claims_party_size_check` constraint was never updated to match - it still
+  only allowed up to 6. Brian hit this live: picking 8 people silently failed, 6 succeeded. Confirmed
+  directly (inserting test rows with the service-role key, bypassing the app entirely): party_size 7 and 8
+  both got rejected with `violates check constraint "claims_party_size_check"`; 6 was the real ceiling.
+  Only `claims` had this - `reservations` has no such constraint (party sizes up to 12 already work fine
+  there, confirmed from real data).
+- Fix was a DB migration, same as the account-deletion one - Brian ran it in Supabase's SQL Editor:
+  ```sql
+  ALTER TABLE claims DROP CONSTRAINT claims_party_size_check;
+  ALTER TABLE claims ADD CONSTRAINT claims_party_size_check CHECK (party_size >= 1 AND party_size <= 8);
+  ```
+- Re-verified live afterward with a disposable test account: party_size=8 now inserts cleanly. Test data
+  cleaned up.
+
 ## ✅ My Claims: the REAL bug found and fixed (Aug 27, 2026) — supabaseAdmin was silently caching reads
 
 Earlier same-day entry below concluded My Claims was "already fixed" based on a synthetic test — a brand
