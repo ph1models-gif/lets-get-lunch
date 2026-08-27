@@ -15,6 +15,20 @@ function getAdmin(): SupabaseClient {
   }
   _client = createClient(supabaseUrl, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
+    // Force every request this client makes to bypass Next.js's Data Cache.
+    // `export const dynamic = 'force-dynamic'` on a route is supposed to be
+    // equivalent to cache: 'no-store' on every fetch inside it, but that
+    // didn't hold for this client's calls in practice: confirmed live that
+    // GET /api/account/claims (force-dynamic, x-vercel-cache: BYPASS on the
+    // outer response) still returned a stale row set - missing a claim
+    // created after the account's *first* claims fetch - identical direct
+    // REST calls with the same service-role key returned the fresh row
+    // every time. Overriding fetch here bypasses whatever internal cache
+    // was catching this, at the source, for every route that uses
+    // supabaseAdmin - not just this one.
+    global: {
+      fetch: (input, init) => fetch(input as any, { ...(init as any), cache: 'no-store' }),
+    },
   })
   return _client
 }
