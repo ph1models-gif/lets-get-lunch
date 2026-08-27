@@ -1,6 +1,73 @@
 # Let's Get Lunch — Project Notes
 **Last updated: August 27, 2026**
 
+## Reservations data cleanup + map crash fix + demand view (Aug 27, 2026)
+
+- Deleted 45 reservation rows tied to Brian's own known test accounts
+  (brian@letsgetlunch.nyc, ph1models@gmail.com, info@briankeithphoto.com),
+  spanning April-August - clearly dev/QA testing, not real diners (test
+  names like "undefined undefined", "john doe", "test app"). 24 real
+  reservations remain. Confirmed zero rows left tied to those accounts
+  after deletion.
+- Fixed an intermittent map crash reported on the phone app ("Application
+  error: a client-side exception has occurred", map not loading).
+  `MapInner.tsx` only checked `window.google` (a bare object) existing
+  before running `initMap()`, but Google's loader can populate that
+  top-level object before the actual `maps.Map`/`Marker`/`InfoWindow`/
+  `SymbolPath`/`event` classes it exposes are ready - a race more likely to
+  lose on a phone's connection than a fast desktop one. Now checks for the
+  exact symbols `initMap()` uses, and wraps the call in a bounded retry.
+  Also added `app/error.tsx` - there was no error boundary anywhere in the
+  app, so any uncaught client exception (this one or a future unrelated
+  one) fell through to Next's bare crash page instead of a friendly retry
+  screen.
+- Added a "Demand by restaurant" summary to the admin Reservations tab -
+  bookings + guest counts per restaurant, sorted highest first, respecting
+  the existing Today/All toggle. This is the warm-sales-list data flagged
+  as valuable back in the May 21 strategy notes, now actually visible.
+
+## RBAC Phase A build started (Aug 27, 2026) — see [[rbac-plan-status]] in memory
+
+Resumed the admin/editor RBAC plan (approved 2026-08-12, execution deferred
+until now). Built the full Phase A application layer per the plan doc
+(`/root/.claude/plans/kind-frolicking-clarke.md`): `lib/auth/
+getUserFromRequest.ts`, `/api/admin/{grant-access,revoke-access,
+invite-editor,list-editors}`, `/admin/login`, `/admin/permissions`,
+`/admin/editor`. Confirmed via `git diff --stat` that zero existing admin
+files were touched - the password-gated `/admin`, `/newsletter/admin`, and
+all 16 pre-existing `/api/admin/*` routes are untouched and still work.
+
+Also wrote the actual migration SQL (`supabase/migrations/
+20260812_rbac.sql`) - the plan doc only had the prose spec, not the literal
+SQL, so this is a fresh write, not something pulled from an earlier
+session. Careful point worth flagging for whoever reviews it: the
+editor-column-guard trigger functions check `if get_user_role() is
+distinct from 'editor'` rather than `<> 'editor'` - a bare `<>` against a
+NULL role (which is what every existing service-role/admin write resolves
+to, since there's no `auth.uid()` in that context) evaluates to NULL, not
+true, in Postgres's three-valued logic, and would have silently applied
+editor column restrictions to admin/service-role writes too. `is distinct
+from` handles NULL correctly. This was reasoned through, not verified
+against a live run - there's no direct Postgres connection in this
+environment, so **this migration has never actually been executed or
+tested against real data.**
+
+**BLOCKED on Brian - nothing further to build until this happens:**
+1. Run `supabase/migrations/20260812_rbac.sql` in Supabase's SQL Editor.
+2. Create an admin account: Supabase Dashboard → Authentication → Users →
+   Add user (own email + a password).
+3. Run a one-line snippet (given separately in chat, not in the repo -
+   contains a real user UUID) to set that new user's role to `admin` in
+   `user_roles`.
+4. Log in at `/admin/login` with that new account, confirm it lands on
+   `/admin/permissions` and existing `/admin` still works unaffected.
+5. Only then: invite Olga by email from `/admin/permissions`, grant her
+   specific restaurants, confirm she lands on `/admin/editor` and can only
+   see/edit what she was granted.
+6. Phase B (retrofit old routes to real roles, retire `ADMIN_SECRET`,
+   tighten Storage policies) stays a separate, later, explicitly-approved
+   step per the original plan - not started.
+
 ## ✅ Claims party size: DB check constraint never matched the app's raised cap (Aug 27, 2026)
 
 - An older commit ("Claim flow: raise party size cap to 8...") raised the app-layer cap on exclusive claims
