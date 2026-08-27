@@ -1,5 +1,42 @@
 # Let's Get Lunch — Project Notes
-**Last updated: August 26, 2026**
+**Last updated: August 27, 2026**
+
+## ✅ My Claims: the REAL bug found and fixed (Aug 27, 2026) — supabaseAdmin was silently caching reads
+
+Earlier same-day entry below concluded My Claims was "already fixed" based on a synthetic test — a brand
+new account, one claim, checked immediately. That test passed but was structurally blind to the real bug:
+a fresh account/fresh query URL is always a cache miss regardless of whether caching is happening. Brian
+then hit it for real on his own account (4 claims total, one brand new) and it reproduced immediately and
+repeatably — logged out, logged back in (ruling out a stale client session/page), still missing just the
+newest claim.
+
+- Verified server-side, not client-side: minted a real sign-in session for Brian's actual account (Supabase
+  admin `generate_link`, no password needed - a read-only support/debug technique, done with his explicit
+  go-ahead after this environment's own safety classifier first blocked it as sensitive) and called the
+  live `GET /api/account/claims` directly. It returned only 3 of his 4 real claims, twice in a row, with
+  `x-vercel-cache: BYPASS` on the outer response both times (different `x-vercel-id` per call - genuinely
+  fresh function invocations, not an edge-cached response) - yet an identical raw REST call straight to
+  Supabase with the same service-role key returned all 4 rows every time.
+- Root cause: `export const dynamic = 'force-dynamic'` on the route is documented as equivalent to
+  `cache: 'no-store'` on every fetch inside it, but that didn't hold in practice for `supabaseAdmin`'s
+  (`lib/supabaseAdmin.ts`) internal `fetch()` calls - something was still caching that specific Supabase
+  REST query across invocations once it had been hit once for a given user, serving whatever row set
+  existed on the *first* time that user's claims were ever fetched.
+- Fix: `lib/supabaseAdmin.ts` now passes a custom `fetch` via the client's `global.fetch` option that
+  forces `cache: 'no-store'` on literally every request the admin client makes, instead of relying on
+  route-level `dynamic` config to propagate down through the library correctly. Fixes this at the source
+  for every route that uses `supabaseAdmin` (claims, delete, claim, all the admin routes), not just this
+  one endpoint.
+- Verified live after deploy: same real-session method as above, `GET /api/account/claims` now returns all
+  4 of Brian's real claims including the previously-missing one.
+- Also confirmed two things along the way that are NOT bugs, just product design working as intended:
+  1. Regular (non-exclusive) listings use the honest reservation hand-off, not the LGX claim flow - tapping
+     "reserve" on one sends a reservation confirmation email and correctly never appears in My Claims. (This
+     is what happened with Burger & Lobster - Bryant Park - not exclusive, so no claim, no bug.)
+  2. My Claims correctly keeps showing old codes even after a restaurant's exclusive flag later gets turned
+     off in admin - it's a permanent redemption record, not a live filter on current listing state. (Smyth
+     Tavern's two July claims still show even though its deal is `is_exclusive: false` today - open question
+     for Brian, not a bug: was pulling it from the exclusive program intentional?)
 
 ## ✅ Both live bugs resolved (Aug 26, 2026) — My Claims was already fixed; Account deletion fixed via DB migration, verified end-to-end
 
