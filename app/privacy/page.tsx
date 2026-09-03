@@ -13,10 +13,10 @@ export default function PrivacyPage() {
             </div>
           </a>
           <h1 className="text-2xl font-bold text-gray-900">Privacy Policy</h1>
-          <p className="text-sm text-gray-500 mt-1">Last updated: August 25, 2026</p>
+          <p className="text-sm text-gray-500 mt-1">Last updated: September 3, 2026</p>
         </div>
         <div className="bg-white rounded-2xl p-8 shadow-sm text-gray-700 text-base leading-relaxed space-y-5">
-          <p>Let&apos;s Get Lunch (&quot;we,&quot; &quot;us&quot;) operates letsgetlunch.nyc and the Let&apos;s Get Lunch iOS app, a directory of New York City prix-fixe lunch specials where you can browse listings, make reservation requests, and claim exclusive deals. This policy explains what we collect and how we use it, on the website and in the app alike.</p>
+          <p>Let&apos;s Get Lunch NYC LLC, a New York limited liability company (&quot;we,&quot; &quot;us&quot;), operates letsgetlunch.nyc and the Let&apos;s Get Lunch iOS app, a directory of New York City prix-fixe lunch specials where you can browse listings, make reservation requests, and claim exclusive deals. This policy explains what we collect and how we use it, on the website and in the app alike.</p>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">What we collect</h2>
             <p>When you create an account, we collect your name, email address, and optionally the neighborhood where you typically eat lunch. If you sign in with Google or Apple, we receive your name and email address from that provider — if you choose Apple&apos;s &quot;Hide My Email&quot; option, we receive a private relay address instead of your real one, which still works normally for account and email purposes. When you make a reservation request, we collect the details of that request, such as the restaurant, date, and party size. When you claim an exclusive deal, we generate a redemption code tied to your account and that deal, which you present at the restaurant. If you use the map&apos;s &quot;near me&quot; feature or grant the app location permission, we use your device&apos;s location in the moment to show nearby specials — we don&apos;t store a history of your location. If you enable push notifications in the app, we tag your device with your account ID so we can send you relevant notifications.</p>

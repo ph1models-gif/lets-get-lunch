@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
                   <a href="https://www.letsgetlunch.nyc" style="color:#4A9FD5;font-size:13px;text-decoration:none">www.letsgetlunch.nyc</a>
                 </p>
                 <p style="color:#bbb;font-size:11px;text-align:center;margin-top:12px">
-                  Let's Get Lunch · New York, NY<br/>
+                  Let's Get Lunch NYC LLC · New York, NY<br/>
                   You're receiving this because you asked us to email you this lunch special.<br/>
                   <a href="https://www.letsgetlunch.nyc/unsubscribe?email=${encodeURIComponent(userEmail)}" style="color:#bbb;text-decoration:underline">Unsubscribe</a>
                 </p>

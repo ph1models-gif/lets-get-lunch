@@ -13,10 +13,10 @@ export default function TermsPage() {
             </div>
           </a>
           <h1 className="text-2xl font-bold text-gray-900">Terms of Service</h1>
-          <p className="text-sm text-gray-500 mt-1">Last updated: August 21, 2026</p>
+          <p className="text-sm text-gray-500 mt-1">Last updated: September 3, 2026</p>
         </div>
         <div className="bg-white rounded-2xl p-8 shadow-sm text-gray-700 text-base leading-relaxed space-y-5">
-          <p>Welcome to Let&apos;s Get Lunch. By using letsgetlunch.nyc or the Let&apos;s Get Lunch iOS app (together, &quot;the service&quot;) you agree to these terms. The service is a directory of New York City prix-fixe lunch specials, a reservation-request tool, and a way to claim exclusive deals at partner restaurants, provided for informational and convenience purposes.</p>
+          <p>Welcome to Let&apos;s Get Lunch, operated by Let&apos;s Get Lunch NYC LLC, a New York limited liability company (&quot;we,&quot; &quot;us,&quot; or &quot;the company&quot;). By using letsgetlunch.nyc or the Let&apos;s Get Lunch iOS app (together, &quot;the service&quot;) you agree to these terms. The service is a directory of New York City prix-fixe lunch specials, a reservation-request tool, and a way to claim exclusive deals at partner restaurants, provided for informational and convenience purposes.</p>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Reservations and claimed deals</h2>
             <p>For most listings, requesting a reservation notifies the restaurant or directs you to call or visit them. For exclusive deals, claiming one generates a redemption code you present at the restaurant. Either way, Let&apos;s Get Lunch does not guarantee a table, specific pricing, availability, or that any particular lunch special will be honored. Those decisions rest with each individual restaurant.</p>

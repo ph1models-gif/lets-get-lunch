@@ -63,7 +63,7 @@ export function announcementEmailHtml(post: AnnouncementPost, recipient: Announc
       </p>
 
       <p style="color:#bbb;font-size:11px;text-align:center;margin-top:8px">
-        Let's Get Lunch - New York, NY<br/>
+        Let's Get Lunch NYC LLC - New York, NY<br/>
         <a href="${BASE}/unsubscribe?email=${encodeURIComponent(recipient.email)}" style="color:#bbb;text-decoration:underline">Unsubscribe completely</a>
       </p>
     </div>

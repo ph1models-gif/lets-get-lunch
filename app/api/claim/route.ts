@@ -117,7 +117,7 @@ function claimEmail(displayCode: string, size: number, rest: any, deal: any, ema
       </div>
       <p style="color:#888;font-size:13px">- The Let's Get Lunch team</p>
       <p style="color:#bbb;font-size:11px;text-align:center;margin-top:12px">
-        Let's Get Lunch - New York, NY<br/>
+        Let's Get Lunch NYC LLC - New York, NY<br/>
         <a href="https://www.letsgetlunch.nyc/unsubscribe?email=${encodeURIComponent(email)}" style="color:#bbb;text-decoration:underline">Unsubscribe</a>
       </p>
     </div>

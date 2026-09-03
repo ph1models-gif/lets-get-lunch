@@ -412,7 +412,7 @@ export default function ListYourRestaurant() {
       </div>
 
       <footer className="px-4 py-8 border-t border-gray-100 text-center">
-        <p className="text-sm text-gray-400">© 2026 Let&apos;s Get Lunch · NYC</p>
+        <p className="text-sm text-gray-400">© 2026 Let&apos;s Get Lunch NYC LLC</p>
       </footer>
     </main>
   );
