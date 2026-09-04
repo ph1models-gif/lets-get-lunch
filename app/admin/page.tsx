@@ -171,10 +171,84 @@ function ReservationsView({ reservations, resView }: { reservations: any[], resV
   )
 }
 
+function ClaimsView({ claims, claimsView }: { claims: any[], claimsView: string }) {
+  const today = new Date().toDateString()
+  const filtered = claimsView === 'today'
+    ? claims.filter(c => new Date(c.created_at).toDateString() === today)
+    : claims
+
+  if (filtered.length === 0) return (
+    <div className="text-center py-12">
+      <p className="text-4xl mb-3">✦</p>
+      <p className="text-gray-400 text-sm">{claimsView === 'today' ? 'No claims today yet' : 'No claims yet'}</p>
+    </div>
+  )
+
+  const byRestaurant: Record<string, { name: string; count: number; guests: number }> = {}
+  filtered.forEach(c => {
+    const name = c.restaurant_name || 'Unknown restaurant'
+    if (!byRestaurant[name]) byRestaurant[name] = { name, count: 0, guests: 0 }
+    byRestaurant[name].count++
+    byRestaurant[name].guests += c.party_size || 1
+  })
+  const topRestaurants = Object.values(byRestaurant).sort((a, b) => b.count - a.count)
+
+  return (
+    <div className="space-y-3">
+      {topRestaurants.length > 0 && (
+        <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6">
+          <p className="text-sm font-semibold text-gray-900 mb-3">Claims by restaurant</p>
+          <div className="space-y-1.5 max-h-64 overflow-y-auto">
+            {topRestaurants.map(rr => (
+              <div key={rr.name} className="flex items-center justify-between text-sm">
+                <span className="text-gray-700">{rr.name}</span>
+                <span className="text-gray-400">{rr.count} claim{rr.count === 1 ? '' : 's'} · {rr.guests} guest{rr.guests === 1 ? '' : 's'}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="bg-orange-50 rounded-xl p-4 text-center">
+          <p className="text-2xl font-bold text-orange-600">{filtered.length}</p>
+          <p className="text-xs text-gray-500 mt-1">{claimsView === 'today' ? "Today" : 'Total'} claims</p>
+        </div>
+        <div className="bg-blue-50 rounded-xl p-4 text-center">
+          <p className="text-2xl font-bold text-[#4A9FD5]">{filtered.reduce((a, c) => a + (c.party_size || 1), 0)}</p>
+          <p className="text-xs text-gray-500 mt-1">Total guests</p>
+        </div>
+      </div>
+      {filtered.map(c => {
+        const claimedAt = new Date(c.created_at)
+        const timeStr = claimedAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+        const dateStr = claimedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        return (
+          <div key={c.id} className="bg-white border border-gray-200 rounded-xl p-4">
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <p className="font-semibold text-gray-900">{c.diner_name}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{c.diner_email}</p>
+              </div>
+              <span className="text-xs font-mono bg-[#EEF6FC] text-[#4A9FD5] px-2 py-1 rounded-lg font-bold">{c.display_code}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-600">
+              <span>🍽️ {c.restaurant_name}</span>
+              <span>👥 Party of {c.party_size}</span>
+              <span>💵 ${c.deal_price} per person</span>
+              <span>📅 {dateStr} at {timeStr}</span>
+            </div>
+            {c.deal_special && <p className="text-xs text-gray-400 mt-2">{c.deal_special}</p>}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false)
   const [pw, setPw] = useState('')
-  const [tab, setTab] = useState<'pending' | 'restaurants' | 'reservations' | 'add' | 'users' | 'contacts' | 'newsletter'>('pending')
+  const [tab, setTab] = useState<'pending' | 'restaurants' | 'reservations' | 'claims' | 'add' | 'users' | 'contacts' | 'newsletter'>('pending')
 
   const [vendors, setVendors] = useState<Vendor[]>([])
   const [vendorLoading, setVendorLoading] = useState(false)
@@ -226,10 +300,15 @@ export default function AdminPage() {
   const [resLoading, setResLoading] = useState(true)
   const [resView, setResView] = useState<'today' | 'all'>('today')
 
+  const [claims, setClaims] = useState<any[]>([])
+  const [claimsLoading, setClaimsLoading] = useState(true)
+  const [claimsView, setClaimsView] = useState<'today' | 'all'>('today')
+
   useEffect(() => {
     if (authed && tab === 'pending') fetchVendors()
     if (authed && tab === 'restaurants') { fetchRestaurants(); fetchAllVendors(); }
     if (authed && tab === 'reservations') fetchReservations()
+    if (authed && tab === 'claims') fetchClaims()
     if (authed && tab === 'users') fetchUsers()
     if (authed && tab === 'contacts') fetchContacts()
   }, [authed, tab])
@@ -295,6 +374,18 @@ export default function AdminPage() {
     const data = await res.json().catch(() => ({}))
     setReservations(res.ok && data.ok ? (data.reservations || []) : [])
     setResLoading(false)
+  }
+
+  async function fetchClaims() {
+    setClaimsLoading(true)
+    const res = await fetch('/api/admin/claims', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw }),
+    })
+    const data = await res.json().catch(() => ({}))
+    setClaims(res.ok && data.ok ? (data.claims || []) : [])
+    setClaimsLoading(false)
   }
 
   async function submitNewRestaurant() {
@@ -654,10 +745,10 @@ export default function AdminPage() {
         </div>
 
         <div className="flex gap-2 mb-6 border-b border-gray-200">
-          {((['pending', 'restaurants', 'reservations', 'add', 'users', 'contacts', 'newsletter'] as const)).map(t => (
+          {((['pending', 'restaurants', 'reservations', 'claims', 'add', 'users', 'contacts', 'newsletter'] as const)).map(t => (
             <button key={t} onClick={() => setTab(t as any)}
               className={`pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${tab === t ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
-              {t === 'pending' ? 'Pending submissions' : t === 'restaurants' ? 'Active listings' : t === 'reservations' ? 'Reservations' : t === 'add' ? '+ Add listing' : t === 'users' ? 'Users' : t === 'contacts' ? 'Contacts' : 'Newsletter'}
+              {t === 'pending' ? 'Pending submissions' : t === 'restaurants' ? 'Active listings' : t === 'reservations' ? 'Reservations' : t === 'claims' ? 'Claims' : t === 'add' ? '+ Add listing' : t === 'users' ? 'Users' : t === 'contacts' ? 'Contacts' : 'Newsletter'}
             </button>
           ))}
         </div>
@@ -1251,6 +1342,26 @@ export default function AdminPage() {
               <p className="text-sm text-gray-400">Loading reservations...</p>
             ) : (
               <ReservationsView reservations={reservations} resView={resView} />
+            )}
+          </div>
+        )}
+
+        {tab === 'claims' && (
+          <div>
+            {/* Today / All toggle */}
+            <div className="flex gap-2 mb-6">
+              {['today', 'all'].map(v => (
+                <button key={v} onClick={() => setClaimsView(v as any)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${claimsView === v ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                  {v === 'today' ? "Today's claims" : "All time"}
+                </button>
+              ))}
+            </div>
+
+            {claimsLoading ? (
+              <p className="text-sm text-gray-400">Loading claims...</p>
+            ) : (
+              <ClaimsView claims={claims} claimsView={claimsView} />
             )}
           </div>
         )}
