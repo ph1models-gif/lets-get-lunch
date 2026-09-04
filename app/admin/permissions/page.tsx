@@ -84,7 +84,10 @@ export default function AdminPermissionsPage() {
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Editor access</h1>
+        <div className="flex items-center justify-between mb-1">
+          <h1 className="text-2xl font-bold text-gray-900">Editor access</h1>
+          <a href="/admin/edit-history" className="text-sm text-[#4A9FD5] hover:underline">Edit history &rarr;</a>
+        </div>
         <p className="text-sm text-gray-500 mb-6">Grant staff (like Olga) edit access to specific restaurants — nothing else.</p>
 
         <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-6">

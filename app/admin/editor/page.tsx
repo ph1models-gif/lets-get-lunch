@@ -8,7 +8,7 @@ type Deal = { id: string; special: string; price: number; days: string[] | null;
 type Restaurant = {
   id: string; name: string; address: string; neighborhood: string; cuisine: string;
   hours: string | null; bio: string | null; photo_url: string | null;
-  work_friendly: boolean | null; wifi: boolean | null; deals?: Deal[];
+  work_friendly: boolean | null; wifi: boolean | null; is_active: boolean; deals?: Deal[];
 };
 
 const inputClass = "w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-base focus:outline-none focus:border-[#4A9FD5]";
@@ -22,13 +22,22 @@ export default function EditorPage() {
   const [dealDrafts, setDealDrafts] = useState<Record<string, Partial<Deal>>>({});
   const [saving, setSaving] = useState<string | null>(null);
   const [savedFlash, setSavedFlash] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   async function load() {
     const { data } = await supabase
       .from('restaurants')
-      .select('id, name, address, neighborhood, cuisine, hours, bio, photo_url, work_friendly, wifi, deals(id, special, price, days, times)')
+      .select('id, name, address, neighborhood, cuisine, hours, bio, photo_url, work_friendly, wifi, is_active, deals(id, special, price, days, times)')
       .order('name');
     setRestaurants((data as any) || []);
+  }
+
+  async function toggleActive(r: Restaurant) {
+    setTogglingId(r.id);
+    const { error } = await supabase.from('restaurants').update({ is_active: !r.is_active }).eq('id', r.id);
+    setTogglingId(null);
+    if (error) { alert(`Couldn't update: ${error.message}`); return; }
+    await load();
   }
 
   useEffect(() => {
@@ -106,12 +115,25 @@ export default function EditorPage() {
             <div key={r.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
               <button onClick={() => setExpanded(expanded === r.id ? null : r.id)}
                 className="w-full flex items-center justify-between px-5 py-4 text-left">
-                <span className="font-medium text-gray-900">{r.name}</span>
+                <span className="font-medium text-gray-900 flex items-center gap-2">
+                  {r.name}
+                  {!r.is_active && <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Hidden</span>}
+                </span>
                 <span className="text-gray-400 text-sm">{r.neighborhood}</span>
               </button>
 
               {expanded === r.id && (
                 <div className="px-5 pb-5 space-y-3 border-t border-gray-50 pt-4">
+                  <div className={`flex items-center justify-between rounded-xl px-4 py-3 ${r.is_active ? 'bg-gray-50' : 'bg-amber-50'}`}>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{r.is_active ? 'Listing is visible' : 'Listing is hidden'}</p>
+                      <p className="text-xs text-gray-500">{r.is_active ? "Hide it if they're no longer running the lunch special." : "Hidden from the site, but not deleted — nothing is lost."}</p>
+                    </div>
+                    <button onClick={() => toggleActive(r)} disabled={togglingId === r.id}
+                      className={`text-sm px-3 py-1.5 rounded-lg border font-medium disabled:opacity-50 ${r.is_active ? 'border-amber-200 text-amber-700 hover:bg-amber-100' : 'border-green-200 text-green-700 hover:bg-green-100'}`}>
+                      {togglingId === r.id ? 'Working…' : r.is_active ? 'Hide listing' : 'Show listing'}
+                    </button>
+                  </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-500 mb-1">Name</label>
                     <input className={inputClass} value={field(r, 'name') || ''} onChange={e => setField(r, 'name', e.target.value)} />
