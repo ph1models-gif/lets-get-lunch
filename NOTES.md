@@ -1,5 +1,100 @@
 # Let's Get Lunch — Project Notes
-**Last updated: August 27, 2026**
+**Last updated: September 4, 2026**
+
+## ✅ RBAC: editor hide/show + edit history/revert built, RLS visibility bug found and fixed (Sept 4, 2026)
+
+Built the edit-history feature that was proposed and paused on Aug 27 (see
+that entry below), plus the specific capability Brian actually asked for:
+Olga needs to go through every listing and hide (never delete) any
+restaurant no longer running its lunch special, and Brian wants to see
+everything she changes so he can review/undo it. Asked Brian directly
+whether he wanted "log + revert" (change goes live immediately, reviewable
+after) or an "approval queue" (change waits for his sign-off first) - he
+picked log + revert.
+
+### What shipped
+- **Editors can now hide/show a listing.** `is_active` was deliberately
+  locked out for editors in Phase A ("stays locked on purpose") - opened it
+  up via `restaurants_editor_column_guard()`'s allow-list. Delete was never
+  possible for editors either way (no DELETE RLS policy exists), so
+  "hide, don't delete" holds by construction, not convention.
+- **Edit history + revert.** New `edit_history` table + `AFTER UPDATE`
+  triggers on `restaurants`/`deals` (`log_edit_history()`, security
+  definer) snapshot before/after as jsonb on every change, from anyone -
+  an editor via RLS, or the old service-role `/admin` panel.
+  `editor_user_id` is `auth.uid()`, which lands NULL for service-role
+  writes and a real UUID for an RLS-authenticated edit - no extra logic
+  needed to tell them apart. New admin-only `/admin/edit-history` page
+  (linked from `/admin/permissions`) shows every change with before→after
+  diffs and a one-click Undo.
+- Migration: `supabase/migrations/20260904_editor_hide_and_history.sql`,
+  run successfully in 3 chunks in Supabase's SQL Editor. Chunk 1 failed
+  once first try - the closing `$$;` got truncated on paste, the same
+  known corruption pattern from Aug 27 (see that gotcha below) - succeeded
+  on retry after re-copying via the code block's copy button.
+
+### 🐛 Found a real RLS gap while testing (pre-existing since Phase A, not introduced today)
+Brian set up a separate personal account
+(`info@newyorkheadshots.com`) with the `editor` role, specifically to test
+the system safely before giving Olga real access - good instinct, and it's
+exactly what caught this. He logged in with zero restaurants granted and
+could see the entire restaurant directory anyway.
+
+Root cause, confirmed by having Brian paste back a read-only
+`select policyname, cmd, roles, qual from pg_policies` query (couldn't
+grep it locally - it predates any migration file in this repo, so it must
+have been created directly in the Supabase dashboard before migrations
+were tracked here): `restaurants` and `deals` each have a `"Public can
+read {table}"` SELECT policy (`is_active = true`, role `{public}`) that
+the live public site depends on for anonymous visitors. Postgres OR's
+multiple applicable RLS policies together for the same command, so that
+public policy applies to a signed-in editor's session too, regardless of
+`restaurant_permissions` - it's not that the editor-scoped policy is
+broken, it's that a *more permissive* policy also matches and RLS doesn't
+support "most restrictive wins."
+
+**Verified this was read-only, not a write hole**, before treating it as
+low-severity: `restaurants_editor_update`/`deals_editor_update` are the
+*only* UPDATE policies available to the editor role, and both correctly
+require a `restaurant_permissions` match with no public/permissive
+equivalent - so an editor could always only ever *see* extra restaurants
+(the same public info any anonymous visitor already sees), never *edit*
+one she wasn't granted. Confirmed by reasoning through the policy set
+rather than by minting a real session as Brian's test account and probing
+live - that specific verification method (admin `generate_link` +
+`/auth/v1/verify` to get a session for another account without its
+password) got auto-blocked by the coding agent's own safety classifier as
+an impersonation pattern, even for Brian's own throwaway test account -
+worth remembering as a dead end, don't retry it; ask for a `pg_policies`
+dump instead.
+
+Fixed in app code, not the shared DB policy (didn't want to touch
+something the live public site depends on): `/admin/editor`'s data load
+now filters client-side to the editor's own `restaurant_permissions` rows
+(editors can already read their own permission rows under existing RLS),
+so what an editor sees now matches what she can actually touch.
+
+### 🐛 Also fixed: silent no-op saves
+Found while investigating the above - `/admin/editor`'s Save/Hide buttons
+never checked whether an RLS-blocked update actually returned a row. An
+editor could click Save on a restaurant she lacked access to and see a
+false "Saved ✓" while nothing happened at all. Now checks the `.select()`
+result and shows a real error pointing back to the admin.
+
+### New: bulk-grant tools on `/admin/permissions`
+Since Olga's actual job is "go through every listing," checking off
+restaurants one at a time didn't fit. Added:
+- **"Grant all restaurants" / "Revoke all"** - one click, every listing.
+- **"Grant this neighborhood" / "Revoke this neighborhood"** - a
+  neighborhood dropdown (Brian's own idea, so he can have Olga work
+  through the directory borough/neighborhood at a time, e.g. Midtown
+  first) backed by `/api/admin/{grant,revoke}-neighborhood-access`.
+
+### Where this left off
+Brian was walked through testing all of the above on his own test
+account; Olga has not yet actually been granted access as of this note -
+next session, check whether he finished testing and follow up on how he
+chose to grant her access (all at once vs. neighborhood by neighborhood).
 
 ## ✅ Admin: Hours dropdown missing 1pm start times (Aug 27, 2026)
 
