@@ -72,6 +72,34 @@ export default function AdminPermissionsPage() {
     setBusyIds(prev => { const n = new Set(prev); n.delete(restaurantId); return n; });
   }
 
+  const [bulkBusy, setBulkBusy] = useState(false);
+
+  async function grantAll() {
+    if (!selectedEditor) return;
+    if (!confirm('Grant this editor access to every restaurant on the site?')) return;
+    setBulkBusy(true);
+    await fetch('/api/admin/grant-all-access', {
+      method: 'POST',
+      headers: { ...(await authHeader()), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: selectedEditor }),
+    });
+    await loadEditors();
+    setBulkBusy(false);
+  }
+
+  async function revokeAll() {
+    if (!selectedEditor) return;
+    if (!confirm("Remove this editor's access to every restaurant?")) return;
+    setBulkBusy(true);
+    await fetch('/api/admin/revoke-all-access', {
+      method: 'POST',
+      headers: { ...(await authHeader()), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: selectedEditor }),
+    });
+    await loadEditors();
+    setBulkBusy(false);
+  }
+
   const currentEditor = editors.find(e => e.user_id === selectedEditor);
   const grantedSet = useMemo(() => new Set(currentEditor?.restaurant_ids || []), [currentEditor]);
   const filteredRestaurants = useMemo(
@@ -123,6 +151,16 @@ export default function AdminPermissionsPage() {
               <p className="text-sm text-gray-400">Select an editor to manage their restaurant access.</p>
             ) : (
               <>
+                <div className="flex gap-2 mb-3">
+                  <button onClick={grantAll} disabled={bulkBusy}
+                    className="text-xs px-3 py-1.5 rounded-lg border border-green-200 text-green-700 hover:bg-green-50 disabled:opacity-50 whitespace-nowrap">
+                    Grant all restaurants
+                  </button>
+                  <button onClick={revokeAll} disabled={bulkBusy}
+                    className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50 whitespace-nowrap">
+                    Revoke all
+                  </button>
+                </div>
                 <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search restaurants…"
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-base mb-3 focus:outline-none focus:border-[#4A9FD5]" />
                 <div className="max-h-[60vh] overflow-y-auto divide-y divide-gray-50">

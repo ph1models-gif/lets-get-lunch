@@ -23,20 +23,39 @@ export default function EditorPage() {
   const [saving, setSaving] = useState<string | null>(null);
   const [savedFlash, setSavedFlash] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  async function load() {
+  async function load(adminOverride?: boolean) {
+    const admin = adminOverride ?? isAdmin;
     const { data } = await supabase
       .from('restaurants')
       .select('id, name, address, neighborhood, cuisine, hours, bio, photo_url, work_friendly, wifi, is_active, deals(id, special, price, days, times)')
       .order('name');
-    setRestaurants((data as any) || []);
+    let rows = (data as any as Restaurant[]) || [];
+
+    // The DB's public-read policy lets any signed-in editor see every active
+    // restaurant, not just the ones they're granted (writes stay correctly
+    // scoped either way) - filter client-side to what this editor can
+    // actually edit, using restaurant_permissions, which editors can read
+    // for their own user_id. Admins see everything, as intended.
+    if (!admin) {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: perms } = await supabase
+        .from('restaurant_permissions')
+        .select('restaurant_id')
+        .eq('user_id', user?.id);
+      const granted = new Set((perms || []).map((p: any) => p.restaurant_id));
+      rows = rows.filter(r => granted.has(r.id));
+    }
+    setRestaurants(rows);
   }
 
   async function toggleActive(r: Restaurant) {
     setTogglingId(r.id);
-    const { error } = await supabase.from('restaurants').update({ is_active: !r.is_active }).eq('id', r.id);
+    const { data, error } = await supabase.from('restaurants').update({ is_active: !r.is_active }).eq('id', r.id).select('id');
     setTogglingId(null);
     if (error) { alert(`Couldn't update: ${error.message}`); return; }
+    if (!data || data.length === 0) { alert("Couldn't update: you no longer have edit access to this restaurant — ask the admin to grant it."); }
     await load();
   }
 
@@ -46,8 +65,10 @@ export default function EditorPage() {
       if (!user) { router.push('/admin/login'); return; }
       const { data } = await supabase.from('user_roles').select('role').eq('user_id', user.id).maybeSingle();
       if (data?.role !== 'editor' && data?.role !== 'admin') { router.push('/admin/login'); return; }
+      const admin = data.role === 'admin';
+      setIsAdmin(admin);
       setChecking(false);
-      await load();
+      await load(admin);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -64,9 +85,10 @@ export default function EditorPage() {
     const draft = drafts[r.id];
     if (!draft) return;
     setSaving(r.id);
-    const { error } = await supabase.from('restaurants').update(draft).eq('id', r.id);
+    const { data, error } = await supabase.from('restaurants').update(draft).eq('id', r.id).select('id');
     setSaving(null);
     if (error) { alert(`Couldn't save: ${error.message}`); return; }
+    if (!data || data.length === 0) { alert("Couldn't save: you no longer have edit access to this restaurant — ask the admin to grant it."); await load(); return; }
     setDrafts(prev => { const n = { ...prev }; delete n[r.id]; return n; });
     setSavedFlash(r.id);
     setTimeout(() => setSavedFlash(null), 1500);
@@ -85,9 +107,10 @@ export default function EditorPage() {
     const draft = dealDrafts[d.id];
     if (!draft) return;
     setSaving(d.id);
-    const { error } = await supabase.from('deals').update(draft).eq('id', d.id);
+    const { data, error } = await supabase.from('deals').update(draft).eq('id', d.id).select('id');
     setSaving(null);
     if (error) { alert(`Couldn't save: ${error.message}`); return; }
+    if (!data || data.length === 0) { alert("Couldn't save: you no longer have edit access to this restaurant — ask the admin to grant it."); await load(); return; }
     setDealDrafts(prev => { const n = { ...prev }; delete n[d.id]; return n; });
     setSavedFlash(d.id);
     setTimeout(() => setSavedFlash(null), 1500);
