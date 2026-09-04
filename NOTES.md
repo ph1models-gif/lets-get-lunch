@@ -1,6 +1,33 @@
 # Let's Get Lunch — Project Notes
 **Last updated: September 4, 2026**
 
+## ✅ Admin: added a Claims tab - the panel had zero visibility into exclusive redemptions (Sept 4, 2026)
+
+Brian went to Aperitivo by Carta (an exclusive-deal partner) with a friend,
+Hélène Cristofani, who signed up and claimed the exclusive on her phone in
+front of him - but he couldn't find any record of it in `/admin`.
+
+Confirmed live (read-only query) that nothing was actually broken: her
+profile, her claim (`LGX-4CHZ-2`, party of 2, Aperitivo by Carta,
+2026-09-03), and the deal all exist exactly as expected. The real issue
+was expectation vs. design: **for an `is_exclusive` deal there is no
+"Reserve" button at all** - `RestaurantClient.tsx` only shows "Claim this
+exclusive lunch," which posts to `/api/claim` and writes to the `claims`
+table only, never `reservations`. That's correct, intentional behavior,
+confirmed by reading the component - not a regression.
+
+What *was* a real gap: the admin panel (`app/admin/page.tsx`) had **no
+screen reading from `claims` at all** - grepped for it and came up empty.
+The only way to check a claim was a direct database query. For a business
+whose whole draw is exclusive claim codes at partner restaurants, that's a
+real blind spot, so built it: new `/api/admin/claims` (password-gated,
+same pattern as `/api/admin/reservations`) and a **Claims** tab mirroring
+the existing Reservations tab - diner name/email, LGX code, restaurant,
+party size, deal details, and a "claims by restaurant" breakdown. Merges
+restaurant/deal/diner details in application code rather than via
+PostgREST embedding, since `claims.user_id` has no direct FK to `profiles`
+for PostgREST to embed through.
+
 ## ✅ RBAC: editor hide/show + edit history/revert built, RLS visibility bug found and fixed (Sept 4, 2026)
 
 Built the edit-history feature that was proposed and paused on Aug 27 (see
