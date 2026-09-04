@@ -17,6 +17,7 @@ export default function AdminPermissionsPage() {
   const [inviting, setInviting] = useState(false);
   const [error, setError] = useState('');
   const [busyIds, setBusyIds] = useState<Set<string>>(new Set());
+  const [selectedNeighborhood, setSelectedNeighborhood] = useState('');
 
   async function authHeader() {
     const { data: { session } } = await supabase.auth.getSession();
@@ -100,11 +101,39 @@ export default function AdminPermissionsPage() {
     setBulkBusy(false);
   }
 
+  async function grantNeighborhood() {
+    if (!selectedEditor || !selectedNeighborhood) return;
+    setBulkBusy(true);
+    await fetch('/api/admin/grant-neighborhood-access', {
+      method: 'POST',
+      headers: { ...(await authHeader()), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: selectedEditor, neighborhood: selectedNeighborhood }),
+    });
+    await loadEditors();
+    setBulkBusy(false);
+  }
+
+  async function revokeNeighborhood() {
+    if (!selectedEditor || !selectedNeighborhood) return;
+    setBulkBusy(true);
+    await fetch('/api/admin/revoke-neighborhood-access', {
+      method: 'POST',
+      headers: { ...(await authHeader()), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: selectedEditor, neighborhood: selectedNeighborhood }),
+    });
+    await loadEditors();
+    setBulkBusy(false);
+  }
+
   const currentEditor = editors.find(e => e.user_id === selectedEditor);
   const grantedSet = useMemo(() => new Set(currentEditor?.restaurant_ids || []), [currentEditor]);
   const filteredRestaurants = useMemo(
     () => restaurants.filter(r => r.name.toLowerCase().includes(search.toLowerCase())),
     [restaurants, search]
+  );
+  const neighborhoods = useMemo(
+    () => Array.from(new Set(restaurants.map(r => r.neighborhood).filter(Boolean))).sort() as string[],
+    [restaurants]
   );
 
   if (checking) return null;
@@ -151,7 +180,7 @@ export default function AdminPermissionsPage() {
               <p className="text-sm text-gray-400">Select an editor to manage their restaurant access.</p>
             ) : (
               <>
-                <div className="flex gap-2 mb-3">
+                <div className="flex flex-wrap gap-2 mb-3">
                   <button onClick={grantAll} disabled={bulkBusy}
                     className="text-xs px-3 py-1.5 rounded-lg border border-green-200 text-green-700 hover:bg-green-50 disabled:opacity-50 whitespace-nowrap">
                     Grant all restaurants
@@ -159,6 +188,21 @@ export default function AdminPermissionsPage() {
                   <button onClick={revokeAll} disabled={bulkBusy}
                     className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50 whitespace-nowrap">
                     Revoke all
+                  </button>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 mb-3 bg-gray-50 rounded-xl p-2.5">
+                  <select value={selectedNeighborhood} onChange={e => setSelectedNeighborhood(e.target.value)}
+                    className="text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white focus:outline-none focus:border-[#4A9FD5]">
+                    <option value="">Choose a neighborhood…</option>
+                    {neighborhoods.map(n => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                  <button onClick={grantNeighborhood} disabled={bulkBusy || !selectedNeighborhood}
+                    className="text-xs px-3 py-1.5 rounded-lg border border-green-200 text-green-700 hover:bg-green-50 disabled:opacity-50 whitespace-nowrap">
+                    Grant this neighborhood
+                  </button>
+                  <button onClick={revokeNeighborhood} disabled={bulkBusy || !selectedNeighborhood}
+                    className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50 whitespace-nowrap">
+                    Revoke this neighborhood
                   </button>
                 </div>
                 <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search restaurants…"
