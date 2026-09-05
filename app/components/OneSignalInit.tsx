@@ -34,7 +34,16 @@ export default function OneSignalInit() {
       if (cancelled) return;
 
       OneSignal.initialize(ONESIGNAL_APP_ID);
-      OneSignal.Notifications.requestPermission(true);
+      // fallbackToSettings must stay false: passing true makes OneSignal
+      // show its own "notifications are off, open Settings" alert
+      // unprompted on every launch once a user has denied permission once -
+      // this is exactly what got the app rejected under App Store Review
+      // Guidelines 4.5.4 and 5.1.1 (2026-09-04). Only ever ask via the
+      // real iOS system dialog, and only when the user hasn't been asked
+      // before - never re-nag after a decision has been made.
+      OneSignal.Notifications.canRequestPermission().then((canPrompt) => {
+        if (canPrompt) OneSignal.Notifications.requestPermission(false);
+      });
 
       supabase.auth.getUser().then(({ data: { user } }) => {
         if (user) OneSignal.login(user.id);
