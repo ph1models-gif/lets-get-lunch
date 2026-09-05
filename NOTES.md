@@ -1,5 +1,54 @@
 # Let's Get Lunch — Project Notes
-**Last updated: September 4, 2026**
+**Last updated: September 5, 2026**
+
+## ✅ App Store: 3rd rejection (Sept 4) - Guidelines 4.5.4 + 5.1.1, fixed same day, no new build needed
+
+Apple rejected V1 again, citing 4.5.4 (Apple Sites and Services) and 5.1.1
+(Privacy - Data Collection and Storage), with a reviewer screenshot of an
+alert reading "You currently have notifications turned off for this
+application. You can open Settings to re-enable them" - appearing
+unprompted over a restaurant card.
+
+Root cause found by inspecting `onesignal-cordova-plugin`'s own type defs:
+`app/components/OneSignalInit.tsx` called
+`OneSignal.Notifications.requestPermission(true)` on every native launch,
+unconditionally. That `true` is `fallbackToSettings` - once a user has
+denied notifications once, passing `true` makes OneSignal show *its own*
+native-looking alert nagging them to open Settings, automatically, every
+single time the app opens - not Apple's own system dialog, and not
+triggered by anything the user did. That's the exact alert Apple
+screenshotted, and matches both guidelines: 4.5.4 (misusing the push
+permission flow) and 5.1.1 (re-soliciting a data-collection permission -
+the push token - the user already declined, outside Apple's controlled
+dialog).
+
+**Fix:** now calls `canRequestPermission()` first, and only calls
+`requestPermission(false)` (no fallback alert) if the user has genuinely
+never been asked. Once a decision is made either way, the app never
+prompts again on subsequent launches - matches what actual native apps
+are expected to do.
+
+**No new Xcode build/TestFlight upload needed** - this is `server.url`
+mode, so the fix lives in the website's JS (`app/components/
+OneSignalInit.tsx`), and pushing to `main` changes what the *already-
+submitted* binary does the next time it loads the live site. Brian's next
+step: confirm on his device (turn notifications off for the app in iOS
+Settings, relaunch, confirm no more popup), then reply in the Resolution
+Center explaining the fix - likely doesn't need a new screen recording
+since this is a removed behavior, not a new feature, but check what Apple
+asks for.
+
+**Separate, non-code housekeeping Apple flagged (boilerplate, not a
+rejection reason):** their standard "reply with all of this" checklist
+asks that the App Review Information **Notes field** (a persistent field
+in App Store Connect, not just a Resolution Center reply) be kept
+populated for every future submission with: a screen recording of core
+flows + any sensitive-permission prompts, devices/OS tested, an app
+description, setup/demo-credential instructions, external services used,
+regional differences, and any regulated-industry documentation. Most of
+this content already exists from the 1st rejection's Resolution Center
+reply (Aug 21-22) - it just needs to be copied into that persistent Notes
+field so future reviewers see it upfront. Brian's task, not code.
 
 ## ✅ Admin: added a Claims tab - the panel had zero visibility into exclusive redemptions (Sept 4, 2026)
 
