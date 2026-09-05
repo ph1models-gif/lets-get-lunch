@@ -1,6 +1,34 @@
 # Let's Get Lunch — Project Notes
 **Last updated: September 5, 2026**
 
+## ⏳ 3rd App Store rejection had a 2nd screenshot too - location auto-prompt, deliberately NOT fixed yet
+
+The 3rd rejection (see entry below) included a second screenshot Brian
+initially missed: the standard iOS "Let's Get Lunch NYC would like to use
+your location" system dialog. Apple gave no written explanation beyond the
+two guideline names (4.5.4 + 5.1.1) and two screenshots - confirmed with
+Brian there's no additional reviewer text anywhere in the rejection.
+
+Likely cause, structurally consistent with the notification fix: `app/
+components/MapInner.tsx` calls `navigator.geolocation.getCurrentPosition()`
+automatically as soon as the homepage's map initializes - before the user
+has tapped anything location-related. Same "ask proactively on launch
+instead of tied to a specific action" pattern that got the notification
+permission flagged. Also load-bearing today: `lib/signupModal.ts`
+deliberately delays the sign-up popup until *after* the user answers the
+location prompt, specifically so the two don't visually stack.
+
+**Proposed fix, NOT built - Brian's explicit call to hold off:** replace
+the automatic request with a "use my location" tap-to-center button on the
+map (default view stays a fixed NYC spot until tapped), and switch the
+sign-up popup to a flat timer instead of waiting on geolocation response.
+Brian chose to submit with only the notification fix first, betting the
+location screenshot might just be supporting context rather than a
+separate complaint. **If Apple rejects again citing 5.1.1 with this same
+screenshot, that's confirmation it's real - build the fix above then,
+don't re-litigate.**
+
+## ✅ App Store: 3rd rejection (Sept 4) - Guidelines 4.5.4 + 5.1.1, fixed same day, no new build needed
 ## ✅ App Store: 3rd rejection (Sept 4) - Guidelines 4.5.4 + 5.1.1, fixed same day, no new build needed
 
 Apple rejected V1 again, citing 4.5.4 (Apple Sites and Services) and 5.1.1
