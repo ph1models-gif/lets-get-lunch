@@ -30,6 +30,7 @@ export default function EditHistoryPage() {
   const [loading, setLoading] = useState(true);
   const [revertingId, setRevertingId] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [email, setEmail] = useState('');
 
   async function authHeader() {
     const { data: { session } } = await supabase.auth.getSession();
@@ -50,6 +51,7 @@ export default function EditHistoryPage() {
       if (!user) { router.push('/admin/login'); return; }
       const { data } = await supabase.from('user_roles').select('role').eq('user_id', user.id).maybeSingle();
       if (data?.role !== 'admin') { router.push('/admin/login'); return; }
+      setEmail(user.email || '');
       setChecking(false);
       await load();
     })();
@@ -79,6 +81,12 @@ export default function EditHistoryPage() {
         <div className="flex items-center gap-3 text-sm">
           <a href="/admin/permissions" className="text-[#4A9FD5] hover:underline">&larr; Editor access</a>
           <a href="/admin" className="text-gray-500 hover:underline">Admin dashboard</a>
+          <button
+            onClick={async () => { await supabase.auth.signOut(); router.push('/admin/login'); }}
+            className="text-gray-500 hover:underline"
+          >
+            Sign out{email ? ` (${email})` : ''}
+          </button>
         </div>
         <h1 className="text-2xl font-bold text-gray-900 mt-2 mb-1">Edit history</h1>
         <p className="text-sm text-gray-500 mb-6">

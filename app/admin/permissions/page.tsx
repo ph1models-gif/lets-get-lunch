@@ -18,6 +18,7 @@ export default function AdminPermissionsPage() {
   const [error, setError] = useState('');
   const [busyIds, setBusyIds] = useState<Set<string>>(new Set());
   const [selectedNeighborhood, setSelectedNeighborhood] = useState('');
+  const [email, setEmail] = useState('');
 
   async function authHeader() {
     const { data: { session } } = await supabase.auth.getSession();
@@ -36,6 +37,7 @@ export default function AdminPermissionsPage() {
       if (!user) { router.push('/admin/login'); return; }
       const { data } = await supabase.from('user_roles').select('role').eq('user_id', user.id).maybeSingle();
       if (data?.role !== 'admin') { router.push('/admin/login'); return; }
+      setEmail(user.email || '');
       setChecking(false);
 
       const { data: rests } = await supabase.from('restaurants').select('id, name, neighborhood').order('name');
@@ -146,6 +148,12 @@ export default function AdminPermissionsPage() {
           <div className="flex items-center gap-3 text-sm">
             <a href="/admin" className="text-gray-500 hover:underline">&larr; Admin dashboard</a>
             <a href="/admin/edit-history" className="text-[#4A9FD5] hover:underline">Edit history &rarr;</a>
+            <button
+              onClick={async () => { await supabase.auth.signOut(); router.push('/admin/login'); }}
+              className="text-gray-500 hover:underline"
+            >
+              Sign out{email ? ` (${email})` : ''}
+            </button>
           </div>
         </div>
         <p className="text-sm text-gray-500 mb-6">Grant staff (like Olga) edit access to specific restaurants — nothing else.</p>
