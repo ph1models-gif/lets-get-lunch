@@ -17,6 +17,7 @@ function getSupabase() {
 export const metadata: Metadata = {
   title: "Newsletter — Let's Get Lunch",
   description: "NYC lunch news, new prix-fixe specials, and neighborhood picks from Let's Get Lunch.",
+  alternates: { canonical: '/newsletter' },
 };
 
 interface Post {

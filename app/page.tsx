@@ -1,6 +1,13 @@
+import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import HomeClient from './HomeClient';
 import { HOMEPAGE_RESTAURANT_SELECT, Restaurant } from './types';
+
+// Self-referencing canonical so /claim (identical content) can point here
+// and Google has an unambiguous URL for the homepage.
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
 
 // Restaurant list is revalidated every 60s instead of on every request.
 // Admin edits/deactivations/exclusive-flag toggles can take up to 60s to

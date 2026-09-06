@@ -14,6 +14,7 @@ const inter = Inter({ subsets: ["latin"] });
 const bebas = Bebas_Neue({ subsets: ["latin"], weight: "400", variable: "--font-bebas" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.letsgetlunch.nyc'),
   manifest: '/manifest.webmanifest',
   icons: {
     icon: [
