@@ -1,10 +1,21 @@
 import type { Metadata } from 'next'
 import { createClient } from '@supabase/supabase-js'
 import { cache } from 'react'
-import { permanentRedirect } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import RestaurantClient from './RestaurantClient'
 
 const BASE = 'https://www.letsgetlunch.nyc'
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+type RestaurantRow = {
+  id: string
+  slug: string
+  name: string
+  neighborhood: string | null
+  cuisine: string | null
+  bio: string | null
+}
 
 function sb() {
   return createClient(
@@ -16,25 +27,39 @@ function sb() {
 // Resolves either a current slug or a legacy UUID to the same row. Shared
 // (via React's cache()) between generateMetadata and the page component so
 // a single request only ever does one DB round trip for the happy path.
-const getRestaurant = cache(async (slugOrId: string) => {
-  const supabase = sb()
-  const { data: bySlug } = await supabase
-    .from('restaurants')
-    .select('id, slug, name, neighborhood, cuisine, bio')
-    .eq('slug', slugOrId)
-    .eq('is_active', true)
-    .maybeSingle()
-  if (bySlug) return bySlug
+// `failed` distinguishes "no such live restaurant" (the page should 404)
+// from "the DB lookup itself errored" (let it 500 and be retried — never a
+// false 404 that drops a real listing from Google).
+const getRestaurant = cache(
+  async (slugOrId: string): Promise<{ row: RestaurantRow | null; failed: boolean }> => {
+    const supabase = sb()
+    const bySlug = await supabase
+      .from('restaurants')
+      .select('id, slug, name, neighborhood, cuisine, bio')
+      .eq('slug', slugOrId)
+      .eq('is_active', true)
+      .maybeSingle()
+    if (bySlug.data) return { row: bySlug.data as RestaurantRow, failed: false }
+    if (bySlug.error) return { row: null, failed: true }
 
-  // Legacy /restaurants/[uuid] link — resolve it so the page component can 308 redirect.
-  const { data: byId } = await supabase
-    .from('restaurants')
-    .select('id, slug, name, neighborhood, cuisine, bio')
-    .eq('id', slugOrId)
-    .eq('is_active', true)
-    .maybeSingle()
-  return byId
-})
+    // Legacy /restaurants/<uuid> link — resolve it so the page component can
+    // redirect to the canonical slug. Only attempt the id lookup when the
+    // param actually looks like a UUID; otherwise every ordinary missing
+    // slug triggers a guaranteed "invalid uuid" error from Postgres.
+    if (UUID_RE.test(slugOrId)) {
+      const byId = await supabase
+        .from('restaurants')
+        .select('id, slug, name, neighborhood, cuisine, bio')
+        .eq('id', slugOrId)
+        .eq('is_active', true)
+        .maybeSingle()
+      if (byId.data) return { row: byId.data as RestaurantRow, failed: false }
+      if (byId.error) return { row: null, failed: true }
+    }
+
+    return { row: null, failed: false }
+  }
+)
 
 export async function generateMetadata(
   { params }: { params: { slug: string } }
@@ -45,7 +70,7 @@ export async function generateMetadata(
     robots: { index: false, follow: false },
   }
   try {
-    const r = await getRestaurant(params.slug)
+    const { row: r } = await getRestaurant(params.slug)
     if (!r || !r.name) return fallback
 
     const supabase = sb()
@@ -95,8 +120,17 @@ export async function generateMetadata(
 }
 
 export default async function Page({ params }: { params: { slug: string } }) {
-  const r = await getRestaurant(params.slug)
-  if (r && r.slug && r.slug !== params.slug) {
+  const { row: r, failed } = await getRestaurant(params.slug)
+
+  if (!r) {
+    // A genuinely unknown / hidden / removed restaurant is a real 404 — not a
+    // 200 page carrying a "not available" message, which Google files as a
+    // soft 404 and drops from the index.
+    if (failed) throw new Error(`restaurant lookup failed for "${params.slug}"`)
+    notFound()
+  }
+
+  if (r.slug && r.slug !== params.slug) {
     permanentRedirect(`/restaurants/${r.slug}`)
   }
   return <RestaurantClient />
