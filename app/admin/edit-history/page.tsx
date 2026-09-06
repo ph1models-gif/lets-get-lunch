@@ -23,6 +23,45 @@ function displayValue(v: any) {
   return String(v);
 }
 
+// Plain-English labels for fields Brian actually recognizes; anything else
+// falls back to turning the raw column name into "Title Case".
+const FIELD_LABELS: Record<string, string> = {
+  is_active: 'Visible on site',
+  name: 'Restaurant name',
+  address: 'Address',
+  neighborhood: 'Neighborhood',
+  cuisine: 'Cuisine',
+  phone: 'Phone',
+  website: 'Website',
+  hours: 'Hours',
+  bio: 'Description',
+  photo_url: 'Main photo',
+  photo_urls: 'Extra photos',
+  wifi: 'Has wifi',
+  work_friendly: 'Work-friendly',
+  walk_in: 'Walk-ins accepted',
+  seats: 'Seats',
+  rating: 'Rating',
+  special: 'Special',
+  price: 'Price',
+  days: 'Days offered',
+  times: 'Times offered',
+  is_exclusive: 'Exclusive (LGX) deal',
+};
+
+function fieldLabel(field: string) {
+  return FIELD_LABELS[field] || field.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase());
+}
+
+// is_active reads better as a plain statement of what happened than as a
+// yes/no diff - that's the field Brian actually asked to see more clearly.
+function changeLine(c: Change) {
+  if (c.field === 'is_active') {
+    return c.after === false ? 'Hidden from the site' : 'Made visible on the site again';
+  }
+  return null;
+}
+
 export default function EditHistoryPage() {
   const router = useRouter();
   const [checking, setChecking] = useState(true);
@@ -119,14 +158,23 @@ export default function EditHistoryPage() {
                 </button>
               </div>
               <div className="space-y-1">
-                {e.changes.map((c, i) => (
-                  <p key={i} className="text-sm text-gray-700">
-                    <span className="font-medium">{c.field}</span>: {' '}
-                    <span className="text-gray-400 line-through">{displayValue(c.before)}</span>
-                    {' → '}
-                    <span>{displayValue(c.after)}</span>
-                  </p>
-                ))}
+                {e.changes.map((c, i) => {
+                  const plain = changeLine(c);
+                  return (
+                    <p key={i} className="text-sm text-gray-700">
+                      {plain ? (
+                        <span className="font-medium">{plain}</span>
+                      ) : (
+                        <>
+                          <span className="font-medium">{fieldLabel(c.field)}</span>: {' '}
+                          <span className="text-gray-400 line-through">{displayValue(c.before)}</span>
+                          {' → '}
+                          <span>{displayValue(c.after)}</span>
+                        </>
+                      )}
+                    </p>
+                  );
+                })}
               </div>
             </div>
           ))}
