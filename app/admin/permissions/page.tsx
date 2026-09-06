@@ -103,6 +103,24 @@ export default function AdminPermissionsPage() {
     setBulkBusy(false);
   }
 
+  async function removeEditor() {
+    if (!selectedEditor) return;
+    const ed = editors.find(e => e.user_id === selectedEditor);
+    if (!confirm(`Permanently remove ${ed?.email || 'this editor'}? This deletes their restaurant access, their editor role, and their login entirely - they'd have to be re-invited from scratch to come back.`)) return;
+    setBulkBusy(true);
+    setError('');
+    const res = await fetch('/api/admin/remove-editor', {
+      method: 'POST',
+      headers: { ...(await authHeader()), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: selectedEditor }),
+    });
+    const json = await res.json();
+    setBulkBusy(false);
+    if (!res.ok) { setError(json.error || 'Failed to remove editor'); return; }
+    setSelectedEditor(null);
+    await loadEditors();
+  }
+
   async function grantNeighborhood() {
     if (!selectedEditor || !selectedNeighborhood) return;
     setBulkBusy(true);
@@ -199,6 +217,10 @@ export default function AdminPermissionsPage() {
                   <button onClick={revokeAll} disabled={bulkBusy}
                     className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50 whitespace-nowrap">
                     Revoke all
+                  </button>
+                  <button onClick={removeEditor} disabled={bulkBusy}
+                    className="text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 whitespace-nowrap">
+                    Remove editor entirely
                   </button>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 mb-3 bg-gray-50 rounded-xl p-2.5">
