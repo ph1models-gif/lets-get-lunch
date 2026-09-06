@@ -148,8 +148,11 @@ export default function AdminPermissionsPage() {
   const currentEditor = editors.find(e => e.user_id === selectedEditor);
   const grantedSet = useMemo(() => new Set(currentEditor?.restaurant_ids || []), [currentEditor]);
   const filteredRestaurants = useMemo(
-    () => restaurants.filter(r => r.name.toLowerCase().includes(search.toLowerCase())),
-    [restaurants, search]
+    () => restaurants.filter(r =>
+      r.name.toLowerCase().includes(search.toLowerCase()) &&
+      (!selectedNeighborhood || r.neighborhood === selectedNeighborhood)
+    ),
+    [restaurants, search, selectedNeighborhood]
   );
   const neighborhoods = useMemo(
     () => Array.from(new Set(restaurants.map(r => r.neighborhood).filter(Boolean))).sort() as string[],
