@@ -740,6 +740,8 @@ export default function AdminPage() {
           <h1 className="text-2xl font-bold text-gray-900">Admin dashboard</h1>
           <div className="flex items-center gap-3">
             <button onClick={() => { fetchVendors(); fetchRestaurants(); }} className="text-sm px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50">↻ Refresh</button>
+            <a href="/admin/permissions" className="text-sm text-[#4A9FD5] hover:underline">Permissions</a>
+            <a href="/admin/edit-history" className="text-sm text-[#4A9FD5] hover:underline">Edit history</a>
             <a href="/" className="text-sm text-orange-500 hover:underline">← Back to site</a>
           </div>
         </div>
