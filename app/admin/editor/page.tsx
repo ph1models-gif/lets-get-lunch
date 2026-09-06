@@ -24,6 +24,7 @@ export default function EditorPage() {
   const [savedFlash, setSavedFlash] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [email, setEmail] = useState('');
 
   async function load(adminOverride?: boolean) {
     const admin = adminOverride ?? isAdmin;
@@ -67,6 +68,7 @@ export default function EditorPage() {
       if (data?.role !== 'editor' && data?.role !== 'admin') { router.push('/admin/login'); return; }
       const admin = data.role === 'admin';
       setIsAdmin(admin);
+      setEmail(user.email || '');
       setChecking(false);
       await load(admin);
     })();
@@ -122,7 +124,18 @@ export default function EditorPage() {
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-8">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Your restaurants</h1>
+        <div className="flex items-center justify-between mb-1">
+          <h1 className="text-2xl font-bold text-gray-900">Your restaurants</h1>
+          <div className="flex items-center gap-3 text-sm">
+            {isAdmin && <a href="/admin" className="text-[#4A9FD5] hover:underline">Admin dashboard</a>}
+            <button
+              onClick={async () => { await supabase.auth.signOut(); router.push('/admin/login'); }}
+              className="text-gray-500 hover:underline"
+            >
+              Sign out{email ? ` (${email})` : ''}
+            </button>
+          </div>
+        </div>
         <p className="text-sm text-gray-500 mb-6">
           You can edit listing details and specials for the restaurants below — nothing else on the site.
         </p>

@@ -76,7 +76,10 @@ export default function EditHistoryPage() {
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-8">
       <div className="max-w-3xl mx-auto">
-        <a href="/admin/permissions" className="text-sm text-[#4A9FD5] hover:underline">&larr; Editor access</a>
+        <div className="flex items-center gap-3 text-sm">
+          <a href="/admin/permissions" className="text-[#4A9FD5] hover:underline">&larr; Editor access</a>
+          <a href="/admin" className="text-gray-500 hover:underline">Admin dashboard</a>
+        </div>
         <h1 className="text-2xl font-bold text-gray-900 mt-2 mb-1">Edit history</h1>
         <p className="text-sm text-gray-500 mb-6">
           Every change to a listing or lunch special, most recent first — who made it, and what changed.
