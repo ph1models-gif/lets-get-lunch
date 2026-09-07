@@ -180,7 +180,7 @@ export default function ListYourRestaurant() {
           <span className="text-xl">🍽️</span>
           <span className="font-semibold text-gray-900">Let&apos;s Get Lunch</span>
         </a>
-        <a href={loginHref} className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full">Sign in</a>
+        <a href={loginHref} rel="nofollow" className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full">Sign in</a>
       </nav>
 
       <div className="max-w-2xl mx-auto px-4 py-12">

@@ -127,7 +127,7 @@ export default function ResetPasswordPage() {
           )}
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            <a href="/login" className="text-[#4A9FD5] font-medium hover:underline">Back to sign in</a>
+            <a href="/login" rel="nofollow" className="text-[#4A9FD5] font-medium hover:underline">Back to sign in</a>
           </p>
         </div>
       </div>

@@ -56,7 +56,7 @@ export default async function NewsletterArchive() {
         <div className="bg-white rounded-2xl shadow-sm p-6 mb-8 text-center">
           <p className="font-semibold text-gray-900 mb-1">Get lunch news in your inbox</p>
           <p className="text-sm text-gray-500 mb-4">Sign up for a free Let&apos;s Get Lunch account — you&apos;ll get the newsletter and be able to claim exclusive lunch specials.</p>
-          <a href="/signup?next=/newsletter"
+          <a href="/signup?next=/newsletter" rel="nofollow"
             className="inline-block bg-[#4A9FD5] text-white rounded-xl px-6 py-3 font-semibold hover:bg-[#3a8fc5] transition-colors">
             Sign up for Let&apos;s Get Lunch
           </a>

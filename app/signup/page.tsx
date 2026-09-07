@@ -240,7 +240,7 @@ export default function SignupPage() {
 
               <p className="text-center text-sm text-gray-500">
                 Already have an account?{' '}
-                <a href={loginHref} className="text-[#4A9FD5] font-medium hover:underline">Sign in</a>
+                <a href={loginHref} rel="nofollow" className="text-[#4A9FD5] font-medium hover:underline">Sign in</a>
               </p>
             </div>
           )}

@@ -326,7 +326,7 @@ export default function RestaurantClient() {
         {userFirstName ? (
           <AccountMenu userFirstName={userFirstName} />
         ) : (
-          <a href={loginHref} className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full font-medium hover:bg-[#3a8fc5]">Sign in</a>
+          <a href={loginHref} rel="nofollow" className="text-sm bg-[#4A9FD5] text-white px-4 py-1.5 rounded-full font-medium hover:bg-[#3a8fc5]">Sign in</a>
         )}
       </nav>
 
