@@ -8,6 +8,7 @@ export default function AccountMenu({ userFirstName }: { userFirstName: string }
   const [showClaims, setShowClaims] = useState(false);
   const [showArea, setShowArea] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -61,11 +62,19 @@ export default function AccountMenu({ userFirstName }: { userFirstName: string }
           >
             Sign Out
           </button>
+          <div className="border-t border-gray-100 my-1" />
+          <button
+            onClick={() => { setShowDelete(true); setOpen(false); }}
+            className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-gray-50"
+          >
+            Delete Account
+          </button>
         </div>
       )}
       {showClaims && <MyClaimsModal onClose={() => setShowClaims(false)} />}
       {showArea && <PreferredAreaModal onClose={() => setShowArea(false)} />}
       {showSettings && <AccountSettingsModal onClose={() => setShowSettings(false)} />}
+      {showDelete && <DeleteAccountModal onClose={() => setShowDelete(false)} />}
     </div>
   );
 }

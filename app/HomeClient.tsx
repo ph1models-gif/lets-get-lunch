@@ -1,5 +1,6 @@
 'use client';
 import dynamic from 'next/dynamic';
+import { Capacitor } from '@capacitor/core';
 import MapComponent from './components/Map';
 import NeighborhoodSearch, { NEIGHBORHOOD_COORDS } from './components/NeighborhoodSearch';
 import AccountMenu from './components/AccountMenu';
@@ -41,6 +42,12 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
   useEffect(() => { userFirstNameRef.current = userFirstName; }, [userFirstName]);
 
   const handleGeolocationResolved = useCallback(() => {
+    // Never in the native iOS app: this sign-up card was styled to mirror an
+    // iOS system alert and fired right after the location prompt, which App
+    // Review read as a custom pre-permission gate (Guideline 5.1.1(iv),
+    // 2026-09-04). The web/PWA is unaffected — the prompt only ever shows
+    // there now.
+    if (Capacitor.isNativePlatform()) return;
     // Scoped to /claim only — the rest of the site is unaffected. Read the
     // path directly (rather than the claimMode state) so this is correct
     // regardless of timing relative to the mount effect that sets it.
