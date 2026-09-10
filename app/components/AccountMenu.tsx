@@ -56,18 +56,21 @@ export default function AccountMenu({ userFirstName }: { userFirstName: string }
           >
             Account Settings
           </button>
+          <div className="border-t border-gray-100 my-1" />
+          {/* Fenced off from Sign Out (below) and de-emphasized so nobody
+              taps it by reflex when they mean to sign out. */}
+          <button
+            onClick={() => { setShowDelete(true); setOpen(false); }}
+            className="w-full text-left px-4 py-2.5 text-sm text-gray-500 hover:bg-gray-50"
+          >
+            Delete Account
+          </button>
+          <div className="border-t border-gray-100 my-1" />
           <button
             onClick={handleSignOut}
             className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
           >
             Sign Out
-          </button>
-          <div className="border-t border-gray-100 my-1" />
-          <button
-            onClick={() => { setShowDelete(true); setOpen(false); }}
-            className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-gray-50"
-          >
-            Delete Account
           </button>
         </div>
       )}
