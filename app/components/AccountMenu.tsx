@@ -247,7 +247,7 @@ function AccountSettingsModal({ onClose }: { onClose: () => void }) {
         </div>
         <div className="mb-6">
           <p className="text-sm font-medium text-gray-900 mb-1">Email frequency</p>
-          <p className="text-xs text-gray-500 mb-3">How often should we send you lunch?</p>
+          <p className="text-xs text-gray-500 mb-3">How often should we email you lunch specials? This doesn&apos;t affect app notifications.</p>
           {EMAIL_FREQUENCY_OPTIONS.map((o) => (
             <button
               key={o.value}
