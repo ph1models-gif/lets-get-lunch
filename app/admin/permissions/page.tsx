@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../../lib/supabase';
+import { NEIGHBORHOOD_GROUPS } from '../../../lib/neighborhoods';
 
 type Restaurant = { id: string; name: string; neighborhood: string | null };
 type Editor = { user_id: string; email: string | null; restaurant_ids: string[] };
@@ -18,6 +19,7 @@ export default function AdminPermissionsPage() {
   const [error, setError] = useState('');
   const [busyIds, setBusyIds] = useState<Set<string>>(new Set());
   const [selectedNeighborhood, setSelectedNeighborhood] = useState('');
+  const [selectedBorough, setSelectedBorough] = useState('');
   const [email, setEmail] = useState('');
 
   async function authHeader() {
@@ -145,6 +147,30 @@ export default function AdminPermissionsPage() {
     setBulkBusy(false);
   }
 
+  async function grantBorough() {
+    if (!selectedEditor || !selectedBorough) return;
+    setBulkBusy(true);
+    await fetch('/api/admin/grant-borough-access', {
+      method: 'POST',
+      headers: { ...(await authHeader()), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: selectedEditor, borough: selectedBorough }),
+    });
+    await loadEditors();
+    setBulkBusy(false);
+  }
+
+  async function revokeBorough() {
+    if (!selectedEditor || !selectedBorough) return;
+    setBulkBusy(true);
+    await fetch('/api/admin/revoke-borough-access', {
+      method: 'POST',
+      headers: { ...(await authHeader()), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: selectedEditor, borough: selectedBorough }),
+    });
+    await loadEditors();
+    setBulkBusy(false);
+  }
+
   const currentEditor = editors.find(e => e.user_id === selectedEditor);
   const grantedSet = useMemo(() => new Set(currentEditor?.restaurant_ids || []), [currentEditor]);
   const filteredRestaurants = useMemo(
@@ -158,6 +184,13 @@ export default function AdminPermissionsPage() {
     () => Array.from(new Set(restaurants.map(r => r.neighborhood).filter(Boolean))).sort() as string[],
     [restaurants]
   );
+  // Only offer boroughs that actually have a listed restaurant in them, same
+  // spirit as `neighborhoods` above - no point offering "Staten Island" if
+  // nothing's there yet to grant.
+  const boroughs = useMemo(() => {
+    const have = new Set(neighborhoods);
+    return NEIGHBORHOOD_GROUPS.filter(g => g.names.some(n => have.has(n))).map(g => g.borough);
+  }, [neighborhoods]);
 
   if (checking) return null;
 
@@ -225,6 +258,22 @@ export default function AdminPermissionsPage() {
                     className="text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 whitespace-nowrap">
                     Remove editor entirely
                   </button>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 mb-2 bg-gray-50 rounded-xl p-2.5">
+                  <select value={selectedBorough} onChange={e => setSelectedBorough(e.target.value)}
+                    className="text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white focus:outline-none focus:border-[#4A9FD5]">
+                    <option value="">Choose a borough…</option>
+                    {boroughs.map(b => <option key={b} value={b}>{b}</option>)}
+                  </select>
+                  <button onClick={grantBorough} disabled={bulkBusy || !selectedBorough}
+                    className="text-xs px-3 py-1.5 rounded-lg border border-green-200 text-green-700 hover:bg-green-50 disabled:opacity-50 whitespace-nowrap">
+                    Grant this borough
+                  </button>
+                  <button onClick={revokeBorough} disabled={bulkBusy || !selectedBorough}
+                    className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50 whitespace-nowrap">
+                    Revoke this borough
+                  </button>
+                  <span className="text-xs text-gray-400 w-full">e.g. Manhattan, Queens — every neighborhood in it at once</span>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 mb-3 bg-gray-50 rounded-xl p-2.5">
                   <select value={selectedNeighborhood} onChange={e => setSelectedNeighborhood(e.target.value)}
