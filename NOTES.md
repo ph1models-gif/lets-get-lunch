@@ -42,6 +42,16 @@ Connect whether replying auto-resubmits (it did for the 1st rejection)
 or needs a separate "Submit for Review" click - has varied by rejection
 type in past rounds.
 
+**Resolved, Brian's side (Sept 14, 2026):** couldn't find a "Reply to App
+Review" box in the Resolution Center (may not have still been available
+post-resubmission - see note above about that window closing). Used the
+persistent App Review Information **Notes field** instead - added a
+"REVIEWER NOTE - GUIDELINE 5.1.1" paragraph at the top explaining the
+location feature was removed entirely, kept the rest of that field
+(demo account, devices, external services, regional/regulated-industry
+answers) unchanged. App has been resubmitted. **Awaiting Apple's review
+as of this note.**
+
 ## ✅ App Store: 3rd rejection (Sept 4) - Guidelines 4.5.4 + 5.1.1, fixed same day, no new build needed
 ## ✅ App Store: 3rd rejection (Sept 4) - Guidelines 4.5.4 + 5.1.1, fixed same day, no new build needed
 
