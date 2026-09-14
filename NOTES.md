@@ -22,11 +22,25 @@ anymore.
 
 **No new Xcode build/TestFlight upload needed** - same as the notification
 fix, this is `server.url` mode, so pushing to `main` changes what the
-already-submitted binary loads next time it opens the live site. Brian's
-next step: confirm on his device (relaunch the app, confirm no location
-prompt on open, confirm tapping the new map button still centers on your
-location), then reply in the Resolution Center referencing this fix -
-check whether Apple wants a new screen recording for this one.
+already-submitted binary loads next time it opens the live site.
+
+**Revised same day - Brian's call, button pulled entirely (commit
+`5030672`):** rather than bet on a reviewer judging the tap-triggered
+button as compliant, removed it and its geolocation call completely for
+this resubmission - the app now has zero location code path anywhere.
+Also flagged separately, worth fixing before the button ever comes back:
+it sat directly on top of Google's map logo/attribution, which risks
+looking like it's mimicking a Google control (and Google's own Maps
+Platform terms require their logo stay unobscured - a real ToS point,
+not just a look). Plan: get this bare-bones version approved, then bring
+the button back in a later release with placement that clears the logo.
+
+Brian's next step: confirm on device (relaunch, confirm no location
+prompt anywhere, map has no locate button), then reply in the Resolution
+Center referencing this fix and resubmit for review. Check in App Store
+Connect whether replying auto-resubmits (it did for the 1st rejection)
+or needs a separate "Submit for Review" click - has varied by rejection
+type in past rounds.
 
 ## ✅ App Store: 3rd rejection (Sept 4) - Guidelines 4.5.4 + 5.1.1, fixed same day, no new build needed
 ## ✅ App Store: 3rd rejection (Sept 4) - Guidelines 4.5.4 + 5.1.1, fixed same day, no new build needed
