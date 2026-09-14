@@ -4,7 +4,7 @@ import { Capacitor } from '@capacitor/core';
 import MapComponent from './components/Map';
 import NeighborhoodSearch, { NEIGHBORHOOD_COORDS } from './components/NeighborhoodSearch';
 import AccountMenu from './components/AccountMenu';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import Image from 'next/image';
 import { HOMEPAGE_RESTAURANT_SELECT, Restaurant } from './types';
@@ -41,22 +41,23 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
   const userFirstNameRef = useRef('');
   useEffect(() => { userFirstNameRef.current = userFirstName; }, [userFirstName]);
 
-  const handleGeolocationResolved = useCallback(() => {
+  useEffect(() => {
     // Never in the native iOS app: this sign-up card was styled to mirror an
-    // iOS system alert and fired right after the location prompt, which App
-    // Review read as a custom pre-permission gate (Guideline 5.1.1(iv),
-    // 2026-09-04). The web/PWA is unaffected — the prompt only ever shows
-    // there now.
+    // iOS system alert. It used to fire right after the location prompt,
+    // which App Review read as a custom pre-permission gate (Guideline
+    // 5.1.1(iv), 2026-09-04) — location is no longer requested
+    // automatically at all (see MapInner.tsx), so this now runs on a flat
+    // timer from page load instead. The web/PWA is unaffected — the prompt
+    // only ever shows there now.
     if (Capacitor.isNativePlatform()) return;
-    // Scoped to /claim only — the rest of the site is unaffected. Read the
-    // path directly (rather than the claimMode state) so this is correct
-    // regardless of timing relative to the mount effect that sets it.
+    // Scoped to /claim only — the rest of the site is unaffected.
     if (!window.location.pathname.startsWith('/claim')) return;
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       if (userFirstNameRef.current) return; // logged in, never show
       if (getCookie(SIGNUP_MODAL_COOKIE)) return; // already seen within the last 7 days
       setShowSignupModal(true);
     }, SIGNUP_MODAL_DELAY_MS);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -234,7 +235,7 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
         </div>
       </section>
 
-      <MapComponent onPanReady={(fn) => { mapPanRef.current = fn; setMapReady(true); }} activeIds={filtered.map(r => r.id)} onBoundsChange={setMapBounds} onGeolocationResolved={handleGeolocationResolved} restaurants={restaurants} />
+      <MapComponent onPanReady={(fn) => { mapPanRef.current = fn; setMapReady(true); }} activeIds={filtered.map(r => r.id)} onBoundsChange={setMapBounds} restaurants={restaurants} />
 
       <section className="px-4 py-3">
         <p className="text-sm text-gray-500">{filtered.length} lunch {filtered.length === 1 ? 'special' : 'specials'} in this area · Scroll for details ↓</p>

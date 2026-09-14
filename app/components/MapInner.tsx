@@ -18,15 +18,17 @@ function navigateToRestaurant(slug: string) {
 interface Props {
   onPanReady?: (fn: (lat: number, lng: number) => void) => void;
   onBoundsChange?: (bounds: {north: number, south: number, east: number, west: number}) => void;
-  onGeolocationResolved?: () => void;
   activeIds?: string[];
   restaurants: Restaurant[];
 }
 
-export default function MapInner({ onPanReady, activeIds, onBoundsChange, onGeolocationResolved, restaurants }: Props) {
+export default function MapInner({ onPanReady, activeIds, onBoundsChange, restaurants }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const markersRef = useRef<Map<string, any>>(new Map());
   const activeIdsRef = useRef<string[] | undefined>(activeIds);
+  // initMap() assigns the real locate function here once the map exists, so
+  // the "use my location" button can call it without re-running initMap.
+  const locateRef = useRef<(() => void) | null>(null);
 
   // Keep the ref synced with the latest prop so initMap (async) sees current value
   useEffect(() => {
@@ -245,10 +247,12 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange, onGeol
       }
     });
 
-    // Fires onGeolocationResolved as soon as the user has responded to the
-    // browser's location prompt — Allow or Don't Allow — independent of
-    // whatever the map does with that answer.
-    if (navigator.geolocation) {
+    // Location is only ever requested when the diner taps the "use my
+    // location" button below — never automatically on load. Apple rejected
+    // the app (Guideline 5.1.1) for firing this on launch with no user
+    // action tied to it.
+    locateRef.current = () => {
+      if (!navigator.geolocation) return;
       navigator.geolocation.getCurrentPosition(pos => {
         const userLatLng = {lat: pos.coords.latitude, lng: pos.coords.longitude};
         // NYC bounding box (rough): lat 40.49-40.92, lng -74.27 to -73.68
@@ -266,14 +270,10 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange, onGeol
           map.setZoom(15);
         }
         // If outside NYC, stay at Madison Square Park default (already set)
-        if (onGeolocationResolved) onGeolocationResolved();
       }, () => {
-        // Permission denied or position unavailable — map stays at default.
-        if (onGeolocationResolved) onGeolocationResolved();
+        // Permission denied or position unavailable — map stays as-is.
       });
-    } else if (onGeolocationResolved) {
-      onGeolocationResolved();
-    }
+    };
   }
 
   return (
@@ -298,6 +298,23 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange, onGeol
       `}</style>
       <div className="map-skeleton" style={{position:'absolute', inset:0, zIndex:0}} />
       <div ref={ref} style={{width:'100%', height:'100%', position:'relative', zIndex:1, background:'transparent'}} />
+      <button
+        type="button"
+        onClick={() => locateRef.current?.()}
+        aria-label="Use my location"
+        title="Use my location"
+        style={{
+          position: 'absolute', right: 12, bottom: 12, zIndex: 2,
+          width: 40, height: 40, borderRadius: '50%', background: 'white',
+          border: '1px solid rgba(0,0,0,0.15)', boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0,
+        }}
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A9FD5" strokeWidth="2" strokeLinecap="round">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+        </svg>
+      </button>
     </div>
   );
 }
