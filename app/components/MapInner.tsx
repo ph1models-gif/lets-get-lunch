@@ -244,45 +244,15 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange, restau
       }
     });
 
-    // Location is only ever requested when the diner taps the "use my
-    // location" control below — never automatically on load. Apple rejected
-    // the app (Guideline 5.1.1) for firing this on launch with no user
-    // action tied to it.
-    function locateUser() {
-      if (!navigator.geolocation) return;
-      navigator.geolocation.getCurrentPosition(pos => {
-        const userLatLng = {lat: pos.coords.latitude, lng: pos.coords.longitude};
-        // NYC bounding box (rough): lat 40.49-40.92, lng -74.27 to -73.68
-        const inNYC = userLatLng.lat >= 40.49 && userLatLng.lat <= 40.92 &&
-                      userLatLng.lng >= -74.27 && userLatLng.lng <= -73.68;
-        new g.Marker({
-          position: userLatLng,
-          map,
-          title: 'You are here',
-          icon: {path:g.SymbolPath.CIRCLE, scale:10, fillColor:'#4285F4', fillOpacity:1, strokeColor:'white', strokeWeight:3},
-          zIndex: 999,
-        });
-        if (inNYC) {
-          map.panTo(userLatLng);
-          map.setZoom(15);
-        }
-        // If outside NYC, stay at Madison Square Park default (already set)
-      }, () => {
-        // Permission denied or position unavailable — map stays as-is.
-      });
-    }
-
-    // Registered as a real Maps control (bottom-left) rather than an
-    // absolutely-positioned div, so it's laid out by the API itself and
-    // never overlaps the built-in zoom control (bottom-right).
-    const locateButton = document.createElement('button');
-    locateButton.type = 'button';
-    locateButton.title = 'Use my location';
-    locateButton.setAttribute('aria-label', 'Use my location');
-    locateButton.style.cssText = 'margin:10px;width:40px;height:40px;border-radius:50%;background:white;border:1px solid rgba(0,0,0,0.15);box-shadow:0 1px 4px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0';
-    locateButton.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A9FD5" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>';
-    locateButton.addEventListener('click', locateUser);
-    map.controls[g.ControlPosition.LEFT_BOTTOM].push(locateButton);
+    // Location is intentionally not requested anywhere in the app right
+    // now (v1 App Store resubmission, 2026-09-14) — pulled after the 4th
+    // 5.1.1 rejection to eliminate the risk entirely rather than rely on a
+    // tap-triggered request being judged compliant. A "use my location"
+    // button existed briefly (commits a74966c/42a1c1b) and can come back in
+    // a later release once this submission clears review, with better
+    // placement (it previously sat on top of Google's logo/attribution,
+    // which is its own problem — see MapInner git history for the removed
+    // implementation).
   }
 
   return (
