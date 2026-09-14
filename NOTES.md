@@ -1,32 +1,32 @@
 # Let's Get Lunch — Project Notes
 **Last updated: September 5, 2026**
 
-## ⏳ 3rd App Store rejection had a 2nd screenshot too - location auto-prompt, deliberately NOT fixed yet
+## ✅ 4th App Store rejection confirmed the location auto-prompt - fixed (Sept 14, 2026)
 
-The 3rd rejection (see entry below) included a second screenshot Brian
-initially missed: the standard iOS "Let's Get Lunch NYC would like to use
-your location" system dialog. Apple gave no written explanation beyond the
-two guideline names (4.5.4 + 5.1.1) and two screenshots - confirmed with
-Brian there's no additional reviewer text anywhere in the rejection.
+Apple rejected again citing Guideline 5.1.1, with a screenshot of the
+location permission dialog appearing when the app first opens - exactly
+the risk flagged (and deliberately left unfixed) after the 3rd rejection,
+below. Confirmation, not a new problem: `navigator.geolocation.
+getCurrentPosition()` in `app/components/MapInner.tsx` was firing
+automatically as soon as the homepage's map initialized, with no user
+action tied to it.
 
-Likely cause, structurally consistent with the notification fix: `app/
-components/MapInner.tsx` calls `navigator.geolocation.getCurrentPosition()`
-automatically as soon as the homepage's map initializes - before the user
-has tapped anything location-related. Same "ask proactively on launch
-instead of tied to a specific action" pattern that got the notification
-permission flagged. Also load-bearing today: `lib/signupModal.ts`
-deliberately delays the sign-up popup until *after* the user answers the
-location prompt, specifically so the two don't visually stack.
+**Fix built and pushed to `main` (`a74966c`):** the automatic call is gone.
+Location is now only ever requested when a diner taps a new "use my
+location" button on the map (bottom-right, crosshair icon) - the map
+otherwise stays centered on the fixed NYC default. The sign-up popup on
+`/claim` (`lib/signupModal.ts`, `HomeClient.tsx`) no longer waits for a
+geolocation answer before appearing - it now runs on a flat 2-second timer
+from page load instead, since there's no automatic prompt to wait on
+anymore.
 
-**Proposed fix, NOT built - Brian's explicit call to hold off:** replace
-the automatic request with a "use my location" tap-to-center button on the
-map (default view stays a fixed NYC spot until tapped), and switch the
-sign-up popup to a flat timer instead of waiting on geolocation response.
-Brian chose to submit with only the notification fix first, betting the
-location screenshot might just be supporting context rather than a
-separate complaint. **If Apple rejects again citing 5.1.1 with this same
-screenshot, that's confirmation it's real - build the fix above then,
-don't re-litigate.**
+**No new Xcode build/TestFlight upload needed** - same as the notification
+fix, this is `server.url` mode, so pushing to `main` changes what the
+already-submitted binary loads next time it opens the live site. Brian's
+next step: confirm on his device (relaunch the app, confirm no location
+prompt on open, confirm tapping the new map button still centers on your
+location), then reply in the Resolution Center referencing this fix -
+check whether Apple wants a new screen recording for this one.
 
 ## ✅ App Store: 3rd rejection (Sept 4) - Guidelines 4.5.4 + 5.1.1, fixed same day, no new build needed
 ## ✅ App Store: 3rd rejection (Sept 4) - Guidelines 4.5.4 + 5.1.1, fixed same day, no new build needed
