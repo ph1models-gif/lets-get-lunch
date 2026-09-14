@@ -26,9 +26,6 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange, restau
   const ref = useRef<HTMLDivElement>(null);
   const markersRef = useRef<Map<string, any>>(new Map());
   const activeIdsRef = useRef<string[] | undefined>(activeIds);
-  // initMap() assigns the real locate function here once the map exists, so
-  // the "use my location" button can call it without re-running initMap.
-  const locateRef = useRef<(() => void) | null>(null);
 
   // Keep the ref synced with the latest prop so initMap (async) sees current value
   useEffect(() => {
@@ -248,10 +245,10 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange, restau
     });
 
     // Location is only ever requested when the diner taps the "use my
-    // location" button below — never automatically on load. Apple rejected
+    // location" control below — never automatically on load. Apple rejected
     // the app (Guideline 5.1.1) for firing this on launch with no user
     // action tied to it.
-    locateRef.current = () => {
+    function locateUser() {
       if (!navigator.geolocation) return;
       navigator.geolocation.getCurrentPosition(pos => {
         const userLatLng = {lat: pos.coords.latitude, lng: pos.coords.longitude};
@@ -273,7 +270,19 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange, restau
       }, () => {
         // Permission denied or position unavailable — map stays as-is.
       });
-    };
+    }
+
+    // Registered as a real Maps control (bottom-left) rather than an
+    // absolutely-positioned div, so it's laid out by the API itself and
+    // never overlaps the built-in zoom control (bottom-right).
+    const locateButton = document.createElement('button');
+    locateButton.type = 'button';
+    locateButton.title = 'Use my location';
+    locateButton.setAttribute('aria-label', 'Use my location');
+    locateButton.style.cssText = 'margin:10px;width:40px;height:40px;border-radius:50%;background:white;border:1px solid rgba(0,0,0,0.15);box-shadow:0 1px 4px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0';
+    locateButton.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A9FD5" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>';
+    locateButton.addEventListener('click', locateUser);
+    map.controls[g.ControlPosition.LEFT_BOTTOM].push(locateButton);
   }
 
   return (
@@ -298,23 +307,6 @@ export default function MapInner({ onPanReady, activeIds, onBoundsChange, restau
       `}</style>
       <div className="map-skeleton" style={{position:'absolute', inset:0, zIndex:0}} />
       <div ref={ref} style={{width:'100%', height:'100%', position:'relative', zIndex:1, background:'transparent'}} />
-      <button
-        type="button"
-        onClick={() => locateRef.current?.()}
-        aria-label="Use my location"
-        title="Use my location"
-        style={{
-          position: 'absolute', right: 12, bottom: 12, zIndex: 2,
-          width: 40, height: 40, borderRadius: '50%', background: 'white',
-          border: '1px solid rgba(0,0,0,0.15)', boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0,
-        }}
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A9FD5" strokeWidth="2" strokeLinecap="round">
-          <circle cx="12" cy="12" r="3" />
-          <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
-        </svg>
-      </button>
     </div>
   );
 }
