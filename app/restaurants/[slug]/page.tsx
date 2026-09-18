@@ -95,10 +95,10 @@ export async function generateMetadata(
     if (d && d.special) {
       description = `${r.name}'s prix-fixe lunch${loc}: ${d.special}`
       if (priceStr) description += ` for ${priceStr}`
-      description += '. Reserve free on Let\'s Get Lunch.'
+      description += '. See the full lunch menu and price on Let\'s Get Lunch.'
     } else {
       const cz = r.cuisine ? `${r.cuisine} ` : ''
-      description = `${r.name} — ${cz}prix-fixe lunch${loc}. Reserve free on Let\'s Get Lunch.`
+      description = `${r.name} — ${cz}prix-fixe lunch${loc}. See the full lunch menu and price on Let\'s Get Lunch.`
     }
     if (description.length > 160) description = description.slice(0, 157) + '...'
 

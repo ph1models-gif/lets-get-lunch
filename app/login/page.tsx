@@ -144,7 +144,7 @@ export default function LoginPage() {
       });
     }
     track('signup_completed');
-    setSuccess("You're in! You can now make reservations.");
+    setSuccess("You're in. You can now claim exclusive lunches.");
     const raw = new URLSearchParams(window.location.search).get('next') || '';
     const safe = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/';
     setTimeout(() => { window.location.href = safe; }, 1500);

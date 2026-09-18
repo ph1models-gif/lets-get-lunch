@@ -542,7 +542,7 @@ export default function RestaurantClient() {
 
                     <button onClick={handleReserve} disabled={submitting}
                       className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50 mt-2">
-                      {submitting ? 'One moment...' : 'Reserve Now'}
+                      {submitting ? 'One moment...' : 'Email me this lunch'}
                     </button>
 
                     {userName ? (
@@ -563,7 +563,7 @@ export default function RestaurantClient() {
                 <>
                   <button onClick={() => setStep('book')} className="text-[#4A9FD5] text-sm mb-4 block">← Back</button>
                   <h2 className="text-xl font-bold text-gray-900 mb-1">Almost done!</h2>
-                  <p className="text-sm text-gray-500 mb-6">One last step — set a password so you can manage your reservations.</p>
+                  <p className="text-sm text-gray-500 mb-6">One last step — set a password so we can email you this lunch.</p>
 
                   {authError && <p className="text-red-500 text-sm bg-red-50 px-4 py-3 rounded-xl mb-4">{authError}</p>}
 
@@ -588,7 +588,7 @@ export default function RestaurantClient() {
                     </label>
                     <button onClick={handleCreateAndReserve} disabled={submitting || !password || password !== confirmPassword}
                       className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50">
-                      {submitting ? 'Confirming...' : 'Confirm Reservation'}
+                      {submitting ? 'Sending...' : 'Email me this lunch'}
                     </button>
 
                   </div>
@@ -600,7 +600,7 @@ export default function RestaurantClient() {
                 <>
                   <button onClick={() => setStep('book')} className="text-[#4A9FD5] text-sm mb-4 block">← Back</button>
                   <h2 className="text-xl font-bold text-gray-900 mb-1">Welcome back!</h2>
-                  <p className="text-sm text-gray-500 mb-6">Sign in to complete your reservation.</p>
+                  <p className="text-sm text-gray-500 mb-6">Sign in and we&apos;ll email you this lunch.</p>
 
                   {authError && <p className="text-red-500 text-sm bg-red-50 px-4 py-3 rounded-xl mb-4">{authError}</p>}
 
@@ -620,7 +620,7 @@ export default function RestaurantClient() {
                     </p>
                     <button onClick={handleSignInAndReserve} disabled={submitting || !signInEmail || !signInPassword}
                       className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50">
-                      {submitting ? 'Signing in...' : 'Sign In & Reserve'}
+                      {submitting ? 'Signing in...' : 'Sign In & Email Me This Lunch'}
                     </button>
                   </div>
                 </>
