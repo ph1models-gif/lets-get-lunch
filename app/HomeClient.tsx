@@ -36,13 +36,13 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
   const [claimMode, setClaimMode] = useState(false);
   const [loginHref, setLoginHref] = useState('/login');
   const [showSignupModal, setShowSignupModal] = useState(false);
-  // Starts hidden (matches SSR, which has no native bridge to check) and is
-  // only flipped on in an effect - checking Capacitor.isNativePlatform()
-  // directly in render can catch the native bridge before it's injected,
-  // and since nothing re-renders this afterward, a wrong "web" result never
-  // corrects itself.
-  const [showAppStoreLink, setShowAppStoreLink] = useState(false);
-  useEffect(() => { setShowAppStoreLink(!Capacitor.isNativePlatform()); }, []);
+  // Recomputed on every render (not cached in state from a single effect
+  // run) - checking once and freezing the result left this wrong after the
+  // native sign-in hand-off (Google/Apple close their in-app browser sheet
+  // and route back in via CapacitorAuthCallback.tsx). Recomputing fresh
+  // each render means any state change after sign-in (userFirstName, right
+  // below) automatically re-checks it too.
+  const showAppStoreLink = typeof window !== 'undefined' && !Capacitor.isNativePlatform();
   // Kept in sync via effect below so the delayed timer always reads the
   // current logged-in state instead of a stale closure value.
   const userFirstNameRef = useRef('');
