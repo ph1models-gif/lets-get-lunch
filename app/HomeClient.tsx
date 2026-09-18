@@ -36,6 +36,13 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
   const [claimMode, setClaimMode] = useState(false);
   const [loginHref, setLoginHref] = useState('/login');
   const [showSignupModal, setShowSignupModal] = useState(false);
+  // Starts hidden (matches SSR, which has no native bridge to check) and is
+  // only flipped on in an effect - checking Capacitor.isNativePlatform()
+  // directly in render can catch the native bridge before it's injected,
+  // and since nothing re-renders this afterward, a wrong "web" result never
+  // corrects itself.
+  const [showAppStoreLink, setShowAppStoreLink] = useState(false);
+  useEffect(() => { setShowAppStoreLink(!Capacitor.isNativePlatform()); }, []);
   // Kept in sync via effect below so the delayed timer always reads the
   // current logged-in state instead of a stale closure value.
   const userFirstNameRef = useRef('');
@@ -193,7 +200,7 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
         </div>
       </nav>
 
-      {!Capacitor.isNativePlatform() && (
+      {showAppStoreLink && (
         <div className="bg-gray-50 border-b border-gray-100 px-4 py-2 flex items-center justify-center gap-3">
           <span className="text-xs text-gray-500 hidden sm:inline">Also available as an iPhone app</span>
           <a href="https://apps.apple.com/us/app/lets-get-lunch/id6804098750" target="_blank" rel="noopener noreferrer"
@@ -375,7 +382,7 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
           </a>
         </div>
         <div className="flex gap-6 text-sm text-gray-400">
-          {!Capacitor.isNativePlatform() && (
+          {showAppStoreLink && (
             <a href="https://apps.apple.com/us/app/lets-get-lunch/id6804098750" target="_blank" rel="noopener noreferrer" className="hover:text-gray-600">Get the iOS App</a>
           )}
           <a href="/list-your-restaurant" className="hover:text-gray-600">For Restaurants</a>
