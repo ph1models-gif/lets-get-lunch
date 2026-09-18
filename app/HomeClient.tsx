@@ -193,6 +193,22 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
         </div>
       </nav>
 
+      {!Capacitor.isNativePlatform() && (
+        <div className="bg-gray-50 border-b border-gray-100 px-4 py-2 flex items-center justify-center gap-3">
+          <span className="text-xs text-gray-500 hidden sm:inline">Also available as an iPhone app</span>
+          <a href="https://apps.apple.com/us/app/lets-get-lunch/id6804098750" target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-black text-white rounded-lg px-3 py-1.5 hover:bg-gray-800 transition-colors">
+            <svg viewBox="0 0 384 512" className="w-4 h-4 fill-white flex-shrink-0" aria-hidden="true">
+              <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-90.5-169.5c-1.9 32.4 23.4 61.9 43.6 74.5 3.4-31.2-14.1-65.1-43.6-74.5z"/>
+            </svg>
+            <span className="text-left leading-none">
+              <span className="block text-[8px] text-gray-300">Download on the</span>
+              <span className="block text-xs font-semibold -mt-0.5">App Store</span>
+            </span>
+          </a>
+        </div>
+      )}
+
       <section className="bg-gradient-to-b from-[#EEF6FC] to-white px-4 pt-3 pb-3 md:pt-6 md:pb-4 text-center">
         <h1 className="hidden md:block text-2xl md:text-4xl font-bold text-gray-900 mb-2">
           NYC&apos;s best lunch specials, <span className="text-[#4A9FD5]">at the table.</span>
@@ -359,6 +375,9 @@ export default function HomeClient({ initialRestaurants }: { initialRestaurants:
           </a>
         </div>
         <div className="flex gap-6 text-sm text-gray-400">
+          {!Capacitor.isNativePlatform() && (
+            <a href="https://apps.apple.com/us/app/lets-get-lunch/id6804098750" target="_blank" rel="noopener noreferrer" className="hover:text-gray-600">Get the iOS App</a>
+          )}
           <a href="/list-your-restaurant" className="hover:text-gray-600">For Restaurants</a>
           <a href="mailto:hello@letsgetlunch.nyc" className="hover:text-gray-600">Contact Us</a>
           <a href="/privacy" className="hover:text-gray-600">Privacy</a>
