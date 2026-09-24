@@ -53,7 +53,7 @@ export default function SignupPage() {
     if (data.user) {
       await supabase.from('profiles').insert({
         id: data.user.id, name: fullName,
-        email: form.email,
+        email: form.email.trim().toLowerCase(),
         neighborhood: form.neighborhood || null,
         marketing_opt_in: marketingOptIn,
       });

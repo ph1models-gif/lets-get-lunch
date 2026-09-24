@@ -139,7 +139,7 @@ export default function LoginPage() {
       await supabase.from('profiles').insert({
         id: data.user.id,
         name: fullName,
-        email: signUpForm.email,
+        email: signUpForm.email.trim().toLowerCase(),
         neighborhood: signUpForm.neighborhood || null,
       });
     }

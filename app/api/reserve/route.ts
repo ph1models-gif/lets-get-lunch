@@ -12,13 +12,22 @@ export async function POST(req: NextRequest) {
   try {
     const { restaurant_id, restaurant_name, name, contact, party_size, preferred_time, user_id } = await req.json()
 
+    // Reject leads with no real name or email. The restaurant page used to
+    // send the literal string "undefined undefined" when the name boxes were
+    // never filled in, so treat that as missing too.
+    const cleanName = typeof name === 'string' ? name.replace(/\bundefined\b/g, '').trim() : ''
+    const cleanContact = typeof contact === 'string' ? contact.trim().toLowerCase() : ''
+    if (!cleanName || !cleanContact.includes('@')) {
+      return NextResponse.json({ error: 'Please enter your name and email.' }, { status: 400 })
+    }
+
     const code = generateCode()
 
     // Save reservation — if this fails we stop
     const { error: dbError } = await supabase.from('reservations').insert({
       restaurant_id,
-      name,
-      contact,
+      name: cleanName,
+      contact: cleanContact,
       party_size,
       preferred_time,
       code,
@@ -50,7 +59,7 @@ export async function POST(req: NextRequest) {
 
     // Send email — wrapped so failure does NOT block the code returning
     try {
-      const userEmail = contact.includes('@') ? contact : null
+      const userEmail = cleanContact
       // Respect unsubscribes: never email someone who opted out
       let isUnsubscribed = false
       if (userEmail) {
@@ -75,7 +84,7 @@ export async function POST(req: NextRequest) {
             html: `
               <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
                 <h1 style="color:#4A9FD5;font-size:24px;margin-bottom:8px">Here's your lunch at ${restaurant_name} 🍽️</h1>
-                <p style="color:#444;font-size:16px">Hi ${name},</p>
+                <p style="color:#444;font-size:16px">Hi ${cleanName},</p>
                 <p style="color:#444;font-size:16px">We've noted your interest in the lunch special at <strong>${restaurant_name}</strong>.</p>
                 <div style="background:#EEF6FC;border-radius:12px;padding:20px;margin:24px 0">
                   <p style="color:#444;font-size:15px;margin:0 0 12px">${restaurant_name} isn't a Let's Get Lunch partner yet, so we can't book your table directly. Call ahead or just walk in — and mention you saw the lunch special on Let's Get Lunch.</p>

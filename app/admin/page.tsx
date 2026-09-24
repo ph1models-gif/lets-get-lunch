@@ -68,7 +68,15 @@ const HOURS_OPTIONS = [
 ];
 
 
-function ReservationsView({ reservations, resView }: { reservations: any[], resView: string }) {
+// Test leads stay in the database but out of the numbers by default:
+// anything flagged is_test, plus any plus-address on letsgetlunch.nyc
+// (brian+appreview@ etc.) so new test accounts are excluded automatically.
+function isTestReservation(r: any): boolean {
+  return !!r.is_test || /\+[^@]*@letsgetlunch\.nyc$/i.test((r.contact || '').trim())
+}
+
+function ReservationsView({ reservations: allReservations, resView, showTest }: { reservations: any[], resView: string, showTest: boolean }) {
+  const reservations = showTest ? allReservations : allReservations.filter(r => !isTestReservation(r))
   const today = new Date().toDateString()
   const filtered = resView === 'today'
     ? reservations.filter(r => new Date(r.created_at).toDateString() === today)
@@ -147,6 +155,9 @@ function ReservationsView({ reservations, resView }: { reservations: any[], resV
               <div>
                 <div className="flex items-center gap-2">
                   <p className="font-semibold text-gray-900">{r.name}</p>
+                  {isTestReservation(r) && (
+                    <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">Test</span>
+                  )}
                   {isRepeat && (
                     <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">
                       🔁 {bookCount}x booker
@@ -297,6 +308,7 @@ export default function AdminPage() {
   const [users, setUsers] = useState<any[]>([])
   const [usersLoading, setUsersLoading] = useState(true)
   const [reservations, setReservations] = useState<any[]>([])
+  const [showTestRes, setShowTestRes] = useState(false)
   const [resLoading, setResLoading] = useState(true)
   const [resView, setResView] = useState<'today' | 'all'>('today')
 
@@ -1338,12 +1350,16 @@ export default function AdminPage() {
                   {v === 'today' ? "Today's bookings" : "All time"}
                 </button>
               ))}
+              <label className="flex items-center gap-2 ml-auto text-sm text-gray-600 cursor-pointer">
+                <input type="checkbox" checked={showTestRes} onChange={e => setShowTestRes(e.target.checked)} />
+                Show test rows
+              </label>
             </div>
 
             {resLoading ? (
               <p className="text-sm text-gray-400">Loading reservations...</p>
             ) : (
-              <ReservationsView reservations={reservations} resView={resView} />
+              <ReservationsView reservations={reservations} resView={resView} showTest={showTestRes} />
             )}
           </div>
         )}

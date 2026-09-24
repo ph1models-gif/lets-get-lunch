@@ -65,7 +65,7 @@ export default function RestaurantClient() {
 
   // Book form
   const [form, setForm] = useState({
-    name: '', email: '', party_size: '2', preferred_time: '12:00 pm',
+    firstName: '', lastName: '', email: '', party_size: '2', preferred_time: '12:00 pm',
   });
 
   // Auth
@@ -134,14 +134,17 @@ export default function RestaurantClient() {
   }
 
   async function handleReserve() {
-    if (userName) {
-      // Signed in — submit directly
+    // Decide "signed in" from the actual session, not from whether we found
+    // a profile name — a signed-in user with no profile row used to get sent
+    // to "create a password", told they already have an account, and end up
+    // saving a lead with no name.
+    let user = null;
+    try { user = (await supabase.auth.getUser()).data.user; } catch(e) {}
+    if (user) {
+      const fullName = userName || `${form.firstName} ${form.lastName}`.trim();
+      if (!fullName) { setAuthError('Please enter your first and last name.'); return; }
       setSubmitting(true);
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) { await submitReservation(user.id); return; }
-      } catch(e) {}
-      setSubmitting(false);
+      await submitReservation(user.id, fullName);
     } else {
       // Not signed in — go to password step
       setStep('password');
@@ -178,15 +181,14 @@ export default function RestaurantClient() {
     if (data.user) {
       await supabase.from('profiles').insert({
         id: data.user.id,
-        name: `${form.firstName} ${form.lastName}`,
-        email: form.email,
-        contact: form.email,
+        name: `${form.firstName} ${form.lastName}`.trim(),
+        email: form.email.trim().toLowerCase(),
         marketing_opt_in: marketingOptIn,
-      });
+      }).then(({ error }) => { if (error) console.error('Profile save error:', error); });
       setUserFirstName(form.firstName);
       setUserName(`${form.firstName} ${form.lastName}`);
       setIsNewUser(true);
-      await submitReservation(data.user.id);
+      await submitReservation(data.user.id, `${form.firstName} ${form.lastName}`.trim());
     }
   }
 
@@ -212,12 +214,20 @@ export default function RestaurantClient() {
         .select('name')
         .eq('id', data.user.id)
         .single();
-      if (profile?.name) setForm(f => ({ ...f, name: profile.name }));
-      await submitReservation(data.user.id);
+      // Returning user: use their saved name, falling back to what they typed.
+      const fullName = profile?.name?.trim() || `${form.firstName} ${form.lastName}`.trim();
+      if (!fullName) {
+        setAuthError('Please add your first and last name, then tap "Email me this lunch".');
+        setStep('book');
+        setSubmitting(false);
+        return;
+      }
+      if (!form.email) setForm(f => ({ ...f, email: data.user!.email || '' }));
+      await submitReservation(data.user.id, fullName, data.user.email || signInEmail);
     }
   }
 
-  async function submitReservation(userId: string) {
+  async function submitReservation(userId: string, fullName: string, email: string = form.email) {
     try {
       const res = await fetch('/api/reserve', {
         method: 'POST',
@@ -227,8 +237,8 @@ export default function RestaurantClient() {
           restaurant_name: r!.name,
           restaurant_email: null,
           user_id: userId,
-          name: `${form.firstName} ${form.lastName}`,
-          contact: form.email,
+          name: fullName,
+          contact: email.trim().toLowerCase(),
           party_size: parseInt(form.party_size),
           preferred_time: form.preferred_time,
           note: null,
