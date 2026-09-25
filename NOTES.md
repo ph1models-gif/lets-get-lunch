@@ -1929,3 +1929,33 @@ POSTed to the real `/api/newsletter-signup` route with a fresh disposable email:
 
 ### Known gap, not addressed this round
 The signup endpoint is public and unauthenticated — no CAPTCHA, no rate limiting, matching the rest of the site's current signup posture (the full `/signup` flow has none either). Worst case if abused: someone else's inbox gets one unwanted confirmation email, which includes a working one-click unsubscribe link. Flagged, not fixed — revisit if it becomes a real problem.
+
+## 2026-09-24/25 — Lead & profile data fixes (built with Claude Code)
+
+### Shipped to main (c27dcbe), verified live
+- **Profiles silently not saving (since 6/17).** The lunch pop-up's signup wrote `contact` to `profiles`, a column that doesn't exist, so every insert failed silently. Fixed by dropping that write (the value duplicated `email`, and nothing reads it), rather than adding the column. Profile save errors are now logged. 17 accounts had no profile row:
+  - 8 were pop-up signups: 7 real diners plus mollymail@mail.ru (lead name "Olga Mi"; Brian says it may be real).
+  - 6 were Apple sign-ins (see below).
+  - 3 were editor invites, which have no profile by design.
+- **Consequences of no profile row:** no newsletter; invisible in admin Users; claims shown as "(deleted account)"; neighborhood and email-frequency settings show "Saved!" but save nothing; the pop-up doesn't recognize them, which fed the "undefined undefined" bug. Sign-in, claims, the claim email and push all still worked (they only need the login account).
+- **Backfilled 7 profiles** (Bo Joun, jamie goldstein, Gustavo Serra, Jerrian Cole, Carolyn Robinson, Adam Tomaszewski, Brooke Stolting). Names came from each diner's first lead and signup dates from their login account. `marketing_opt_in = false` for all 7, because their checkbox answer was never stored anywhere and is permanently lost. mollymail was NOT backfilled (awaiting Brian).
+- **"undefined undefined" leads (Path B).** A returning user who used the pop-up's "Sign in" step never filled the name boxes. The sign-in step wrote their profile name to the wrong form field, too late to be used. Now "signed in" is decided from the real session, and the sign-in step passes the saved profile name (or the typed name) straight into the lead.
+- **Server validation.** `/api/reserve` rejects leads with no name or no email, and a bare "undefined" counts as no name.
+- **Emails lowercased on save** (leads, /signup, /login, pop-up). Existing data lowercased: 4 leads and 3 profiles. Brooke Stolting's Stolting@/stolting@ leads are now one person with 2 leads, and her "undefined undefined" row was renamed.
+- **Test rows.** Brian added `reservations.is_test boolean not null default false` via the SQL Editor. 23 rows are flagged and none deleted:
+  - brian+appreview ×3, plus my own 3 walkthrough leads
+  - test@test.com, ph1models@gmailcom, info@newyorkheadshots.com, brian@newyorkheadshots.com, info@keith-photography.com, brian@letsgetlunch.nyc
+  - 11 rows with no email: 8 "undefined undefined" from direct API calls on dev days, and 3 null rows from 8/26 account-deletion testing
+  - mollymail is deliberately NOT flagged.
+- **Admin Reservations** hides test rows by default, where a test row is `is_test` or any `+` address on letsgetlunch.nyc, and has a "Show test rows" toggle. Verified on the live admin page: **11 reservations / 19 guests / 1 repeat booker** (Brooke), and 34 / 64 / 5 with test rows shown.
+- **Live walkthrough** (headless Chromium against www.letsgetlunch.nyc), all passed:
+  - a new pop-up signup got a profile row
+  - a signed-in user's second lead got their name
+  - a returning user who signed in from the pop-up without touching the name boxes (typed with mixed case) got their name and a lowercase email
+  - The test account `brian+lglverify1790293849@letsgetlunch.nyc` was left in place (opt-in on).
+
+### Apple sign-in: accounts with no profile (investigated 9/25, not fixed)
+- All 6 Apple accounts without a profile are named **"John Apple"**, created 8/25, 8/30, 9/2, 9/4, 9/14 and 9/17. Those line up with the App Store review rounds, so they're Apple's App Review testers, not diners. Every real Apple user got a profile (Hélène Cristofani 9/3, Tanya Ilieva 9/19, and an 8/27 account with a blank name). None of the 6 has leads, claims or roles, so there's no need to backfill them.
+- The cause isn't proven. The profile is created by the page the sign-in lands on: /auth/callback on the web, and CapacitorAuthCallback's custom-scheme hand-off in the app. If a sign-in completes at Apple/Supabase but never lands there, you get a login account with no profile. The most likely case is the reviewer's in-app browser not handing the `nyc.letsgetlunch.app://` link back to the app. Account deletion failing partway was ruled out as far as possible: every user-referencing table in the migrations cascades or nulls on delete.
+- Can't dig further from here: Supabase's auth log isn't reachable with the service key, and Vercel logs don't go back that far. A clean check is the OneSignal dashboard. If a "John Apple" user ID shows up as an external ID, the app did get the session; if not, the hand-off never arrived.
+- Suggested hardening (not built): create a missing profile whenever a signed-in user loads any page, using their login email and name. That covers any sign-in path that skips the callback page.
