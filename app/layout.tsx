@@ -7,6 +7,7 @@ import InstallPrompt from "./components/InstallPrompt";
 import CapacitorExternalLinks from "./components/CapacitorExternalLinks";
 import CapacitorAuthCallback from "./components/CapacitorAuthCallback";
 import OneSignalInit from "./components/OneSignalInit";
+import EnsureProfile from "./components/EnsureProfile";
 import { INSTALL_PROMPT_ENABLED } from "../lib/pwa";
 import "./globals.css";
 
@@ -68,6 +69,7 @@ export default function RootLayout({
         <CapacitorExternalLinks />
         <CapacitorAuthCallback />
         <OneSignalInit />
+        <EnsureProfile />
         <Analytics />
       </body>
     </html>

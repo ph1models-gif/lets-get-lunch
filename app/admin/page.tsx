@@ -71,8 +71,12 @@ const HOURS_OPTIONS = [
 // Test leads stay in the database but out of the numbers by default:
 // anything flagged is_test, plus any plus-address on letsgetlunch.nyc
 // (brian+appreview@ etc.) so new test accounts are excluded automatically.
+function isTestEmail(email: string | null | undefined): boolean {
+  return /\+[^@]*@letsgetlunch\.nyc$/i.test((email || '').trim())
+}
+
 function isTestReservation(r: any): boolean {
-  return !!r.is_test || /\+[^@]*@letsgetlunch\.nyc$/i.test((r.contact || '').trim())
+  return !!r.is_test || isTestEmail(r.contact)
 }
 
 function ReservationsView({ reservations: allReservations, resView, showTest }: { reservations: any[], resView: string, showTest: boolean }) {
@@ -306,6 +310,8 @@ export default function AdminPage() {
   const [allVendorContacts, setAllVendorContacts] = useState<any[]>([])
   const [contactsLoading, setContactsLoading] = useState(true)
   const [users, setUsers] = useState<any[]>([])
+  // Admin Users counts leave out test accounts (plus-addresses on letsgetlunch.nyc).
+  const realUsers = users.filter(u => !isTestEmail(u.email))
   const [usersLoading, setUsersLoading] = useState(true)
   const [reservations, setReservations] = useState<any[]>([])
   const [showTestRes, setShowTestRes] = useState(false)
@@ -1209,12 +1215,12 @@ export default function AdminPage() {
                 {/* Summary */}
                 <div className="grid grid-cols-3 gap-3 mb-6">
                   <div className="bg-blue-50 rounded-xl p-4 text-center">
-                    <p className="text-2xl font-bold text-[#4A9FD5]">{users.length}</p>
+                    <p className="text-2xl font-bold text-[#4A9FD5]">{realUsers.length}</p>
                     <p className="text-xs text-gray-500 mt-1">Total signups</p>
                   </div>
                   <div className="bg-green-50 rounded-xl p-4 text-center">
                     <p className="text-2xl font-bold text-green-600">
-                      {users.filter(u => {
+                      {realUsers.filter(u => {
                         const d = new Date(u.created_at)
                         const now = new Date()
                         return (now.getTime() - d.getTime()) < 7 * 24 * 60 * 60 * 1000
@@ -1224,7 +1230,7 @@ export default function AdminPage() {
                   </div>
                   <div className="bg-purple-50 rounded-xl p-4 text-center">
                     <p className="text-2xl font-bold text-purple-600">
-                      {users.filter(u => u.neighborhood).length}
+                      {realUsers.filter(u => u.neighborhood).length}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">With neighborhood</p>
                   </div>
@@ -1239,7 +1245,10 @@ export default function AdminPage() {
                     return (
                       <div key={u.id} className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-between">
                         <div>
-                          <p className="font-medium text-gray-900 text-sm">{u.name || '—'}</p>
+                          <p className="font-medium text-gray-900 text-sm">
+                            {u.name || '—'}
+                            {isTestEmail(u.email) && <span className="ml-2 text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">Test</span>}
+                          </p>
                           <p className="text-xs text-gray-500">{u.email || '—'}</p>
                           <p className="text-xs text-gray-400">{u.neighborhood || 'No neighborhood'}</p>
                         </div>
