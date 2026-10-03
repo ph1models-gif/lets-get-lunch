@@ -3,6 +3,9 @@ import { useState, useEffect } from 'react';
 import { track } from '@vercel/analytics';
 import { supabase } from '../../lib/supabase';
 import { APPLE_AUTH_ENABLED } from '../../lib/auth';
+import { validatePassword, PASSWORD_RULES, friendlySignupError } from '../../lib/password';
+import PasswordInput from '../components/PasswordInput';
+import FormError from '../components/FormError';
 import { Capacitor } from '@capacitor/core';
 
 import { NEIGHBORHOODS, NEIGHBORHOOD_GROUPS } from '../../lib/neighborhoods';
@@ -15,14 +18,6 @@ function AppleLogo() {
       <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.06 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.033-.013-3.182-1.22-3.215-4.857-.03-3.04 2.485-4.497 2.598-4.57-1.429-2.09-3.638-2.324-4.415-2.376-2.006-.163-3.688 1.09-4.591 1.09zm3.53-3.243c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.817-.78.896-1.454 2.338-1.276 3.715 1.336.104 2.71-.688 3.563-1.703z"/>
     </svg>
   );
-}
-
-function validatePassword(pw: string): string | null {
-  if (pw.length < 8) return 'Password must be at least 8 characters.';
-  if (!/[A-Z]/.test(pw)) return 'Password must include at least one uppercase letter.';
-  if (!/[0-9]/.test(pw)) return 'Password must include at least one number.';
-  if (!/[^A-Za-z0-9]/.test(pw)) return 'Password must include at least one symbol (e.g. !@#$).';
-  return null;
 }
 
 export default function SignupPage() {
@@ -49,7 +44,7 @@ export default function SignupPage() {
     }
     const fullName = `${form.firstName.trim()} ${form.lastName.trim()}`;
     const { data, error } = await supabase.auth.signUp({ email: form.email, password: form.password });
-    if (error) { setError(error.message); setLoading(false); return; }
+    if (error) { setError(friendlySignupError(error.message)); setLoading(false); return; }
     if (data.user) {
       await supabase.from('profiles').insert({
         id: data.user.id, name: fullName,
@@ -165,8 +160,6 @@ export default function SignupPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {error && <p className="text-red-500 text-sm bg-red-50 px-4 py-3 rounded-xl">{error}</p>}
-
               <button onClick={handleGoogle} disabled={loading}
                 className="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white text-gray-700 py-3.5 rounded-xl font-medium text-base hover:bg-gray-50 transition-colors disabled:opacity-50">
                 <img src="https://www.google.com/favicon.ico" width="18" height="18" alt="" />
@@ -206,14 +199,15 @@ export default function SignupPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
-                <input type="password" value={form.password} onChange={e => setForm(f => ({...f, password: e.target.value}))}
-                  placeholder="Min 8 chars, uppercase, number, symbol" className={inputClass} />
+                <PasswordInput value={form.password} onChange={v => setForm(f => ({...f, password: v}))}
+                  placeholder="Create a password" autoComplete="new-password" className={inputClass} />
+                <p className="text-gray-500 text-xs mt-1">{PASSWORD_RULES}</p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm password</label>
-                <input type="password" value={form.confirmPassword} onChange={e => setForm(f => ({...f, confirmPassword: e.target.value}))}
-                  placeholder="Type password again" className={inputClass} />
+                <PasswordInput value={form.confirmPassword} onChange={v => setForm(f => ({...f, confirmPassword: v}))}
+                  placeholder="Type password again" autoComplete="new-password" className={inputClass} />
                 {form.confirmPassword && form.password !== form.confirmPassword && (
                   <p className="text-red-500 text-xs mt-1">Passwords do not match.</p>
                 )}
@@ -232,6 +226,8 @@ export default function SignupPage() {
                   className="mt-0.5 w-4 h-4 accent-[#4A9FD5]" />
                 <span className="text-sm text-gray-600">Send me new lunch specials as they go live.</span>
               </label>
+
+              <FormError message={error} />
 
               <button onClick={handleSignUp} disabled={loading}
                 className="w-full bg-[#4A9FD5] text-white py-3.5 rounded-xl font-semibold text-base hover:bg-[#3a8fc5] transition-colors disabled:opacity-50 mt-2">

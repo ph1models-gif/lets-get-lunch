@@ -3,6 +3,9 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
 import AccountMenu from '../../components/AccountMenu';
+import PasswordInput from '../../components/PasswordInput';
+import FormError from '../../components/FormError';
+import { validatePassword, PASSWORD_RULES } from '../../../lib/password';
 
 interface Restaurant {
   id: string;
@@ -25,13 +28,6 @@ interface Restaurant {
 }
 
 
-function validatePassword(pw: string): string | null {
-  if (pw.length < 8) return 'Password must be at least 8 characters.';
-  if (!/[A-Z]/.test(pw)) return 'Password must include at least one uppercase letter.';
-  if (!/[0-9]/.test(pw)) return 'Password must include at least one number.';
-  if (!/[^A-Za-z0-9]/.test(pw)) return 'Password must include at least one symbol (e.g. !@#$).';
-  return null;
-}
 
 type ModalStep = 'book' | 'password' | 'signin' | 'success';
 
@@ -153,6 +149,7 @@ export default function RestaurantClient() {
 
   async function handleCreateAndReserve() {
     const pwErr = validatePassword(password);
+    if (!password) { setAuthError('Create a password to continue.'); return; }
     if (pwErr) { setAuthError(pwErr); return; }
     if (password !== confirmPassword) {
       setAuthError('Passwords do not match. Please try again.'); return;
@@ -193,7 +190,7 @@ export default function RestaurantClient() {
   }
 
   async function handleSignInAndReserve() {
-    if (!signInEmail || !signInPassword) return;
+    if (!signInEmail || !signInPassword) { setAuthError('Enter your email and password.'); return; }
     setSubmitting(true);
     setAuthError('');
 
@@ -575,18 +572,17 @@ export default function RestaurantClient() {
                   <h2 className="text-xl font-bold text-gray-900 mb-1">Almost done!</h2>
                   <p className="text-sm text-gray-500 mb-6">One last step — set a password so we can email you this lunch.</p>
 
-                  {authError && <p className="text-red-500 text-sm bg-red-50 px-4 py-3 rounded-xl mb-4">{authError}</p>}
-
                   <div className="space-y-4">
                     <div>
                       <label className={labelClass}>Create a password</label>
-                      <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-                        placeholder="Min 8 chars, uppercase, number, symbol" className={inputClass} />
+                      <PasswordInput value={password} onChange={setPassword}
+                        placeholder="Create a password" autoComplete="new-password" className={inputClass} />
+                      <p className="text-gray-500 text-xs mt-1">{PASSWORD_RULES}</p>
                     </div>
                     <div>
                       <label className={labelClass}>Confirm password</label>
-                      <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-                        placeholder="Type password again" className={inputClass} />
+                      <PasswordInput value={confirmPassword} onChange={setConfirmPassword}
+                        placeholder="Type password again" autoComplete="new-password" className={inputClass} />
                       {confirmPassword && password !== confirmPassword && (
                         <p className="text-red-500 text-xs mt-1">Passwords do not match.</p>
                       )}
@@ -596,7 +592,8 @@ export default function RestaurantClient() {
                         className="mt-0.5 w-4 h-4 accent-[#4A9FD5]" />
                       <span className="text-sm text-gray-600">Send me new lunch specials as they go live.</span>
                     </label>
-                    <button onClick={handleCreateAndReserve} disabled={submitting || !password || password !== confirmPassword}
+                    <FormError message={authError} />
+                    <button onClick={handleCreateAndReserve} disabled={submitting}
                       className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50">
                       {submitting ? 'Sending...' : 'Email me this lunch'}
                     </button>
@@ -612,8 +609,6 @@ export default function RestaurantClient() {
                   <h2 className="text-xl font-bold text-gray-900 mb-1">Welcome back!</h2>
                   <p className="text-sm text-gray-500 mb-6">Sign in and we&apos;ll email you this lunch.</p>
 
-                  {authError && <p className="text-red-500 text-sm bg-red-50 px-4 py-3 rounded-xl mb-4">{authError}</p>}
-
                   <div className="space-y-4">
                     <div>
                       <label className={labelClass}>Email</label>
@@ -622,13 +617,14 @@ export default function RestaurantClient() {
                     </div>
                     <div>
                       <label className={labelClass}>Password</label>
-                      <input type="password" value={signInPassword} onChange={e => setSignInPassword(e.target.value)}
-                        placeholder="Your password" className={inputClass} />
+                      <PasswordInput value={signInPassword} onChange={setSignInPassword}
+                        placeholder="Your password" autoComplete="current-password" className={inputClass} />
                     </div>
                     <p className="text-right">
                       <a href="/reset-password" className="text-xs text-[#4A9FD5] hover:underline">Forgot password?</a>
                     </p>
-                    <button onClick={handleSignInAndReserve} disabled={submitting || !signInEmail || !signInPassword}
+                    <FormError message={authError} />
+                    <button onClick={handleSignInAndReserve} disabled={submitting}
                       className="w-full bg-[#4A9FD5] text-white py-4 rounded-xl font-semibold text-lg hover:bg-[#3a8fc5] transition-colors disabled:opacity-50">
                       {submitting ? 'Signing in...' : 'Sign In & Email Me This Lunch'}
                     </button>

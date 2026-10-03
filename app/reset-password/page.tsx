@@ -1,14 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import { validatePassword, PASSWORD_RULES } from '../../lib/password';
+import PasswordInput from '../components/PasswordInput';
 
-function validatePassword(pw: string): string | null {
-  if (pw.length < 8) return 'Password must be at least 8 characters.';
-  if (!/[A-Z]/.test(pw)) return 'Password must include at least one uppercase letter.';
-  if (!/[0-9]/.test(pw)) return 'Password must include at least one number.';
-  if (!/[^A-Za-z0-9]/.test(pw)) return 'Password must include at least one symbol (e.g. !@#$).';
-  return null;
-}
 
 export default function ResetPasswordPage() {
   const [step, setStep] = useState<'request' | 'update'>('request');
@@ -108,13 +103,14 @@ export default function ResetPasswordPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">New password</label>
-                <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-                  placeholder="Min 8 chars, uppercase, number, symbol" className={inputClass} />
+                <PasswordInput value={password} onChange={setPassword}
+                  placeholder="New password" autoComplete="new-password" className={inputClass} />
+                <p className="text-gray-500 text-xs mt-1">{PASSWORD_RULES}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm new password</label>
-                <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-                  placeholder="Type password again" className={inputClass} />
+                <PasswordInput value={confirmPassword} onChange={setConfirmPassword}
+                  placeholder="Type password again" autoComplete="new-password" className={inputClass} />
                 {confirmPassword && password !== confirmPassword && (
                   <p className="text-red-500 text-xs mt-1">Passwords do not match.</p>
                 )}
